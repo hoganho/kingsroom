@@ -17,9 +17,10 @@
  * 4. Updates the records
  * 
  * Usage:
- *   node migrate-fix-socialaccount-dates.mjs --preview
- *   node migrate-fix-socialaccount-dates.mjs --execute
- *   node migrate-fix-socialaccount-dates.mjs --execute --account-id <id>
+ *   node migrate-fix-socialaccount-dates.mjs                    # Interactive env selection + preview
+ *   node migrate-fix-socialaccount-dates.mjs --execute          # Interactive env selection + execute
+ *   node migrate-fix-socialaccount-dates.mjs --account-id <id>  # Fix specific account
+ *   node migrate-fix-socialaccount-dates.mjs --entity-id <id>   # Filter by entity
  * 
  * Options:
  *   --preview, -p          Preview changes without executing (default)
@@ -28,7 +29,6 @@
  *   --entity-id <id>       Filter by entity ID
  *   --limit <n>            Limit number of accounts to process
  *   --batch-size <n>       Batch size for updates (default: 25)
- *   --env <env>            Environment: 'prod' or 'dev' (default: prod)
  */
 
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
@@ -42,16 +42,48 @@ import readline from 'readline';
 import fs from 'fs';
 
 // ============================================================================
-// CONFIGURATION
+// ENVIRONMENT CONFIGURATIONS
 // ============================================================================
 
-const TABLE_CONFIG = {
-  prod: {
-    socialAccountTable: 'SocialAccount-ynuahifnznb5zddz727oiqnicy-prod',
-  },
+const ENVIRONMENTS = {
   dev: {
-    socialAccountTable: 'SocialAccount-ht3nugt6lvddpeeuwj3x6mkite-dev',
+    API_ID: 'ht3nugt6lvddpeeuwj3x6mkite',
+    ENV_SUFFIX: 'dev',
   },
+  prod: {
+    API_ID: 'ynuahifnznb5zddz727oiqnicy',
+    ENV_SUFFIX: 'prod',
+  },
+};
+
+const REGION = 'ap-southeast-2';
+
+// ============================================================================
+// RUNTIME STATE
+// ============================================================================
+
+let SELECTED_ENV = null;
+let CONFIG = null;
+
+// ============================================================================
+// HELPERS
+// ============================================================================
+
+function askQuestion(query) {
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
+  return new Promise((resolve) =>
+    rl.question(query, (ans) => {
+      rl.close();
+      resolve(ans);
+    })
+  );
+}
+
+const getTableName = (modelName) => {
+  return `${modelName}-${CONFIG.API_ID}-${CONFIG.ENV_SUFFIX}`;
 };
 
 // Date fields to check and fix
@@ -73,7 +105,6 @@ const options = {
   entityId: null,
   limit: null,
   batchSize: 25,
-  env: 'prod',
 };
 
 for (let i = 0; i < args.length; i++) {
@@ -101,9 +132,6 @@ for (let i = 0; i < args.length; i++) {
     case '--batch-size':
       options.batchSize = parseInt(args[++i], 10);
       break;
-    case '--env':
-      options.env = args[++i];
-      break;
     case '--help':
     case '-h':
       console.log(`
@@ -122,28 +150,17 @@ Options:
   --entity-id <id>       Filter by entity ID
   --limit <n>            Limit number of accounts to process
   --batch-size <n>       Batch size for updates (default: 25)
-  --env <env>            Environment: 'prod' or 'dev' (default: prod)
   --help, -h             Show this help message
       `);
       process.exit(0);
   }
 }
 
-const CONFIG = {
-  region: 'ap-southeast-2',
-  ...TABLE_CONFIG[options.env],
-};
-
-if (!CONFIG.socialAccountTable) {
-  console.error(`❌ Unknown environment: ${options.env}`);
-  process.exit(1);
-}
-
 // ============================================================================
 // AWS CLIENT SETUP
 // ============================================================================
 
-const client = new DynamoDBClient({ region: CONFIG.region });
+const client = new DynamoDBClient({ region: REGION });
 const docClient = DynamoDBDocumentClient.from(client, {
   marshallOptions: { removeUndefinedValues: true },
 });
@@ -210,19 +227,6 @@ function checkDateFields(record) {
 // HELPER FUNCTIONS
 // ============================================================================
 
-function prompt(question) {
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
-  return new Promise((resolve) => {
-    rl.question(question, (answer) => {
-      rl.close();
-      resolve(answer.toLowerCase());
-    });
-  });
-}
-
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -235,7 +239,8 @@ function sleep(ms) {
  * Scan all social accounts (with optional filter)
  */
 async function scanSocialAccounts() {
-  console.log(`\n📂 Scanning ${CONFIG.socialAccountTable}...`);
+  const tableName = getTableName('SocialAccount');
+  console.log(`\n📂 Scanning ${tableName}...`);
   
   const accounts = [];
   let lastKey = undefined;
@@ -243,7 +248,7 @@ async function scanSocialAccounts() {
   
   do {
     const params = {
-      TableName: CONFIG.socialAccountTable,
+      TableName: tableName,
       ExclusiveStartKey: lastKey,
     };
     
@@ -284,8 +289,9 @@ async function scanSocialAccounts() {
  * Get a single account by ID
  */
 async function getSocialAccount(id) {
+  const tableName = getTableName('SocialAccount');
   const result = await docClient.send(new GetCommand({
-    TableName: CONFIG.socialAccountTable,
+    TableName: tableName,
     Key: { id },
   }));
   return result.Item;
@@ -295,6 +301,7 @@ async function getSocialAccount(id) {
  * Update account with fixed date fields
  */
 async function updateAccountDates(id, fixes) {
+  const tableName = getTableName('SocialAccount');
   const updateParts = [];
   const names = {};
   const values = {};
@@ -313,7 +320,7 @@ async function updateAccountDates(id, fixes) {
   }
   
   await docClient.send(new UpdateCommand({
-    TableName: CONFIG.socialAccountTable,
+    TableName: tableName,
     Key: { id },
     UpdateExpression: `SET ${updateParts.join(', ')}`,
     ExpressionAttributeNames: names,
@@ -322,27 +329,64 @@ async function updateAccountDates(id, fixes) {
 }
 
 // ============================================================================
+// ENVIRONMENT SELECTION
+// ============================================================================
+
+async function selectEnvironment() {
+  console.log('\n╔═══════════════════════════════════════════════════════════════════╗');
+  console.log('║        SOCIALACCOUNT DATE FORMAT MIGRATION                        ║');
+  console.log('║        Fixes timezone offset dates to proper ISO 8601 format      ║');
+  console.log('╚═══════════════════════════════════════════════════════════════════╝\n');
+
+  console.log('Available environments:\n');
+  console.log('  [1] dev  - Development environment');
+  console.log(`        API ID: ${ENVIRONMENTS.dev.API_ID}`);
+  console.log('');
+  console.log('  [2] prod - Production environment');
+  console.log(`        API ID: ${ENVIRONMENTS.prod.API_ID}`);
+  console.log('');
+
+  const answer = await askQuestion('Select environment (dev/prod or 1/2): ');
+  const normalizedAnswer = answer.toLowerCase().trim();
+
+  if (normalizedAnswer === 'dev' || normalizedAnswer === '1') {
+    return 'dev';
+  } else if (normalizedAnswer === 'prod' || normalizedAnswer === '2') {
+    return 'prod';
+  } else {
+    console.error(`Invalid selection: "${answer}". Please enter "dev", "prod", "1", or "2".`);
+    process.exit(1);
+  }
+}
+
+// ============================================================================
 // MAIN MIGRATION
 // ============================================================================
 
 async function runMigration() {
-  console.log('\n' + '='.repeat(70));
-  console.log('  SOCIALACCOUNT DATE FORMAT MIGRATION');
-  console.log('='.repeat(70));
-  console.log(`  Mode:        ${options.execute ? '🔴 EXECUTE' : '🟢 PREVIEW'}`);
-  console.log(`  Environment: ${options.env.toUpperCase()}`);
-  console.log(`  Table:       ${CONFIG.socialAccountTable}`);
-  if (options.accountId) console.log(`  Account ID:  ${options.accountId}`);
-  if (options.entityId) console.log(`  Entity ID:   ${options.entityId}`);
-  if (options.limit) console.log(`  Limit:       ${options.limit}`);
-  console.log('='.repeat(70));
+  // Select environment first
+  SELECTED_ENV = await selectEnvironment();
+  CONFIG = ENVIRONMENTS[SELECTED_ENV];
 
-  // Confirmation for execute mode
-  if (options.execute) {
-    const answer = await prompt('\n⚠️  This will modify data. Type "yes" to continue: ');
-    if (answer !== 'yes') {
-      console.log('Aborted.');
-      process.exit(0);
+  const tableName = getTableName('SocialAccount');
+
+  console.log('\n' + '─'.repeat(70));
+  console.log(`Selected environment: ${SELECTED_ENV.toUpperCase()}`);
+  console.log(`API ID: ${CONFIG.API_ID}`);
+  console.log(`Mode: ${options.execute ? '🔴 EXECUTE' : '🟢 PREVIEW'}`);
+  console.log(`Table: ${tableName}`);
+  if (options.accountId) console.log(`Account ID: ${options.accountId}`);
+  if (options.entityId) console.log(`Entity ID: ${options.entityId}`);
+  if (options.limit) console.log(`Limit: ${options.limit}`);
+  console.log('─'.repeat(70));
+
+  // Production safety check
+  if (SELECTED_ENV === 'prod' && options.execute) {
+    console.log('\n⚠️  You are about to MODIFY PRODUCTION data!');
+    const confirm = await askQuestion('Type "fix prod" to confirm: ');
+    if (confirm.toLowerCase().trim() !== 'fix prod') {
+      console.log('Aborted by user.');
+      return;
     }
   }
 
@@ -458,12 +502,12 @@ async function runMigration() {
 
   // Write detailed report to JSON file
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-').split('T')[0];
-  const outputFile = `socialaccount-date-fix-report-${timestamp}.json`;
+  const outputFile = `socialaccount-date-fix-report-${SELECTED_ENV}-${timestamp}.json`;
   const outputData = {
     generatedAt: new Date().toISOString(),
     mode: options.execute ? 'EXECUTE' : 'PREVIEW',
-    environment: options.env,
-    table: CONFIG.socialAccountTable,
+    environment: SELECTED_ENV,
+    table: tableName,
     summary: {
       checked: results.checked,
       alreadyCorrect: results.alreadyCorrect,

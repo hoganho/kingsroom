@@ -18,11 +18,11 @@
  * then update them with _version: 1 and _lastChangedAt: Date.now()
  * 
  * Usage:
- *   node backfill-metrics-sync-fields.mjs --preview       # Show what would be fixed
- *   node backfill-metrics-sync-fields.mjs --execute       # Actually fix the records
- *   node backfill-metrics-sync-fields.mjs --table entity  # Fix only EntityPlayerMetrics
- *   node backfill-metrics-sync-fields.mjs --table venue   # Fix only VenuePlayerMetrics
- *   node backfill-metrics-sync-fields.mjs --table global  # Fix only GlobalPlayerMetrics
+ *   node backfill-metrics-sync-fields.mjs                        # Interactive env selection + preview
+ *   node backfill-metrics-sync-fields.mjs --execute              # Interactive env selection + execute
+ *   node backfill-metrics-sync-fields.mjs --table entity         # Fix only EntityPlayerMetrics
+ *   node backfill-metrics-sync-fields.mjs --table venue          # Fix only VenuePlayerMetrics
+ *   node backfill-metrics-sync-fields.mjs --table global         # Fix only GlobalPlayerMetrics
  * 
  * ===================================================================
  */
@@ -33,26 +33,51 @@ import {
   ScanCommand,
   UpdateCommand,
 } from '@aws-sdk/lib-dynamodb';
+import * as readline from 'readline';
 
 // ============================================================================
-// CONFIGURATION
+// ENVIRONMENT CONFIGURATIONS
 // ============================================================================
 
-const CONFIG = {
-  region: 'ap-southeast-2',
-  apiId: process.env.API_KINGSROOM_GRAPHQLAPIIDOUTPUT || 'ynuahifnznb5zddz727oiqnicy',
-  env: process.env.ENV || 'prod',
+const ENVIRONMENTS = {
+  dev: {
+    API_ID: 'ht3nugt6lvddpeeuwj3x6mkite',
+    ENV_SUFFIX: 'dev',
+  },
+  prod: {
+    API_ID: 'ynuahifnznb5zddz727oiqnicy',
+    ENV_SUFFIX: 'prod',
+  },
 };
+
+const REGION = 'ap-southeast-2';
+
+// ============================================================================
+// RUNTIME STATE
+// ============================================================================
+
+let SELECTED_ENV = null;
+let CONFIG = null;
+
+// ============================================================================
+// HELPERS
+// ============================================================================
+
+function askQuestion(query) {
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
+  return new Promise((resolve) =>
+    rl.question(query, (ans) => {
+      rl.close();
+      resolve(ans);
+    })
+  );
+}
 
 const getTableName = (modelName) => {
-  return `${modelName}-${CONFIG.apiId}-${CONFIG.env}`;
-};
-
-// Tables to process
-const METRICS_TABLES = {
-  entity: getTableName('EntityPlayerMetrics'),
-  venue: getTableName('VenuePlayerMetrics'),
-  global: getTableName('GlobalPlayerMetrics'),
+  return `${modelName}-${CONFIG.API_ID}-${CONFIG.ENV_SUFFIX}`;
 };
 
 // ============================================================================
@@ -106,7 +131,7 @@ Usage:
 Options:
   --preview, -p        Preview changes without executing (default)
   --execute, -e        Execute the fixes
-  --table, -t <name>   Fix only specific table: 'entity', 'venue', or 'global'
+  --table, -t <n>   Fix only specific table: 'entity', 'venue', or 'global'
   --verbose, -v        Show detailed output
   --help, -h           Show this help message
 
@@ -128,7 +153,7 @@ Examples:
 // AWS CLIENT
 // ============================================================================
 
-const client = new DynamoDBClient({ region: CONFIG.region });
+const client = new DynamoDBClient({ region: REGION });
 const docClient = DynamoDBDocumentClient.from(client, {
   marshallOptions: { removeUndefinedValues: true },
 });
@@ -284,20 +309,72 @@ async function processTable(tableKey, tableName) {
 }
 
 // ============================================================================
+// ENVIRONMENT SELECTION
+// ============================================================================
+
+async function selectEnvironment() {
+  console.log('\n╔═══════════════════════════════════════════════════════════════════╗');
+  console.log('║        BACKFILL DATASTORE SYNC FIELDS                             ║');
+  console.log('║        Fixes missing _version and _lastChangedAt fields           ║');
+  console.log('╚═══════════════════════════════════════════════════════════════════╝\n');
+
+  console.log('Available environments:\n');
+  console.log('  [1] dev  - Development environment');
+  console.log(`        API ID: ${ENVIRONMENTS.dev.API_ID}`);
+  console.log('');
+  console.log('  [2] prod - Production environment');
+  console.log(`        API ID: ${ENVIRONMENTS.prod.API_ID}`);
+  console.log('');
+
+  const answer = await askQuestion('Select environment (dev/prod or 1/2): ');
+  const normalizedAnswer = answer.toLowerCase().trim();
+
+  if (normalizedAnswer === 'dev' || normalizedAnswer === '1') {
+    return 'dev';
+  } else if (normalizedAnswer === 'prod' || normalizedAnswer === '2') {
+    return 'prod';
+  } else {
+    console.error(`Invalid selection: "${answer}". Please enter "dev", "prod", "1", or "2".`);
+    process.exit(1);
+  }
+}
+
+// ============================================================================
 // MAIN
 // ============================================================================
 
 async function main() {
-  console.log('='.repeat(70));
-  console.log('BACKFILL DATASTORE SYNC FIELDS FOR PLAYER METRICS');
-  console.log('='.repeat(70));
+  // Select environment first
+  SELECTED_ENV = await selectEnvironment();
+  CONFIG = ENVIRONMENTS[SELECTED_ENV];
+
+  // Build table names based on selected environment
+  const METRICS_TABLES = {
+    entity: getTableName('EntityPlayerMetrics'),
+    venue: getTableName('VenuePlayerMetrics'),
+    global: getTableName('GlobalPlayerMetrics'),
+  };
+
+  console.log('\n' + '─'.repeat(70));
+  console.log(`Selected environment: ${SELECTED_ENV.toUpperCase()}`);
+  console.log(`API ID: ${CONFIG.API_ID}`);
   console.log(`Mode: ${options.execute ? '🔧 EXECUTE' : '👁️  PREVIEW'}`);
-  console.log(`Environment: ${CONFIG.env}`);
-  console.log(`Region: ${CONFIG.region}`);
   if (options.table) {
     console.log(`Table filter: ${options.table}`);
   }
-  
+  console.log('─'.repeat(70) + '\n');
+
+  // Production safety check
+  if (SELECTED_ENV === 'prod' && options.execute) {
+    console.log('⚠️  You are about to MODIFY PRODUCTION data!');
+    const confirm = await askQuestion('Type "fix prod" to confirm: ');
+    if (confirm.toLowerCase().trim() !== 'fix prod') {
+      console.log('Aborted by user.');
+      return;
+    }
+    console.log('');
+  }
+
   // Determine which tables to process
   const tablesToProcess = options.table 
     ? { [options.table]: METRICS_TABLES[options.table] }

@@ -12,14 +12,13 @@
  * 4. Updates the RecurringGame with firstGameDate (and lastGameDate if needed)
  * 
  * Usage:
- *   node migrate-backfill-firstGameDate.mjs --preview          # Dry run
- *   node migrate-backfill-firstGameDate.mjs --execute          # Apply changes
+ *   node migrate-backfill-firstGameDate.mjs                    # Interactive env selection + preview
+ *   node migrate-backfill-firstGameDate.mjs --execute          # Interactive env selection + execute
  *   node migrate-backfill-firstGameDate.mjs --venue <id>       # Single venue
  *   node migrate-backfill-firstGameDate.mjs --entity <id>      # Single entity
  * 
  * Prerequisites:
  *   - AWS credentials configured
- *   - Environment variables or update TABLE_NAMES below
  */
 
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
@@ -29,24 +28,58 @@ import {
     QueryCommand, 
     UpdateCommand 
 } from '@aws-sdk/lib-dynamodb';
+import readline from 'readline';
 
-// ===================================================================
-// CONFIGURATION - Update these for your environment
-// ===================================================================
+// ============================================================================
+// ENVIRONMENT CONFIGURATIONS
+// ============================================================================
 
-const AWS_REGION = process.env.AWS_REGION || 'ap-southeast-2';
+const ENVIRONMENTS = {
+  dev: {
+    API_ID: 'ht3nugt6lvddpeeuwj3x6mkite',
+    ENV_SUFFIX: 'dev',
+  },
+  prod: {
+    API_ID: 'ynuahifnznb5zddz727oiqnicy',
+    ENV_SUFFIX: 'prod',
+  },
+};
 
-// Table names - update these or set via environment variables
-const TABLE_NAMES = {
-    RECURRING_GAME: process.env.API_KINGSROOM_RECURRINGGAMETABLE_NAME || 'RecurringGame-ynuahifnznb5zddz727oiqnicy-prod',
-    GAME: process.env.API_KINGSROOM_GAMETABLE_NAME || 'Game-ynuahifnznb5zddz727oiqnicy-prod',
+const REGION = 'ap-southeast-2';
+
+// ============================================================================
+// RUNTIME STATE
+// ============================================================================
+
+let SELECTED_ENV = null;
+let CONFIG = null;
+
+// ============================================================================
+// HELPERS
+// ============================================================================
+
+function askQuestion(query) {
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
+  return new Promise((resolve) =>
+    rl.question(query, (ans) => {
+      rl.close();
+      resolve(ans);
+    })
+  );
+}
+
+const getTableName = (modelName) => {
+  return `${modelName}-${CONFIG.API_ID}-${CONFIG.ENV_SUFFIX}`;
 };
 
 // ===================================================================
 // DYNAMODB CLIENT
 // ===================================================================
 
-const client = new DynamoDBClient({ region: AWS_REGION });
+const client = new DynamoDBClient({ region: REGION });
 const docClient = DynamoDBDocumentClient.from(client, {
     marshallOptions: { removeUndefinedValues: true }
 });
@@ -123,6 +156,7 @@ const log = (message, data = null) => {
 const getAllRecurringGames = async ({ venueId, entityId }) => {
     const items = [];
     let lastKey = null;
+    const tableName = getTableName('RecurringGame');
     
     log('Fetching recurring games...');
     
@@ -131,21 +165,21 @@ const getAllRecurringGames = async ({ venueId, entityId }) => {
         
         if (venueId) {
             params = {
-                TableName: TABLE_NAMES.RECURRING_GAME,
+                TableName: tableName,
                 IndexName: 'byVenueRecurringGame',
                 KeyConditionExpression: 'venueId = :vid',
                 ExpressionAttributeValues: { ':vid': venueId }
             };
         } else if (entityId) {
             params = {
-                TableName: TABLE_NAMES.RECURRING_GAME,
+                TableName: tableName,
                 IndexName: 'byEntityRecurringGame',
                 KeyConditionExpression: 'entityId = :eid',
                 ExpressionAttributeValues: { ':eid': entityId }
             };
         } else {
             params = {
-                TableName: TABLE_NAMES.RECURRING_GAME
+                TableName: tableName
             };
         }
         
@@ -175,12 +209,13 @@ const getAllRecurringGames = async ({ venueId, entityId }) => {
 const getGamesByRecurringGameId = async (recurringGameId) => {
     const items = [];
     let lastKey = null;
+    const tableName = getTableName('Game');
     
     do {
         try {
             // Try using the byRecurringGame index first
             const params = {
-                TableName: TABLE_NAMES.GAME,
+                TableName: tableName,
                 IndexName: 'byRecurringGame',
                 KeyConditionExpression: 'recurringGameId = :rgid',
                 ExpressionAttributeValues: { ':rgid': recurringGameId }
@@ -198,7 +233,7 @@ const getGamesByRecurringGameId = async (recurringGameId) => {
             if (error.name === 'ValidationException' || error.name === 'ResourceNotFoundException') {
                 log(`  Index not available for ${recurringGameId}, using scan...`);
                 const scanResult = await docClient.send(new ScanCommand({
-                    TableName: TABLE_NAMES.GAME,
+                    TableName: tableName,
                     FilterExpression: 'recurringGameId = :rgid',
                     ExpressionAttributeValues: { ':rgid': recurringGameId }
                 }));
@@ -221,8 +256,10 @@ const updateRecurringGameDates = async (recurringGameId, firstGameDate) => {
         return;
     }
     
+    const tableName = getTableName('RecurringGame');
+    
     await docClient.send(new UpdateCommand({
-        TableName: TABLE_NAMES.RECURRING_GAME,
+        TableName: tableName,
         Key: { id: recurringGameId },
         UpdateExpression: 'SET #firstGameDate = :firstGameDate, updatedAt = :now',
         ExpressionAttributeNames: {
@@ -235,21 +272,68 @@ const updateRecurringGameDates = async (recurringGameId, firstGameDate) => {
     }));
 };
 
+// ============================================================================
+// ENVIRONMENT SELECTION
+// ============================================================================
+
+async function selectEnvironment() {
+  console.log('\n╔═══════════════════════════════════════════════════════════════════╗');
+  console.log('║        BACKFILL FIRSTGAMEDATE ON RECURRINGGAME                    ║');
+  console.log('║        Populates firstGameDate from earliest Game record          ║');
+  console.log('╚═══════════════════════════════════════════════════════════════════╝\n');
+
+  console.log('Available environments:\n');
+  console.log('  [1] dev  - Development environment');
+  console.log(`        API ID: ${ENVIRONMENTS.dev.API_ID}`);
+  console.log('');
+  console.log('  [2] prod - Production environment');
+  console.log(`        API ID: ${ENVIRONMENTS.prod.API_ID}`);
+  console.log('');
+
+  const answer = await askQuestion('Select environment (dev/prod or 1/2): ');
+  const normalizedAnswer = answer.toLowerCase().trim();
+
+  if (normalizedAnswer === 'dev' || normalizedAnswer === '1') {
+    return 'dev';
+  } else if (normalizedAnswer === 'prod' || normalizedAnswer === '2') {
+    return 'prod';
+  } else {
+    console.error(`Invalid selection: "${answer}". Please enter "dev", "prod", "1", or "2".`);
+    process.exit(1);
+  }
+}
+
 // ===================================================================
 // MAIN MIGRATION FUNCTION
 // ===================================================================
 
-const runMigration = async (config) => {
-    const { preview, venueId, entityId } = config;
+const runMigration = async (argsConfig) => {
+    // Select environment first
+    SELECTED_ENV = await selectEnvironment();
+    CONFIG = ENVIRONMENTS[SELECTED_ENV];
     
-    log('='.repeat(60));
-    log('MIGRATION: Backfill firstGameDate on RecurringGame');
-    log('='.repeat(60));
-    log(`Mode: ${preview ? 'PREVIEW (dry run)' : 'EXECUTE (applying changes)'}`);
-    log(`Tables:`, TABLE_NAMES);
-    if (venueId) log(`Filtering by venueId: ${venueId}`);
-    if (entityId) log(`Filtering by entityId: ${entityId}`);
-    log('');
+    const { preview, venueId, entityId } = argsConfig;
+    
+    console.log('\n' + '─'.repeat(70));
+    console.log(`Selected environment: ${SELECTED_ENV.toUpperCase()}`);
+    console.log(`API ID: ${CONFIG.API_ID}`);
+    console.log(`Mode: ${preview ? '👁️  PREVIEW (dry run)' : '🔧 EXECUTE (applying changes)'}`);
+    console.log(`RecurringGame table: ${getTableName('RecurringGame')}`);
+    console.log(`Game table: ${getTableName('Game')}`);
+    if (venueId) console.log(`Filtering by venueId: ${venueId}`);
+    if (entityId) console.log(`Filtering by entityId: ${entityId}`);
+    console.log('─'.repeat(70) + '\n');
+    
+    // Production safety check
+    if (SELECTED_ENV === 'prod' && !preview) {
+      log('⚠️  You are about to MODIFY PRODUCTION data!');
+      const confirm = await askQuestion('Type "fix prod" to confirm: ');
+      if (confirm.toLowerCase().trim() !== 'fix prod') {
+        log('Aborted by user.');
+        return;
+      }
+      console.log('');
+    }
     
     const stats = {
         processed: 0,
@@ -413,17 +497,9 @@ const runMigration = async (config) => {
 // ENTRY POINT
 // ===================================================================
 
-const config = parseArgs();
+const argsConfig = parseArgs();
 
-// Validate table names
-if (TABLE_NAMES.RECURRING_GAME.includes('XXXXXX') || TABLE_NAMES.GAME.includes('XXXXXX')) {
-    log('ERROR: Please update TABLE_NAMES in the script or set environment variables:');
-    log('  API_KINGSROOM_RECURRINGGAMETABLE_NAME');
-    log('  API_KINGSROOM_GAMETABLE_NAME');
-    process.exit(1);
-}
-
-runMigration(config)
+runMigration(argsConfig)
     .then(() => {
         log('');
         log('Done.');

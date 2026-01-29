@@ -1,0 +1,30 @@
+
+PRIZEPOOL ADDED VALUE CLEANUP REPORT
+====================================
+Generated: 2026-01-29T02:47:35.028Z
+Environment: DEV
+Dry Run: NO
+
+SCAN STATISTICS
+---------------
+Games with overlay scanned: 565
+Games with overlay > 0: 565
+Corrupted (prizepoolAddedValue == guaranteeOverlayCost): 303
+Already correct (prizepoolAddedValue == 0): 262
+
+FIX RESULTS
+-----------
+Successfully fixed: 303
+Failed to fix: 0
+
+NOTE: GameFinancialSnapshot records will auto-update via DynamoDB stream
+      triggering gameFinancialsProcessor when dataChangedAt changes.
+
+
+
+WHAT WAS FIXED
+--------------
+For each corrupted game:
+- prizepoolAddedValue: was set to guaranteeOverlayCost value → reset to 0
+- prizepoolCalculated: was inflated by overlay amount → recalculated as prizepoolPlayerContributions only
+- GameFinancialSnapshot: will be recalculated via gameFinancialsProcessor stream trigger

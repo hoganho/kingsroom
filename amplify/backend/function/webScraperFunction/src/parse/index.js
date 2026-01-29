@@ -84,7 +84,7 @@ const parseHtml = (html, options = {}) => {
     defaultStrategy.getTotalRebuys(ctx);
     defaultStrategy.getTotalAddons(ctx);
     defaultStrategy.getTotalEntries(ctx);
-    defaultStrategy.getTotalDuration(ctx);
+    defaultStrategy.getTotalDurationEnhanced(ctx);
     defaultStrategy.getBuyIn(ctx);
     defaultStrategy.getRake(ctx);
     defaultStrategy.getStartingStack(ctx);

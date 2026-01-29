@@ -1029,11 +1029,6 @@ const defaultStrategy = {
         ctx.add('totalEntries', totalInitialEntries + totalRebuys + totalAddons);
     },
 
-    getTotalDuration(ctx) { 
-        if (ctx.data.scrapeStatus === 'NOT_FOUND') return;
-        ctx.getText('totalDuration', 'div.cw-clock-label:contains("Total Time")'); 
-    },
-    
     /**
      * Get buy-in amount
      */
@@ -1191,7 +1186,6 @@ const defaultStrategy = {
             const shortfall = guaranteeAmount - prizepoolPlayerContributions;
             if (shortfall > 0) {
                 guaranteeOverlayCost = shortfall;
-                prizepoolAddedValue = shortfall;
             } else {
                 prizepoolSurplus = -shortfall;
             }
@@ -1205,7 +1199,6 @@ const defaultStrategy = {
         ctx.add('rakeRevenue', rakeRevenue);
         ctx.add('prizepoolPlayerContributions', prizepoolPlayerContributions);
         ctx.add('prizepoolCalculated', prizepoolPlayerContributions);
-        ctx.add('prizepoolAddedValue', prizepoolAddedValue);
         ctx.add('prizepoolSurplus', prizepoolSurplus);
         ctx.add('guaranteeOverlayCost', guaranteeOverlayCost);
         ctx.add('gameProfit', gameProfit);
@@ -1471,8 +1464,11 @@ const defaultStrategy = {
         if (ctx.gameData) {
             // Extract duration in seconds
             if (ctx.gameData.ttime !== undefined && ctx.gameData.ttime > 0) {
-                ctx.add('totalDuration', ctx.gameData.ttime);
-                console.log(`[HtmlParser] Duration: ${ctx.gameData.ttime} seconds`);
+                const duration = parseInt(ctx.gameData.ttime, 10);
+                if (!isNaN(duration)) {
+                    ctx.add('totalDuration', duration);
+                    console.log(`[HtmlParser] Duration: ${duration} seconds`);
+                }
             }
             
             // Extract actual start time

@@ -4,7 +4,7 @@
  * Cleanup Script: Merge Duplicate Tournament Series
  * ===================================================================
  * 
- * VERSION: 1.0.0
+ * VERSION: 1.1.0 (with interactive environment selection)
  * 
  * This script identifies and merges duplicate TournamentSeries and 
  * TournamentSeriesTitle records that were created due to the series
@@ -24,10 +24,10 @@
  * 5. Deletes the duplicate series records
  * 
  * Usage:
- *   node cleanup-duplicate-series.mjs --preview
- *   node cleanup-duplicate-series.mjs --execute
- *   node cleanup-duplicate-series.mjs --execute --entity-id <id>
- *   node cleanup-duplicate-series.mjs --preview --verbose
+ *   node cleanup-duplicate-series.mjs                     # Interactive env selection + preview
+ *   node cleanup-duplicate-series.mjs --execute           # Interactive env selection + execute
+ *   node cleanup-duplicate-series.mjs --entity-id <id>    # Filter by entity
+ *   node cleanup-duplicate-series.mjs --verbose           # Detailed output
  * 
  * Options:
  *   --preview, -p              Preview changes without executing (default)
@@ -57,17 +57,48 @@ import {
 import readline from 'readline';
 
 // ============================================================================
-// CONFIGURATION
+// ENVIRONMENT CONFIGURATIONS
 // ============================================================================
 
-const CONFIG = {
-  region: 'ap-southeast-2',
-  apiId: process.env.API_KINGSROOM_GRAPHQLAPIIDOUTPUT || 'ynuahifnznb5zddz727oiqnicy',
-  env: process.env.ENV || 'prod',
+const ENVIRONMENTS = {
+  dev: {
+    API_ID: 'ht3nugt6lvddpeeuwj3x6mkite',
+    ENV_SUFFIX: 'dev',
+  },
+  prod: {
+    API_ID: 'ynuahifnznb5zddz727oiqnicy',
+    ENV_SUFFIX: 'prod',
+  },
 };
 
+const REGION = 'ap-southeast-2';
+
+// ============================================================================
+// RUNTIME STATE
+// ============================================================================
+
+let SELECTED_ENV = null;
+let CONFIG = null;
+
+// ============================================================================
+// HELPERS
+// ============================================================================
+
+function askQuestion(query) {
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
+  return new Promise((resolve) =>
+    rl.question(query, (ans) => {
+      rl.close();
+      resolve(ans);
+    })
+  );
+}
+
 const getTableName = (modelName) => {
-  return `${modelName}-${CONFIG.apiId}-${CONFIG.env}`;
+  return `${modelName}-${CONFIG.API_ID}-${CONFIG.ENV_SUFFIX}`;
 };
 
 // ============================================================================
@@ -121,7 +152,7 @@ const options = {
   batchSize: 25,
   verbose: false,
   dryRunGames: false,
-  renameCanonical: false,  // NEW: Rename canonical to clean base name
+  renameCanonical: false,
 };
 
 for (let i = 0; i < args.length; i++) {
@@ -195,7 +226,7 @@ Examples:
 // AWS CLIENT SETUP
 // ============================================================================
 
-const client = new DynamoDBClient({ region: CONFIG.region });
+const client = new DynamoDBClient({ region: REGION });
 const docClient = DynamoDBDocumentClient.from(client, {
   marshallOptions: { removeUndefinedValues: true },
 });
@@ -203,19 +234,6 @@ const docClient = DynamoDBDocumentClient.from(client, {
 // ============================================================================
 // HELPER FUNCTIONS
 // ============================================================================
-
-function prompt(question) {
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
-  return new Promise((resolve) => {
-    rl.question(question, (answer) => {
-      rl.close();
-      resolve(answer.trim().toLowerCase());
-    });
-  });
-}
 
 async function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -355,18 +373,15 @@ async function scanTable(tableName, filterExpression = null, expressionValues = 
       TableName: tableName,
     };
     
-    // Only add ExclusiveStartKey if we have one
     if (lastEvaluatedKey) {
       params.ExclusiveStartKey = lastEvaluatedKey;
     }
     
-    // Only add filter params if they exist
     if (filterExpression && expressionValues) {
       params.FilterExpression = filterExpression;
       params.ExpressionAttributeValues = expressionValues;
     }
     
-    // Only add expression names if they exist
     if (expressionNames) {
       params.ExpressionAttributeNames = expressionNames;
     }
@@ -402,7 +417,6 @@ async function getGamesBySeriesId(seriesId) {
     }));
     return result.Items || [];
   } catch (error) {
-    // Index might not exist, fall back to scan with filter
     if (error.name === 'ResourceNotFoundException' || error.message?.includes('index')) {
       console.log('   ⚠️  byTournamentSeries index not found, using scan...');
       const games = await scanTable(
@@ -457,7 +471,6 @@ async function getMetricsBySeriesId(seriesId) {
     }));
     return result.Items || [];
   } catch (error) {
-    // Index might not exist or table might not exist
     if (error.name === 'ResourceNotFoundException') {
       console.log('   ⚠️  TournamentSeriesMetrics table/index not found, skipping...');
       return [];
@@ -535,7 +548,6 @@ async function renameTournamentSeries(seriesId, newName) {
  * Generate a clean series name from base name and year
  */
 function generateCleanSeriesName(baseName, year) {
-  // Capitalize first letter of each word
   const cleanBase = baseName
     .split(' ')
     .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
@@ -572,20 +584,64 @@ async function renameTournamentSeriesTitle(titleId, newTitle) {
 }
 
 // ============================================================================
+// ENVIRONMENT SELECTION
+// ============================================================================
+
+async function selectEnvironment() {
+  console.log('\n╔═══════════════════════════════════════════════════════════════════╗');
+  console.log('║        TOURNAMENT SERIES DUPLICATE CLEANUP                        ║');
+  console.log('║        Merges duplicate TournamentSeries records                  ║');
+  console.log('╚═══════════════════════════════════════════════════════════════════╝\n');
+
+  console.log('Available environments:\n');
+  console.log('  [1] dev  - Development environment');
+  console.log(`        API ID: ${ENVIRONMENTS.dev.API_ID}`);
+  console.log('');
+  console.log('  [2] prod - Production environment');
+  console.log(`        API ID: ${ENVIRONMENTS.prod.API_ID}`);
+  console.log('');
+
+  const answer = await askQuestion('Select environment (dev/prod or 1/2): ');
+  const normalizedAnswer = answer.toLowerCase().trim();
+
+  if (normalizedAnswer === 'dev' || normalizedAnswer === '1') {
+    return 'dev';
+  } else if (normalizedAnswer === 'prod' || normalizedAnswer === '2') {
+    return 'prod';
+  } else {
+    console.error(`Invalid selection: "${answer}". Please enter "dev", "prod", "1", or "2".`);
+    process.exit(1);
+  }
+}
+
+// ============================================================================
 // MAIN CLEANUP LOGIC
 // ============================================================================
 
 async function runCleanup() {
-  console.log('\n' + '='.repeat(70));
-  console.log('TOURNAMENT SERIES DUPLICATE CLEANUP');
-  console.log('='.repeat(70));
+  // Select environment first
+  SELECTED_ENV = await selectEnvironment();
+  CONFIG = ENVIRONMENTS[SELECTED_ENV];
+
+  console.log('\n' + '─'.repeat(70));
+  console.log(`Selected environment: ${SELECTED_ENV.toUpperCase()}`);
+  console.log(`API ID: ${CONFIG.API_ID}`);
   console.log(`Mode: ${options.execute ? '🔴 EXECUTE' : '🟢 PREVIEW'}`);
-  console.log(`Environment: ${CONFIG.env}`);
-  console.log(`API ID: ${CONFIG.apiId}`);
   if (options.entityId) console.log(`Entity filter: ${options.entityId}`);
   if (options.venueId) console.log(`Venue filter: ${options.venueId}`);
   if (options.year) console.log(`Year filter: ${options.year}`);
-  console.log('='.repeat(70) + '\n');
+  console.log('─'.repeat(70) + '\n');
+
+  // Production safety check
+  if (SELECTED_ENV === 'prod' && options.execute) {
+    console.log('⚠️  You are about to MODIFY PRODUCTION data!');
+    const confirm = await askQuestion('Type "fix prod" to confirm: ');
+    if (confirm.toLowerCase().trim() !== 'fix prod') {
+      console.log('Aborted by user.');
+      return;
+    }
+    console.log('');
+  }
   
   // ========================================
   // STEP 1: Load all TournamentSeriesTitle records
@@ -631,7 +687,7 @@ async function runCleanup() {
   allTitles.forEach(t => titleById.set(t.id, t));
   
   // Group series by base name + year
-  const seriesGroups = new Map(); // key: "baseName|year" -> array of series
+  const seriesGroups = new Map();
   
   for (const series of allSeries) {
     const { baseName, normalized, method } = extractBaseSeriesName(series.name);
@@ -687,19 +743,16 @@ async function runCleanup() {
       const metrics = await getMetricsBySeriesId(s.id);
       const hasValidTitle = s.tournamentSeriesTitleId && titleById.has(s.tournamentSeriesTitleId);
       const nameLength = s.name.length;
-      const nameLower = s.name.toLowerCase();
       
       // Penalties for messy names
       const hasEventInName = /event\s*#?\s*\d+/i.test(s.name);
       const hasSatellite = /sat(?:ty|ellite)/i.test(s.name);
       const hasFlightDay = /(?:flight|day)\s*\d/i.test(s.name);
-      const hasDescription = /-\s*\w/.test(s.name); // Has "- something" suffix
+      const hasDescription = /-\s*\w/.test(s.name);
       const hasGuarantee = /gtd|guaranteed|\$\d+/i.test(s.name);
       
-      // Bonus for clean names that are just "Series Name YEAR"
       const isCleanName = !hasEventInName && !hasSatellite && !hasFlightDay && !hasDescription && !hasGuarantee;
       
-      // Score: more games = better, has title = better, cleaner name = better
       let score = (games.length * 100) + 
                   (hasValidTitle ? 50 : 0) + 
                   (isCleanName ? 200 : 0) +
@@ -722,10 +775,8 @@ async function runCleanup() {
       };
     }));
     
-    // Sort by score descending
     scoredSeries.sort((a, b) => b.score - a.score);
     
-    // Select canonical (first one after sorting)
     const canonical = scoredSeries[0];
     const duplicates = scoredSeries.slice(1);
     
@@ -755,15 +806,12 @@ async function runCleanup() {
       }
     }
     
-    // Calculate total games to move
     const totalGamesToMove = duplicates.reduce((sum, d) => sum + d.gameCount, 0);
     
-    // Generate clean canonical name
     const cleanCanonicalName = generateCleanSeriesName(group.baseName, group.year);
     const cleanTitleName = generateCleanTitleName(group.baseName);
     const needsRename = canonical.name !== cleanCanonicalName;
     
-    // Get the canonical's title to check if it needs renaming
     const canonicalTitle = canonical.tournamentSeriesTitleId ? titleById.get(canonical.tournamentSeriesTitleId) : null;
     const needsTitleRename = canonicalTitle && canonicalTitle.title !== cleanTitleName;
     
@@ -805,7 +853,6 @@ async function runCleanup() {
     totalDuplicateSeries += op.duplicates.length;
     totalGamesToUpdate += op.totalGamesToMove;
     
-    // Count series and titles that need renaming
     if (options.renameCanonical && op.needsRename) {
       totalSeriesToRename++;
     }
@@ -813,17 +860,14 @@ async function runCleanup() {
       totalTitlesToRename++;
     }
     
-    // Count metrics from duplicates that will be deleted
     for (const dup of op.duplicates) {
       totalMetricsToDelete += dup.metricsCount || 0;
     }
     
-    // Count orphaned titles (titles only used by duplicates)
     const canonicalTitleId = op.canonical.tournamentSeriesTitleId;
     for (const dup of op.duplicates) {
       if (dup.tournamentSeriesTitleId && 
           dup.tournamentSeriesTitleId !== canonicalTitleId) {
-        // Check if this title is used by any other series
         const otherUsers = allSeries.filter(s => 
           s.tournamentSeriesTitleId === dup.tournamentSeriesTitleId && 
           s.id !== dup.id
@@ -853,8 +897,7 @@ async function runCleanup() {
     console.log('EXECUTING MERGE OPERATIONS');
     console.log('='.repeat(70));
     
-    // Confirm before executing
-    const answer = await prompt('\n⚠️  This will modify the database. Continue? (yes/no): ');
+    const answer = await askQuestion('\n⚠️  This will modify the database. Continue? (yes/no): ');
     if (answer !== 'yes') {
       console.log('Aborted by user.\n');
       return;
@@ -887,15 +930,14 @@ async function runCleanup() {
         }
       }
       
-      // Rename canonical series if requested (so games get the new name)
+      // Rename canonical series if requested
       if (options.renameCanonical && op.needsRename) {
         try {
           console.log(`   Renaming series: "${canonicalName}" → "${op.cleanCanonicalName}"`);
           await renameTournamentSeries(canonicalId, op.cleanCanonicalName);
-          canonicalName = op.cleanCanonicalName; // Use new name for games
+          canonicalName = op.cleanCanonicalName;
           seriesRenamed++;
           
-          // Update seriesName for games already in the canonical series
           if (op.canonical.games && op.canonical.games.length > 0) {
             console.log(`   Updating ${op.canonical.games.length} existing games in canonical...`);
             for (const game of op.canonical.games) {
@@ -922,7 +964,6 @@ async function runCleanup() {
       }
       
       for (const dup of op.duplicates) {
-        // Update all games from duplicate to canonical
         console.log(`   Moving ${dup.gameCount} games from "${dup.name}"...`);
         
         for (const game of dup.games) {
@@ -946,7 +987,6 @@ async function runCleanup() {
         }
         console.log('');
         
-        // Delete metrics for the duplicate series (they will be orphaned)
         if (dup.metrics && dup.metrics.length > 0) {
           console.log(`   Deleting ${dup.metrics.length} metrics records...`);
           for (const metric of dup.metrics) {
@@ -960,7 +1000,6 @@ async function runCleanup() {
           }
         }
         
-        // Delete the duplicate series
         try {
           console.log(`   Deleting series: ${dup.id}`);
           await deleteTournamentSeries(dup.id);
@@ -970,10 +1009,8 @@ async function runCleanup() {
           errors++;
         }
         
-        // Delete orphaned title if applicable
         if (dup.tournamentSeriesTitleId && 
             dup.tournamentSeriesTitleId !== canonicalTitleId) {
-          // Check if any other series uses this title
           const otherUsers = allSeries.filter(s => 
             s.tournamentSeriesTitleId === dup.tournamentSeriesTitleId && 
             s.id !== dup.id &&

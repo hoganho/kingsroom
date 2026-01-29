@@ -19,10 +19,10 @@
  * are child tournament records consolidated into parents).
  * 
  * Usage:
- *   node repair-player-summary-stats.mjs --preview       # Show what would be fixed
- *   node repair-player-summary-stats.mjs --execute       # Actually fix the records
- *   node repair-player-summary-stats.mjs --player <id>   # Fix specific player
- *   node repair-player-summary-stats.mjs --entity <id>   # Fix players for entity
+ *   node repair-player-summary-stats.mjs                     # Interactive env selection + preview
+ *   node repair-player-summary-stats.mjs --execute           # Interactive env selection + execute
+ *   node repair-player-summary-stats.mjs --player <id>       # Fix specific player
+ *   node repair-player-summary-stats.mjs --entity <id>       # Fix players for entity
  * 
  * ===================================================================
  */
@@ -35,19 +35,51 @@ import {
   UpdateCommand,
   GetCommand,
 } from '@aws-sdk/lib-dynamodb';
+import * as readline from 'readline';
 
 // ============================================================================
-// CONFIGURATION
+// ENVIRONMENT CONFIGURATIONS
 // ============================================================================
 
-const CONFIG = {
-  region: 'ap-southeast-2',
-  apiId: process.env.API_KINGSROOM_GRAPHQLAPIIDOUTPUT || 'ynuahifnznb5zddz727oiqnicy',
-  env: process.env.ENV || 'prod',
+const ENVIRONMENTS = {
+  dev: {
+    API_ID: 'ht3nugt6lvddpeeuwj3x6mkite',
+    ENV_SUFFIX: 'dev',
+  },
+  prod: {
+    API_ID: 'ynuahifnznb5zddz727oiqnicy',
+    ENV_SUFFIX: 'prod',
+  },
 };
 
+const REGION = 'ap-southeast-2';
+
+// ============================================================================
+// RUNTIME STATE
+// ============================================================================
+
+let SELECTED_ENV = null;
+let CONFIG = null;
+
+// ============================================================================
+// HELPERS
+// ============================================================================
+
+function askQuestion(query) {
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
+  return new Promise((resolve) =>
+    rl.question(query, (ans) => {
+      rl.close();
+      resolve(ans);
+    })
+  );
+}
+
 const getTableName = (modelName) => {
-  return `${modelName}-${CONFIG.apiId}-${CONFIG.env}`;
+  return `${modelName}-${CONFIG.API_ID}-${CONFIG.ENV_SUFFIX}`;
 };
 
 // ============================================================================
@@ -128,7 +160,7 @@ Examples:
 // AWS CLIENT
 // ============================================================================
 
-const client = new DynamoDBClient({ region: CONFIG.region });
+const client = new DynamoDBClient({ region: REGION });
 const docClient = DynamoDBDocumentClient.from(client, {
   marshallOptions: { removeUndefinedValues: true },
 });
@@ -251,103 +283,92 @@ async function calculateCorrectStats(playerId, currentSummary) {
   const resultCounts = await countValidPlayerResults(playerId);
   const venueCount = await countPlayerVenues(playerId);
   
+  const current = {
+    sessionsPlayed: currentSummary.sessionsPlayed || 0,
+    tournamentsPlayed: currentSummary.tournamentsPlayed || 0,
+    cashGamesPlayed: currentSummary.cashGamesPlayed || 0,
+    venuesVisited: currentSummary.venuesVisited || 0,
+  };
+  
+  const correct = {
+    sessionsPlayed: resultCounts.total,
+    tournamentsPlayed: resultCounts.tournaments,
+    cashGamesPlayed: resultCounts.cashGames,
+    venuesVisited: venueCount,
+  };
+  
+  // Determine if fix is needed
+  const isNegative = current.sessionsPlayed < 0 || current.tournamentsPlayed < 0;
+  const needsFix = isNegative || 
+    current.sessionsPlayed !== correct.sessionsPlayed ||
+    current.tournamentsPlayed !== correct.tournamentsPlayed;
+  
   return {
-    playerId,
-    current: {
-      sessionsPlayed: currentSummary.sessionsPlayed,
-      tournamentsPlayed: currentSummary.tournamentsPlayed,
-      cashGamesPlayed: currentSummary.cashGamesPlayed || 0,
-      venuesVisited: currentSummary.venuesVisited,
-    },
-    correct: {
-      sessionsPlayed: resultCounts.total,
-      tournamentsPlayed: resultCounts.tournaments,
-      cashGamesPlayed: resultCounts.cashGames,
-      venuesVisited: venueCount,
-    },
-    needsFix: (
-      currentSummary.sessionsPlayed !== resultCounts.total ||
-      currentSummary.tournamentsPlayed !== resultCounts.tournaments ||
-      currentSummary.sessionsPlayed < 0 ||
-      currentSummary.tournamentsPlayed < 0
-    ),
-    isNegative: currentSummary.sessionsPlayed < 0 || currentSummary.tournamentsPlayed < 0,
+    current,
+    correct,
     resultCount: resultCounts.total,
+    isNegative,
+    needsFix,
   };
 }
 
-// ============================================================================
-// MAIN FUNCTIONS
-// ============================================================================
-
 /**
- * Find PlayerSummary records that need repair
+ * Find corrupted PlayerSummary records
  */
 async function findCorruptedSummaries() {
   const playerSummaryTable = getTableName('PlayerSummary');
-  const corrupted = [];
-  let scanned = 0;
+  
+  console.log(`Scanning ${playerSummaryTable} for corrupted records...`);
+  
+  let items = [];
   let lastEvaluatedKey = undefined;
   
-  console.log('Scanning PlayerSummary table for corrupted records...');
-  
-  // If specific player requested, just get that one
+  // Build scan/query based on options
   if (options.playerId) {
+    // Single player
     const response = await docClient.send(new GetCommand({
       TableName: playerSummaryTable,
       Key: { id: options.playerId },
     }));
-    
     if (response.Item) {
-      const stats = await calculateCorrectStats(options.playerId, response.Item);
-      if (stats.needsFix || options.includeAll) {
-        corrupted.push({
-          ...response.Item,
-          calculatedStats: stats,
-        });
-      }
+      items = [response.Item];
     }
-    
-    return corrupted;
+  } else if (options.entityId) {
+    // Filter by entity
+    do {
+      const response = await docClient.send(new ScanCommand({
+        TableName: playerSummaryTable,
+        FilterExpression: 'entityId = :eid',
+        ExpressionAttributeValues: { ':eid': options.entityId },
+        ExclusiveStartKey: lastEvaluatedKey,
+      }));
+      items.push(...(response.Items || []));
+      lastEvaluatedKey = response.LastEvaluatedKey;
+    } while (lastEvaluatedKey);
+  } else {
+    // Full scan - look for negative values or consolidation markers
+    do {
+      const response = await docClient.send(new ScanCommand({
+        TableName: playerSummaryTable,
+        FilterExpression: options.includeAll 
+          ? 'attribute_exists(lastConsolidationAt)'
+          : 'sessionsPlayed < :zero OR tournamentsPlayed < :zero',
+        ExpressionAttributeValues: options.includeAll 
+          ? {}
+          : { ':zero': 0 },
+        ExclusiveStartKey: lastEvaluatedKey,
+      }));
+      items.push(...(response.Items || []));
+      lastEvaluatedKey = response.LastEvaluatedKey;
+      
+      if (items.length % 100 === 0) {
+        console.log(`  Found ${items.length} records so far...`);
+      }
+    } while (lastEvaluatedKey);
   }
   
-  // Full scan
-  do {
-    const scanParams = {
-      TableName: playerSummaryTable,
-      ExclusiveStartKey: lastEvaluatedKey,
-    };
-    
-    // If entity filter specified, we still need to scan but filter
-    // (PlayerSummary may not have a byEntity index)
-    
-    const response = await docClient.send(new ScanCommand(scanParams));
-    
-    for (const item of response.Items || []) {
-      scanned++;
-      
-      // Filter by entity if specified
-      if (options.entityId && item.entityId !== options.entityId) {
-        continue;
-      }
-      
-      // Check if this record needs repair
-      const isNegative = item.sessionsPlayed < 0 || item.tournamentsPlayed < 0;
-      const wasConsolidated = !!item.lastConsolidationAt;
-      
-      if (isNegative || (options.includeAll && wasConsolidated)) {
-        corrupted.push(item);
-      }
-    }
-    
-    lastEvaluatedKey = response.LastEvaluatedKey;
-    process.stdout.write(`\rScanned ${scanned} records, found ${corrupted.length} needing repair...`);
-    
-  } while (lastEvaluatedKey);
-  
-  console.log(`\nScan complete: ${scanned} total, ${corrupted.length} need repair`);
-  
-  return corrupted;
+  console.log(`Found ${items.length} records to check`);
+  return items;
 }
 
 /**
@@ -388,6 +409,7 @@ async function repairCorruptedSummaries() {
   console.log('='.repeat(70));
   console.log('REPAIR CORRUPTED PLAYERSUMMARY STATISTICS');
   console.log('='.repeat(70));
+  console.log(`Environment: ${SELECTED_ENV.toUpperCase()}`);
   console.log(`Mode: ${options.execute ? '🔧 EXECUTE' : '👁️  PREVIEW'}`);
   console.log(`Table: ${getTableName('PlayerSummary')}`);
   if (options.playerId) console.log(`Player: ${options.playerId}`);
@@ -503,10 +525,9 @@ async function repairCorruptedSummaries() {
   }
 }
 
-// ============================================================================
-// ADDITIONAL DIAGNOSTIC FUNCTION
-// ============================================================================
-
+/**
+ * Additional diagnostics for specific player
+ */
 async function showDiagnostics() {
   if (!options.playerId) return;
   
@@ -592,11 +613,62 @@ async function showDiagnostics() {
 }
 
 // ============================================================================
+// ENVIRONMENT SELECTION
+// ============================================================================
+
+async function selectEnvironment() {
+  console.log('\n╔═══════════════════════════════════════════════════════════════════╗');
+  console.log('║        REPAIR CORRUPTED PLAYERSUMMARY STATISTICS                  ║');
+  console.log('║        Fixes negative sessionsPlayed/tournamentsPlayed values     ║');
+  console.log('╚═══════════════════════════════════════════════════════════════════╝\n');
+
+  console.log('Available environments:\n');
+  console.log('  [1] dev  - Development environment');
+  console.log(`        API ID: ${ENVIRONMENTS.dev.API_ID}`);
+  console.log('');
+  console.log('  [2] prod - Production environment');
+  console.log(`        API ID: ${ENVIRONMENTS.prod.API_ID}`);
+  console.log('');
+
+  const answer = await askQuestion('Select environment (dev/prod or 1/2): ');
+  const normalizedAnswer = answer.toLowerCase().trim();
+
+  if (normalizedAnswer === 'dev' || normalizedAnswer === '1') {
+    return 'dev';
+  } else if (normalizedAnswer === 'prod' || normalizedAnswer === '2') {
+    return 'prod';
+  } else {
+    console.error(`Invalid selection: "${answer}". Please enter "dev", "prod", "1", or "2".`);
+    process.exit(1);
+  }
+}
+
+// ============================================================================
 // RUN
 // ============================================================================
 
 async function main() {
   try {
+    // Select environment first
+    SELECTED_ENV = await selectEnvironment();
+    CONFIG = ENVIRONMENTS[SELECTED_ENV];
+
+    console.log('\n' + '─'.repeat(70));
+    console.log(`Selected environment: ${SELECTED_ENV.toUpperCase()}`);
+    console.log(`API ID: ${CONFIG.API_ID}`);
+    console.log('─'.repeat(70) + '\n');
+
+    // Production safety check
+    if (SELECTED_ENV === 'prod' && options.execute) {
+      console.log('⚠️  You are about to MODIFY PRODUCTION data!');
+      const confirm = await askQuestion('Type "fix prod" to confirm: ');
+      if (confirm.toLowerCase().trim() !== 'fix prod') {
+        console.log('Aborted by user.');
+        return;
+      }
+      console.log('');
+    }
+
     await repairCorruptedSummaries();
     
     if (options.verbose || options.playerId) {

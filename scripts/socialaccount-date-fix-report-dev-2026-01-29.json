@@ -1,0 +1,15 @@
+{
+  "generatedAt": "2026-01-29T02:59:18.137Z",
+  "mode": "PREVIEW",
+  "environment": "dev",
+  "table": "SocialAccount-ht3nugt6lvddpeeuwj3x6mkite-dev",
+  "summary": {
+    "checked": 18,
+    "alreadyCorrect": 18,
+    "needsFix": 0,
+    "fieldCounts": {},
+    "updated": 0,
+    "errors": 0
+  },
+  "fixes": []
+}
