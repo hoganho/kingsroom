@@ -1,0 +1,34 @@
+
+SOCIAL POST IMAGES BACKFILL REPORT
+==================================
+Generated: 2026-01-29T12:28:08.008Z
+Environment: PROD
+Dry Run: NO
+
+SCAN STATISTICS
+---------------
+Total posts scanned: 6819
+Posts with media: 6769
+Posts with Facebook URLs: 2700
+Posts already on S3: 4069
+Posts without media: 50
+
+PROCESSING RESULTS
+------------------
+Posts fully fixed: 2655
+Posts partially fixed: 0
+Posts failed: 0
+
+Images downloaded: 3314
+Images failed: 45
+Duplicate images removed: 1775
+
+
+
+WHAT WAS FIXED
+--------------
+For each post with Facebook CDN URLs:
+1. Removed duplicate images (same image with different query params)
+2. Downloaded image from Facebook CDN
+3. Uploaded to S3 bucket: kingsroom-storage-prod
+4. Updated mediaUrls and thumbnailUrl in DynamoDB

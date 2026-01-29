@@ -1,0 +1,34 @@
+
+SOCIAL POST IMAGES BACKFILL REPORT
+==================================
+Generated: 2026-01-29T13:03:02.347Z
+Environment: DEV
+Dry Run: NO
+
+SCAN STATISTICS
+---------------
+Total posts scanned: 4149
+Posts with media: 4117
+Posts with Facebook URLs: 55
+Posts already on S3: 4062
+Posts without media: 32
+
+PROCESSING RESULTS
+------------------
+Posts fully fixed: 0
+Posts partially fixed: 0
+Posts failed: 0
+
+Images downloaded: 0
+Images failed: 56
+Duplicate images removed: 7
+
+
+
+WHAT WAS FIXED
+--------------
+For each post with Facebook CDN URLs:
+1. Removed duplicate images (same image with different query params)
+2. Downloaded image from Facebook CDN
+3. Uploaded to S3 bucket: pokerpro-scraper-storage
+4. Updated mediaUrls and thumbnailUrl in DynamoDB

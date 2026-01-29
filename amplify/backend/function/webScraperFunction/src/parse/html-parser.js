@@ -1201,6 +1201,7 @@ const defaultStrategy = {
         ctx.add('prizepoolCalculated', prizepoolPlayerContributions);
         ctx.add('prizepoolSurplus', prizepoolSurplus);
         ctx.add('guaranteeOverlayCost', guaranteeOverlayCost);
+        ctx.add('prizepoolAddedValue', prizepoolAddedValue);
         ctx.add('gameProfit', gameProfit);
     },
 
