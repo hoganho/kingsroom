@@ -47,6 +47,7 @@ const listTournamentSeriesTitlesShallow = /* GraphQL */ `
       items {
         id
         title
+        aliases
         seriesCategory
         _version
         _deleted
@@ -244,6 +245,7 @@ export const SeriesManagementPage = () => {
   const handleSaveTitle = async (input: { 
     id?: string; 
     title: string; 
+    aliases?: string[] | null;
     seriesCategory?: APITypes.SeriesCategory | null; 
     _version?: number 
   }) => {
@@ -253,8 +255,18 @@ export const SeriesManagementPage = () => {
       : mutations.createTournamentSeriesTitle;
 
     const payload = input.id
-      ? { id: input.id, title: input.title, seriesCategory: input.seriesCategory, _version: input._version }
-      : { title: input.title, seriesCategory: input.seriesCategory };
+      ? { 
+          id: input.id, 
+          title: input.title, 
+          aliases: input.aliases,
+          seriesCategory: input.seriesCategory, 
+          _version: input._version 
+        }
+      : { 
+          title: input.title, 
+          aliases: input.aliases,
+          seriesCategory: input.seriesCategory 
+        };
 
     try {
       await client.graphql({ query: mutation, variables: { input: payload } });

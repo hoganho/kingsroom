@@ -44,6 +44,112 @@ const SERIES_MATCH_THRESHOLD = 0.7;
 const BASE_SERIES_MATCH_THRESHOLD = 0.75;
 
 // ===================================================================
+// ALIAS EXPANSION - Converts abbreviations to full names
+// ===================================================================
+
+/**
+ * Common abbreviations used in tournament names
+ * These are expanded BEFORE pattern matching for better consolidation
+ */
+const ALIAS_EXPANSIONS = {
+  // Series abbreviations
+  'kc': 'Kings Cup',
+  'cny': 'Chinese New Year',
+  'apt': 'Asia Pacific Tour',
+  'wsop': 'World Series of Poker',
+  'wpt': 'World Poker Tour',
+  'ept': 'European Poker Tour',
+  'appt': 'Asia Pacific Poker Tour',
+  'anzpt': 'Australia New Zealand Poker Tour',
+  
+  // Event abbreviations
+  'me': 'Main Event',
+  'hr': 'High Roller',
+  'plo': 'Pot Limit Omaha',
+  'nlhe': 'No Limit Holdem',
+  'ss': 'Super Series',
+  'sig': 'Signature',
+  
+  // Structure abbreviations
+  'gtd': 'Guaranteed',
+  'satty': 'Satellite',
+  'sat': 'Satellite',
+};
+
+/**
+ * Venue-specific series aliases - maps alias patterns to canonical series names
+ * These are checked first for highest priority matching
+ */
+const VENUE_SERIES_ALIASES = {
+  'kc @ churchills': 'Kings Cup @ Churchills',
+  'kc@churchills': 'Kings Cup @ Churchills',
+  'kc at churchills': 'Kings Cup @ Churchills',
+  'dragon lunar': 'Chinese New Year Lunar Series',
+  'cny lunar': 'Chinese New Year Lunar Series',
+  'cny lunar series': 'Chinese New Year Lunar Series',
+  'chinese ny lunar': 'Chinese New Year Lunar Series',
+};
+
+/**
+ * Expand known abbreviations in a tournament name
+ * 
+ * @param {string} name - Original tournament name
+ * @returns {{ expanded: string, aliasMatch: object|null }} - Name with abbreviations expanded and match details
+ */
+const expandAliases = (name) => {
+  if (!name) return { expanded: name, aliasMatch: null };
+  
+  let expanded = name;
+  const aliasMatch = {
+    type: null,           // 'VENUE_ALIAS' or 'WORD_ALIAS'
+    original: name,
+    expanded: null,
+    matchedAlias: null,   // The alias pattern that matched
+    canonicalName: null,  // What it expanded to
+    allExpansions: []     // Track all word expansions
+  };
+  
+  // Check venue-specific aliases first (case-insensitive, full match at start)
+  const lowerName = name.toLowerCase().trim();
+  for (const [alias, canonical] of Object.entries(VENUE_SERIES_ALIASES)) {
+    if (lowerName.startsWith(alias)) {
+      // Replace the alias portion while keeping the rest of the name
+      expanded = canonical + name.slice(alias.length);
+      aliasMatch.type = 'VENUE_ALIAS';
+      aliasMatch.matchedAlias = alias;
+      aliasMatch.canonicalName = canonical;
+      aliasMatch.expanded = expanded;
+      console.log(`[SERIES] Alias expansion (VENUE): "${name}" → "${expanded}"`);
+      break;
+    }
+  }
+  
+  // Then expand individual word abbreviations (word boundaries only)
+  for (const [abbrev, full] of Object.entries(ALIAS_EXPANSIONS)) {
+    // Only match whole words (case-insensitive)
+    const regex = new RegExp(`\\b${abbrev}\\b`, 'gi');
+    const before = expanded;
+    expanded = expanded.replace(regex, full);
+    if (before !== expanded) {
+      if (!aliasMatch.type) {
+        aliasMatch.type = 'WORD_ALIAS';
+      }
+      aliasMatch.allExpansions.push({ from: abbrev, to: full });
+      console.log(`[SERIES] Alias expansion (WORD): "${abbrev}" → "${full}"`);
+    }
+  }
+  
+  if (aliasMatch.type) {
+    aliasMatch.expanded = expanded;
+  }
+  
+  return { 
+    expanded, 
+    aliasMatch: aliasMatch.type ? aliasMatch : null 
+  };
+};
+
+// ===================================================================
 // NEW: BASE SERIES NAME EXTRACTION
 // ===================================================================
 
@@ -54,6 +160,10 @@ const BASE_SERIES_MATCH_THRESHOLD = 0.75;
  * Order matters: more specific patterns first
  */
 const KNOWN_SERIES_PATTERNS = [
+  // Venue-specific series (after alias expansion, these will match)
+  /\b(Kings?\s+Cup\s+@\s+Churchills)\b/i,
+  /\b(Chinese\s+New\s+Year\s+Lunar\s+Series)\b/i,
+  
   // Specific named series (add your venue-specific ones here)
   /\b(CNY\s+Lunar\s+Series)\b/i,
   /\b(Dragon\s+Lunar)\b/i,
@@ -76,7 +186,11 @@ const KNOWN_SERIES_PATTERNS = [
   /\b(St\.?\s*Patricks?\s+Day\s+Series)\b/i,
   /\b(Public\s+Holiday\s+Events?)\b/i,
   
-  // Major poker tours
+  // Major poker tours (after alias expansion)
+  /\b(World\s+Series\s+of\s+Poker(?:\s+Circuit)?)\b/i,
+  /\b(World\s+Poker\s+Tour)\b/i,
+  /\b(European\s+Poker\s+Tour)\b/i,
+  /\b(Asia\s+Pacific\s+(?:Poker\s+)?Tour)\b/i,
   /\b(WSOP(?:\s+Circuit)?)\b/i,
   /\b(WPT)\b/i,
   /\b(EPT)\b/i,
@@ -109,11 +223,22 @@ const KNOWN_SERIES_PATTERNS = [
  */
 const extractBaseSeriesName = (tournamentName) => {
   if (!tournamentName) {
-    return { baseName: null, confidence: 0, extractionMethod: 'NONE', eventDetails: {} };
+    return { baseName: null, confidence: 0, extractionMethod: 'NONE', eventDetails: {}, aliasMatch: null };
   }
   
-  const name = tournamentName.trim();
+  const originalName = tournamentName.trim();
   const eventDetails = {};
+  
+  // ===== FIRST: Expand aliases (KC → Kings Cup, etc.) =====
+  const { expanded: expandedName, aliasMatch: hardcodedAliasMatch } = expandAliases(originalName);
+  const wasExpanded = expandedName !== originalName;
+  
+  if (wasExpanded) {
+    console.log(`[SERIES] Alias expansion applied: "${originalName}" → "${expandedName}"`);
+  }
+  
+  // Use expanded name for pattern matching
+  const name = expandedName;
   
   // ===== METHOD 1: Known series pattern matching (highest confidence) =====
   for (const pattern of KNOWN_SERIES_PATTERNS) {
@@ -130,7 +255,11 @@ const extractBaseSeriesName = (tournamentName) => {
         baseName,
         confidence: 0.95,
         extractionMethod: 'KNOWN_PATTERN',
-        eventDetails
+        eventDetails,
+        wasExpanded,
+        originalName,
+        expandedName: wasExpanded ? expandedName : null,
+        aliasMatch: hardcodedAliasMatch
       };
     }
   }
@@ -170,7 +299,11 @@ const extractBaseSeriesName = (tournamentName) => {
           baseName,
           confidence: 0.85,
           extractionMethod: 'EVENT_PATTERN',
-          eventDetails
+          eventDetails,
+          wasExpanded,
+          originalName,
+          expandedName: wasExpanded ? expandedName : null,
+          aliasMatch: hardcodedAliasMatch
         };
       }
     }
@@ -202,7 +335,11 @@ const extractBaseSeriesName = (tournamentName) => {
           baseName,
           confidence: 0.80,
           extractionMethod: 'KEYWORD_PATTERN',
-          eventDetails
+          eventDetails,
+          wasExpanded,
+          originalName,
+          expandedName: wasExpanded ? expandedName : null,
+          aliasMatch: hardcodedAliasMatch
         };
       }
     }
@@ -230,7 +367,11 @@ const extractBaseSeriesName = (tournamentName) => {
       baseName,
       confidence: 0.60,
       extractionMethod: 'FALLBACK',
-      eventDetails
+      eventDetails,
+      wasExpanded,
+      originalName,
+      expandedName: wasExpanded ? expandedName : null,
+      aliasMatch: hardcodedAliasMatch
     };
   }
   
@@ -239,7 +380,11 @@ const extractBaseSeriesName = (tournamentName) => {
     baseName: name,
     confidence: 0.30,
     extractionMethod: 'ORIGINAL',
-    eventDetails
+    eventDetails,
+    wasExpanded,
+    originalName,
+    expandedName: wasExpanded ? expandedName : null,
+    aliasMatch: hardcodedAliasMatch
   };
 };
 
@@ -420,51 +565,88 @@ const getAllSeriesTitles = async () => {
  * Match tournament name against TournamentSeriesTitle database
  * 
  * ENHANCED: Now extracts base series name first for better matching
+ * and tracks alias match details for debugging
  */
 const matchAgainstDatabase = (gameName, seriesTitles = [], venues = []) => {
   if (!gameName || !seriesTitles.length) return null;
   
-  // First, extract the base series name
-  const { baseName, confidence: extractionConfidence, extractionMethod } = extractBaseSeriesName(gameName);
+  // First, extract the base series name (includes hardcoded alias expansion)
+  const { 
+    baseName, 
+    confidence: extractionConfidence, 
+    extractionMethod,
+    wasExpanded,
+    originalName,
+    expandedName,
+    aliasMatch: hardcodedAliasMatch 
+  } = extractBaseSeriesName(gameName);
   
   const namesToMatch = [gameName];
   if (baseName && baseName !== gameName) {
     namesToMatch.unshift(baseName); // Try base name first
   }
   
+  // Build alias resolution details object
+  const buildAliasResolution = (dbAliasMatch = null) => ({
+    hardcoded: hardcodedAliasMatch,
+    database: dbAliasMatch,
+    originalInput: gameName,
+    afterExpansion: wasExpanded ? expandedName : null,
+    extractedBaseName: baseName
+  });
+  
   for (const nameToMatch of namesToMatch) {
     const upperCaseName = nameToMatch.toUpperCase();
     
     // Step 1: Exact substring matching
     for (const series of seriesTitles) {
-      const titlesToCheck = [series.title, ...(series.aliases || [])];
+      const titlesToCheck = [
+        { name: series.title, isAlias: false },
+        ...(series.aliases || []).map(a => ({ name: a, isAlias: true }))
+      ];
       
-      for (const seriesName of titlesToCheck) {
+      for (const { name: seriesName, isAlias } of titlesToCheck) {
+        if (!seriesName) continue;
+        
         // Check if the series title is contained in the game name
         if (upperCaseName.includes(seriesName.toUpperCase())) {
-          console.log(`[SERIES] Database exact match: "${series.title}" in "${gameName}"`);
+          const dbAliasMatch = isAlias ? {
+            type: 'EXACT_SUBSTRING',
+            matchedAlias: seriesName,
+            titleMatched: series.title
+          } : null;
+          
+          console.log(`[SERIES] Database exact match: "${series.title}"${isAlias ? ` (via alias "${seriesName}")` : ''} in "${gameName}"`);
           return {
             matched: true,
             seriesTitle: series.title,
             seriesTitleId: series.id,
             seriesCategory: series.seriesCategory || 'REGULAR',
             confidence: 1.0,
-            matchType: 'DATABASE_EXACT',
-            extractedBaseName: baseName
+            matchType: isAlias ? 'DATABASE_EXACT_ALIAS' : 'DATABASE_EXACT',
+            extractedBaseName: baseName,
+            aliasResolution: buildAliasResolution(dbAliasMatch)
           };
         }
         
         // Also check if game name is contained in series title (for short game names)
         if (seriesName.toUpperCase().includes(upperCaseName) && nameToMatch.length >= 8) {
-          console.log(`[SERIES] Database reverse match: "${series.title}" contains "${nameToMatch}"`);
+          const dbAliasMatch = isAlias ? {
+            type: 'REVERSE_MATCH',
+            matchedAlias: seriesName,
+            titleMatched: series.title
+          } : null;
+          
+          console.log(`[SERIES] Database reverse match: "${series.title}"${isAlias ? ` (via alias "${seriesName}")` : ''} contains "${nameToMatch}"`);
           return {
             matched: true,
             seriesTitle: series.title,
             seriesTitleId: series.id,
             seriesCategory: series.seriesCategory || 'REGULAR',
             confidence: 0.95,
-            matchType: 'DATABASE_REVERSE',
-            extractedBaseName: baseName
+            matchType: isAlias ? 'DATABASE_REVERSE_ALIAS' : 'DATABASE_REVERSE',
+            extractedBaseName: baseName,
+            aliasResolution: buildAliasResolution(dbAliasMatch)
           };
         }
       }
@@ -476,11 +658,16 @@ const matchAgainstDatabase = (gameName, seriesTitles = [], venues = []) => {
     const cleanedBaseName = baseName.toLowerCase().replace(/[^a-z0-9\s]/g, '').trim();
     
     const allNamesToMatch = seriesTitles.flatMap(series =>
-      [series.title, ...(series.aliases || [])].map(name => ({
+      [
+        { name: series.title, isAlias: false },
+        ...(series.aliases || []).filter(a => a).map(a => ({ name: a, isAlias: true }))
+      ].map(({ name, isAlias }) => ({
         seriesId: series.id,
         seriesTitle: series.title,
         seriesCategory: series.seriesCategory,
-        matchName: name.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, ' ').trim().toLowerCase()
+        matchName: name.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, ' ').trim().toLowerCase(),
+        originalName: name,
+        isAlias
       }))
     );
     
@@ -495,15 +682,23 @@ const matchAgainstDatabase = (gameName, seriesTitles = [], venues = []) => {
         const matchedSeries = allNamesToMatch.find(s => s.matchName === bestMatch.target);
         
         if (matchedSeries) {
-          console.log(`[SERIES] Database fuzzy match on base name: "${matchedSeries.seriesTitle}" (base: "${baseName}", score: ${bestMatch.rating.toFixed(2)})`);
+          const dbAliasMatch = matchedSeries.isAlias ? {
+            type: 'FUZZY_BASE',
+            matchedAlias: matchedSeries.originalName,
+            titleMatched: matchedSeries.seriesTitle,
+            similarity: bestMatch.rating
+          } : null;
+          
+          console.log(`[SERIES] Database fuzzy match on base name: "${matchedSeries.seriesTitle}"${matchedSeries.isAlias ? ` (via alias "${matchedSeries.originalName}")` : ''} (base: "${baseName}", score: ${bestMatch.rating.toFixed(2)})`);
           return {
             matched: true,
             seriesTitle: matchedSeries.seriesTitle,
             seriesTitleId: matchedSeries.seriesId,
             seriesCategory: matchedSeries.seriesCategory || 'REGULAR',
             confidence: bestMatch.rating,
-            matchType: 'DATABASE_FUZZY_BASE',
-            extractedBaseName: baseName
+            matchType: matchedSeries.isAlias ? 'DATABASE_FUZZY_BASE_ALIAS' : 'DATABASE_FUZZY_BASE',
+            extractedBaseName: baseName,
+            aliasResolution: buildAliasResolution(dbAliasMatch)
           };
         }
       }
@@ -514,11 +709,16 @@ const matchAgainstDatabase = (gameName, seriesTitles = [], venues = []) => {
   const cleanedGameName = cleanupNameForSeriesMatching(gameName, venues);
   
   const allNamesToMatch = seriesTitles.flatMap(series =>
-    [series.title, ...(series.aliases || [])].map(name => ({
+    [
+      { name: series.title, isAlias: false },
+      ...(series.aliases || []).filter(a => a).map(a => ({ name: a, isAlias: true }))
+    ].map(({ name, isAlias }) => ({
       seriesId: series.id,
       seriesTitle: series.title,
       seriesCategory: series.seriesCategory,
-      matchName: name.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, ' ').trim().toLowerCase()
+      matchName: name.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, ' ').trim().toLowerCase(),
+      originalName: name,
+      isAlias
     }))
   );
   
@@ -533,15 +733,23 @@ const matchAgainstDatabase = (gameName, seriesTitles = [], venues = []) => {
     const matchedSeries = allNamesToMatch.find(s => s.matchName === bestMatch.target);
     
     if (matchedSeries) {
-      console.log(`[SERIES] Database fuzzy match: "${matchedSeries.seriesTitle}" (score: ${bestMatch.rating.toFixed(2)})`);
+      const dbAliasMatch = matchedSeries.isAlias ? {
+        type: 'FUZZY_FULL',
+        matchedAlias: matchedSeries.originalName,
+        titleMatched: matchedSeries.seriesTitle,
+        similarity: bestMatch.rating
+      } : null;
+      
+      console.log(`[SERIES] Database fuzzy match: "${matchedSeries.seriesTitle}"${matchedSeries.isAlias ? ` (via alias "${matchedSeries.originalName}")` : ''} (score: ${bestMatch.rating.toFixed(2)})`);
       return {
         matched: true,
         seriesTitle: matchedSeries.seriesTitle,
         seriesTitleId: matchedSeries.seriesId,
         seriesCategory: matchedSeries.seriesCategory || 'REGULAR',
         confidence: bestMatch.rating,
-        matchType: 'DATABASE_FUZZY',
-        extractedBaseName: baseName
+        matchType: matchedSeries.isAlias ? 'DATABASE_FUZZY_ALIAS' : 'DATABASE_FUZZY',
+        extractedBaseName: baseName,
+        aliasResolution: buildAliasResolution(dbAliasMatch)
       };
     }
   }
@@ -986,10 +1194,10 @@ const createTournamentSeriesTitle = async (titleName, seriesCategory = 'SPECIAL'
 const findExistingSeriesTitle = async (titleName, seriesCategory = null) => {
   const allTitles = await getAllSeriesTitles();
   
-  if (allTitles.length === 0) return null;
+  if (allTitles.length === 0) return { title: null, dbAliasMatch: null };
   
-  // Extract base series name
-  const { baseName } = extractBaseSeriesName(titleName);
+  // Extract base series name (this now also expands aliases)
+  const { baseName, wasExpanded, aliasMatch: hardcodedAliasMatch } = extractBaseSeriesName(titleName);
   const searchName = baseName || titleName;
   
   // Clean up the input name for matching
@@ -999,28 +1207,71 @@ const findExistingSeriesTitle = async (titleName, seriesCategory = null) => {
     .toLowerCase()
     .trim();
   
-  console.log(`[SERIES] Searching for existing title: "${cleanInput}" (from "${titleName}")`);
+  // Also keep the original input (before expansion) for alias matching
+  const originalCleanInput = titleName
+    .replace(/\s+20[2-3]\d$/, '')
+    .replace(/\s+Event\s*#?\s*\d+.*/i, '')
+    .toLowerCase()
+    .trim();
   
-  // First try exact match
+  console.log(`[SERIES] Searching for existing title: "${cleanInput}" (from "${titleName}"${wasExpanded ? ', expanded' : ''})`);
+  
+  // Track database alias match info
+  let dbAliasMatch = null;
+  
+  // First try exact match on title
   for (const title of allTitles) {
     const cleanTitle = title.title.toLowerCase().trim();
     if (cleanTitle === cleanInput) {
       if (seriesCategory && title.seriesCategory !== seriesCategory) continue;
       console.log(`[SERIES] Found existing title by exact match: "${title.title}" (${title.id})`);
-      return title;
+      return { 
+        title, 
+        dbAliasMatch: null,  // No alias needed - direct title match
+        matchMethod: 'EXACT_TITLE'
+      };
     }
+  }
+  
+  // Check aliases - both exact and fuzzy
+  for (const title of allTitles) {
+    const aliases = title.aliases || [];
     
-    // Check aliases
-    for (const alias of (title.aliases || [])) {
-      if (alias.toLowerCase().trim() === cleanInput) {
+    for (const alias of aliases) {
+      if (!alias) continue;
+      const cleanAlias = alias.toLowerCase().trim();
+      
+      // Exact match on alias (check both expanded and original input)
+      if (cleanAlias === cleanInput || cleanAlias === originalCleanInput) {
         if (seriesCategory && title.seriesCategory !== seriesCategory) continue;
-        console.log(`[SERIES] Found existing title by alias: "${title.title}" (${title.id})`);
-        return title;
+        console.log(`[SERIES] Found existing title by exact alias match: "${title.title}" (alias: "${alias}")`);
+        dbAliasMatch = {
+          type: 'EXACT_ALIAS',
+          matchedAlias: alias,
+          searchedFor: cleanAlias === originalCleanInput ? originalCleanInput : cleanInput,
+          titleMatched: title.title
+        };
+        return { title, dbAliasMatch, matchMethod: 'EXACT_ALIAS' };
+      }
+      
+      // Fuzzy match on alias (high threshold for aliases)
+      const sim = stringSimilarity.compareTwoStrings(cleanInput, cleanAlias);
+      if (sim >= 0.85) {
+        if (seriesCategory && title.seriesCategory !== seriesCategory) continue;
+        console.log(`[SERIES] Found existing title by fuzzy alias match: "${title.title}" (alias: "${alias}", score: ${sim.toFixed(2)})`);
+        dbAliasMatch = {
+          type: 'FUZZY_ALIAS',
+          matchedAlias: alias,
+          searchedFor: cleanInput,
+          titleMatched: title.title,
+          similarity: sim
+        };
+        return { title, dbAliasMatch, matchMethod: 'FUZZY_ALIAS' };
       }
     }
   }
   
-  // Try fuzzy matching with lower threshold for base name
+  // Try fuzzy matching on title itself with lower threshold for base name
   const similarity = stringSimilarity.findBestMatch(
     cleanInput,
     allTitles.map(t => t.title.toLowerCase().trim())
@@ -1032,13 +1283,20 @@ const findExistingSeriesTitle = async (titleName, seriesCategory = null) => {
       t => t.title.toLowerCase().trim() === similarity.bestMatch.target
     );
     if (matchedTitle) {
-      if (seriesCategory && matchedTitle.seriesCategory !== seriesCategory) return null;
+      if (seriesCategory && matchedTitle.seriesCategory !== seriesCategory) {
+        return { title: null, dbAliasMatch: null };
+      }
       console.log(`[SERIES] Found existing title by fuzzy match: "${matchedTitle.title}" (score: ${similarity.bestMatch.rating.toFixed(2)})`);
-      return matchedTitle;
+      return { 
+        title: matchedTitle, 
+        dbAliasMatch: null,
+        matchMethod: 'FUZZY_TITLE',
+        similarity: similarity.bestMatch.rating
+      };
     }
   }
   
-  return null;
+  return { title: null, dbAliasMatch: null };
 };
 
 /**
@@ -1046,15 +1304,20 @@ const findExistingSeriesTitle = async (titleName, seriesCategory = null) => {
  */
 const findOrCreateSeriesTitle = async (titleName, seriesCategory = 'SPECIAL') => {
   // First try to find existing
-  const existing = await findExistingSeriesTitle(titleName, seriesCategory);
+  const { title: existing, dbAliasMatch, matchMethod } = await findExistingSeriesTitle(titleName, seriesCategory);
   
   if (existing) {
-    return { title: existing, wasCreated: false };
+    return { 
+      title: existing, 
+      wasCreated: false,
+      dbAliasMatch,
+      matchMethod
+    };
   }
   
   // Create new title
   const newTitle = await createTournamentSeriesTitle(titleName, seriesCategory);
-  return { title: newTitle, wasCreated: true };
+  return { title: newTitle, wasCreated: true, dbAliasMatch: null, matchMethod: 'CREATED_NEW' };
 };
 
 // ===================================================================
@@ -1704,11 +1967,121 @@ const detectHolidayContextEnhanced = (gameName, dateObj) => {
 // EXPORTS
 // ===================================================================
 
+// ===================================================================
+// ALIAS RESOLUTION DEBUG HELPER
+// ===================================================================
+
+/**
+ * Format alias resolution details into a human-readable summary
+ * Useful for debugging and logging which aliases were matched
+ * 
+ * @param {Object} aliasResolution - The aliasResolution object from matchAgainstDatabase
+ * @returns {string} - Formatted summary string
+ */
+const formatAliasResolution = (aliasResolution) => {
+  if (!aliasResolution) return 'No alias resolution data';
+  
+  const lines = [];
+  lines.push(`📥 Input: "${aliasResolution.originalInput}"`);
+  
+  // Hardcoded alias info
+  if (aliasResolution.hardcoded) {
+    const h = aliasResolution.hardcoded;
+    lines.push(`🔧 Hardcoded Alias Match:`);
+    lines.push(`   Type: ${h.type}`);
+    if (h.type === 'VENUE_ALIAS') {
+      lines.push(`   Matched: "${h.matchedAlias}" → "${h.canonicalName}"`);
+    } else if (h.type === 'WORD_ALIAS') {
+      lines.push(`   Expansions: ${h.allExpansions.map(e => `"${e.from}"→"${e.to}"`).join(', ')}`);
+    }
+    lines.push(`   After expansion: "${h.expanded}"`);
+  } else {
+    lines.push(`🔧 Hardcoded Alias: None applied`);
+  }
+  
+  // Expanded name
+  if (aliasResolution.afterExpansion) {
+    lines.push(`📤 After Expansion: "${aliasResolution.afterExpansion}"`);
+  }
+  
+  // Extracted base name
+  if (aliasResolution.extractedBaseName) {
+    lines.push(`🎯 Extracted Base Name: "${aliasResolution.extractedBaseName}"`);
+  }
+  
+  // Database alias info
+  if (aliasResolution.database) {
+    const d = aliasResolution.database;
+    lines.push(`💾 Database Alias Match:`);
+    lines.push(`   Type: ${d.type}`);
+    lines.push(`   Matched alias: "${d.matchedAlias}"`);
+    lines.push(`   Resolved to title: "${d.titleMatched}"`);
+    if (d.similarity) {
+      lines.push(`   Similarity: ${(d.similarity * 100).toFixed(1)}%`);
+    }
+  } else {
+    lines.push(`💾 Database Alias: None (direct title match or no match)`);
+  }
+  
+  return lines.join('\n');
+};
+
+/**
+ * Test alias resolution for a given tournament name
+ * Useful for debugging without actually creating/updating records
+ * 
+ * @param {string} tournamentName - Tournament name to test
+ * @param {Array} seriesTitles - Optional array of series titles to match against
+ * @returns {Object} - Detailed resolution results
+ */
+const testAliasResolution = async (tournamentName, seriesTitles = null) => {
+  // Get titles from database if not provided
+  const titles = seriesTitles || await getAllSeriesTitles();
+  
+  // Extract base name (includes hardcoded alias expansion)
+  const extraction = extractBaseSeriesName(tournamentName);
+  
+  // Try to match against database
+  const dbMatch = matchAgainstDatabase(tournamentName, titles, []);
+  
+  return {
+    input: tournamentName,
+    extraction: {
+      baseName: extraction.baseName,
+      method: extraction.extractionMethod,
+      confidence: extraction.confidence,
+      wasExpanded: extraction.wasExpanded,
+      expandedTo: extraction.expandedName,
+      hardcodedAliasMatch: extraction.aliasMatch
+    },
+    databaseMatch: dbMatch ? {
+      matched: true,
+      title: dbMatch.seriesTitle,
+      titleId: dbMatch.seriesTitleId,
+      matchType: dbMatch.matchType,
+      confidence: dbMatch.confidence,
+      aliasResolution: dbMatch.aliasResolution
+    } : {
+      matched: false
+    },
+    formattedSummary: dbMatch ? formatAliasResolution(dbMatch.aliasResolution) : 'No database match'
+  };
+};
+
+// ===================================================================
+// EXPORTS
+// ===================================================================
+
 module.exports = {
   // Main resolver
   resolveSeriesAssignment,
   
-  // NEW: Base series name extraction
+  // Alias expansion
+  expandAliases,
+  ALIAS_EXPANSIONS,
+  VENUE_SERIES_ALIASES,
+  
+  // Base series name extraction
   extractBaseSeriesName,
   extractEventDetailsFromRemainder,
   containsSeriesKeyword,
@@ -1739,5 +2112,9 @@ module.exports = {
   // Title management
   createTournamentSeriesTitle,
   findExistingSeriesTitle,
-  findOrCreateSeriesTitle
+  findOrCreateSeriesTitle,
+  
+  // Debug helpers
+  formatAliasResolution,
+  testAliasResolution
 };

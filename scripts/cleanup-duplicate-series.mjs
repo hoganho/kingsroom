@@ -102,11 +102,67 @@ const getTableName = (modelName) => {
 };
 
 // ============================================================================
+// ALIAS EXPANSION MAP - Expands abbreviations to full names
+// ============================================================================
+
+const ALIAS_EXPANSIONS = {
+  // Abbreviations → Full names
+  'kc': 'Kings Cup',
+  'cny': 'Chinese New Year',
+  'apt': 'Asia Pacific Tour',
+  'wsop': 'World Series of Poker',
+  'wpt': 'World Poker Tour',
+  'me': 'Main Event',
+  'hr': 'High Roller',
+  'plo': 'Pot Limit Omaha',
+  'nlhe': 'No Limit Hold\'em',
+  'ss': 'Super Series',
+  'sig': 'Signature',
+};
+
+// Venue-specific series aliases - maps alias to canonical series name
+const VENUE_SERIES_ALIASES = {
+  'kc @ churchills': 'Kings Cup @ Churchills',
+  'kc@churchills': 'Kings Cup @ Churchills',
+  'dragon lunar': 'Chinese New Year Lunar Series',
+  'cny lunar': 'Chinese New Year Lunar Series',
+  'cny lunar series': 'Chinese New Year Lunar Series',
+};
+
+/**
+ * Expand known abbreviations in a name
+ */
+function expandAliases(name) {
+  if (!name) return name;
+  
+  let expanded = name;
+  
+  // Check venue-specific aliases first (case-insensitive)
+  const lowerName = name.toLowerCase().trim();
+  for (const [alias, canonical] of Object.entries(VENUE_SERIES_ALIASES)) {
+    if (lowerName.startsWith(alias)) {
+      expanded = canonical + name.slice(alias.length);
+      break;
+    }
+  }
+  
+  // Then expand individual abbreviations (word boundaries)
+  for (const [abbrev, full] of Object.entries(ALIAS_EXPANSIONS)) {
+    const regex = new RegExp(`\\b${abbrev}\\b`, 'gi');
+    expanded = expanded.replace(regex, full);
+  }
+  
+  return expanded;
+}
+
+// ============================================================================
 // KNOWN SERIES PATTERNS - Used for base name extraction
 // ============================================================================
 
 const KNOWN_SERIES_PATTERNS = [
-  // Specific named series
+  // Specific named series (after alias expansion)
+  /\b(Chinese\s+New\s+Year\s+Lunar\s+Series)\b/i,
+  /\b(Kings?\s+Cup\s+@\s+Churchills)\b/i,
   /\b(CNY\s+Lunar\s+Series)\b/i,
   /\b(Dragon\s+Lunar)\b/i,
   /\b(Kings?\s+Cup)\b/i,
@@ -127,7 +183,6 @@ const KNOWN_SERIES_PATTERNS = [
   /\b(Labour\s+Day\s+Series)\b/i,
   /\b(St\.?\s*Patricks?\s+Day\s+Series)\b/i,
   /\b(Public\s+Holiday\s+Events?)\b/i,
-  /\b(KC\s+@\s+Churchills)\b/i,
   
   // Major poker tours
   /\b(WSOP(?:\s+Circuit)?)\b/i,
@@ -153,6 +208,7 @@ const options = {
   verbose: false,
   dryRunGames: false,
   renameCanonical: false,
+  renameAll: false,  // NEW: Rename ALL series with messy names
 };
 
 for (let i = 0; i < args.length; i++) {
@@ -190,6 +246,9 @@ for (let i = 0; i < args.length; i++) {
     case '--rename-canonical':
       options.renameCanonical = true;
       break;
+    case '--rename-all':
+      options.renameAll = true;
+      break;
     case '--help':
     case '-h':
       console.log(`
@@ -211,12 +270,14 @@ Options:
   --verbose, -v              Show detailed output
   --dry-run-games            Show games that would be updated
   --rename-canonical         Rename canonical series to clean base name (e.g., "CNY Lunar Series 2026")
+  --rename-all               Rename ALL series with messy names (expands aliases like KC → Kings Cup)
   --help, -h                 Show this help message
 
 Examples:
   node cleanup-duplicate-series.mjs --preview
   node cleanup-duplicate-series.mjs --preview --year 2026 --verbose
   node cleanup-duplicate-series.mjs --execute --entity-id abc123
+  node cleanup-duplicate-series.mjs --preview --rename-all
       `);
       process.exit(0);
   }
@@ -248,20 +309,24 @@ function extractBaseSeriesName(name) {
   
   const originalName = name.trim();
   
-  // Try known patterns first
+  // FIRST: Expand aliases (KC → Kings Cup, etc.)
+  const expandedName = expandAliases(originalName);
+  
+  // Try known patterns on expanded name first
   for (const pattern of KNOWN_SERIES_PATTERNS) {
-    const match = originalName.match(pattern);
+    const match = expandedName.match(pattern);
     if (match) {
       const baseName = match[1].trim();
       return {
         baseName,
         normalized: baseName.toLowerCase().replace(/\s+/g, ' ').trim(),
-        method: 'KNOWN_PATTERN'
+        method: 'KNOWN_PATTERN',
+        wasExpanded: expandedName !== originalName
       };
     }
   }
   
-  // Try event pattern extraction
+  // Try event pattern extraction on expanded name
   const eventPatterns = [
     /^(.+?)\s+Event\s*#?\s*\d+\s*[:\-]\s*.+$/i,
     /^(.+?)\s+Event\s*#?\s*\d+$/i,
@@ -269,7 +334,7 @@ function extractBaseSeriesName(name) {
   ];
   
   for (const pattern of eventPatterns) {
-    const match = originalName.match(pattern);
+    const match = expandedName.match(pattern);
     if (match) {
       let baseName = match[1].trim();
       baseName = baseName.replace(/\s+20[2-3]\d$/, '').trim();
@@ -278,13 +343,14 @@ function extractBaseSeriesName(name) {
         return {
           baseName,
           normalized: baseName.toLowerCase().replace(/\s+/g, ' ').trim(),
-          method: 'EVENT_PATTERN'
+          method: 'EVENT_PATTERN',
+          wasExpanded: expandedName !== originalName
         };
       }
     }
   }
   
-  // Try keyword extraction
+  // Try keyword extraction on expanded name
   const keywordPatterns = [
     /^(.+?\s+Series)\b/i,
     /^(.+?\s+Championship)\b/i,
@@ -294,7 +360,7 @@ function extractBaseSeriesName(name) {
   ];
   
   for (const pattern of keywordPatterns) {
-    const match = originalName.match(pattern);
+    const match = expandedName.match(pattern);
     if (match) {
       let baseName = match[1].trim();
       baseName = baseName.replace(/\s+20[2-3]\d$/, '').trim();
@@ -303,14 +369,15 @@ function extractBaseSeriesName(name) {
         return {
           baseName,
           normalized: baseName.toLowerCase().replace(/\s+/g, ' ').trim(),
-          method: 'KEYWORD_PATTERN'
+          method: 'KEYWORD_PATTERN',
+          wasExpanded: expandedName !== originalName
         };
       }
     }
   }
   
-  // Fallback: strip common suffixes
-  let baseName = originalName
+  // Fallback: strip common suffixes from expanded name
+  let baseName = expandedName
     .replace(/\s+Event\s*#?\s*\d+\s*[:\-]?\s*.*/i, '')
     .replace(/\s+Flight\s*\d*[A-Z]?\b.*/i, '')
     .replace(/\s+Day\s*\d+.*/i, '')
@@ -320,9 +387,10 @@ function extractBaseSeriesName(name) {
     .trim();
   
   return {
-    baseName: baseName || originalName,
-    normalized: (baseName || originalName).toLowerCase().replace(/\s+/g, ' ').trim(),
-    method: 'FALLBACK'
+    baseName: baseName || expandedName,
+    normalized: (baseName || expandedName).toLowerCase().replace(/\s+/g, ' ').trim(),
+    method: 'FALLBACK',
+    wasExpanded: expandedName !== originalName
   };
 }
 
@@ -548,11 +616,7 @@ async function renameTournamentSeries(seriesId, newName) {
  * Generate a clean series name from base name and year
  */
 function generateCleanSeriesName(baseName, year) {
-  const cleanBase = baseName
-    .split(' ')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(' ');
-  
+  const cleanBase = smartCapitalize(baseName);
   return `${cleanBase} ${year}`;
 }
 
@@ -560,9 +624,41 @@ function generateCleanSeriesName(baseName, year) {
  * Generate a clean title name (without year)
  */
 function generateCleanTitleName(baseName) {
-  return baseName
+  return smartCapitalize(baseName);
+}
+
+/**
+ * Smart capitalization that preserves certain words/patterns
+ */
+function smartCapitalize(text) {
+  // Words that should stay uppercase
+  const preserveUppercase = ['CNY', 'NYC', 'APT', 'WPT', 'WSOP', 'EPT', 'PLO', 'NLHE', 'GTD', 'HR'];
+  // Words that should stay lowercase
+  const preserveLowercase = ['@', 'at', 'the', 'of', 'and', 'in', 'for'];
+  
+  return text
     .split(' ')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .map((word, index) => {
+      const upperWord = word.toUpperCase();
+      
+      // Preserve known uppercase words
+      if (preserveUppercase.includes(upperWord)) {
+        return upperWord;
+      }
+      
+      // Handle @ symbol
+      if (word === '@') {
+        return '@';
+      }
+      
+      // Keep lowercase words lowercase (except first word)
+      if (index > 0 && preserveLowercase.includes(word.toLowerCase())) {
+        return word.toLowerCase();
+      }
+      
+      // Standard title case
+      return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    })
     .join(' ');
 }
 
@@ -879,6 +975,81 @@ async function runCleanup() {
     }
   }
   
+  // ========================================
+  // STEP 5b: Analyze ALL series for renaming (--rename-all)
+  // ========================================
+  
+  const renameAllOperations = [];
+  
+  if (options.renameAll) {
+    console.log('\n' + '─'.repeat(60));
+    console.log('🔄 Analyzing ALL series for alias expansion/renaming...\n');
+    
+    for (const series of allSeries) {
+      const { baseName, normalized, wasExpanded } = extractBaseSeriesName(series.name);
+      const year = series.year || new Date().getFullYear();
+      const cleanName = generateCleanSeriesName(baseName, year);
+      
+      // Check if name needs updating
+      const needsRename = series.name !== cleanName;
+      
+      // Check if the associated title needs updating
+      let needsTitleRename = false;
+      let currentTitle = null;
+      if (series.tournamentSeriesTitleId) {
+        currentTitle = titleById.get(series.tournamentSeriesTitleId);
+        if (currentTitle && currentTitle.title !== baseName) {
+          needsTitleRename = true;
+        }
+      }
+      
+      if (needsRename || needsTitleRename) {
+        // Check if this series is already being handled by duplicate merge
+        const isInDuplicateGroup = mergeOperations.some(op => 
+          op.canonical.id === series.id || op.duplicates.some(d => d.id === series.id)
+        );
+        
+        if (!isInDuplicateGroup) {
+          renameAllOperations.push({
+            series,
+            currentName: series.name,
+            newName: cleanName,
+            baseName,
+            needsRename,
+            currentTitle,
+            newTitleName: baseName,
+            needsTitleRename,
+            wasExpanded,
+          });
+        }
+      }
+    }
+    
+    if (renameAllOperations.length > 0) {
+      console.log(`   Found ${renameAllOperations.length} series to rename:\n`);
+      
+      for (const op of renameAllOperations) {
+        console.log(`   📝 "${op.currentName}"`);
+        if (op.wasExpanded) {
+          console.log(`      🔧 Alias expanded to base: "${op.baseName}"`);
+        }
+        if (op.needsRename) {
+          console.log(`      → Series rename: "${op.newName}"`);
+        }
+        if (op.needsTitleRename && op.currentTitle) {
+          console.log(`      → Title rename: "${op.currentTitle.title}" → "${op.newTitleName}"`);
+        }
+        console.log('');
+      }
+    } else {
+      console.log('   No additional series need renaming.\n');
+    }
+  }
+  
+  console.log('\n' + '='.repeat(70));
+  console.log('MERGE SUMMARY');
+  console.log('='.repeat(70));
+
   console.log(`\nDuplicate groups:           ${mergeOperations.length}`);
   console.log(`Series to delete:           ${totalDuplicateSeries}`);
   console.log(`Games to update:            ${totalGamesToUpdate}`);
@@ -887,6 +1058,13 @@ async function runCleanup() {
   if (options.renameCanonical) {
     console.log(`Series to rename:           ${totalSeriesToRename}`);
     console.log(`Titles to rename:           ${totalTitlesToRename}`);
+  }
+  if (options.renameAll) {
+    const additionalSeriesToRename = renameAllOperations.filter(op => op.needsRename).length;
+    const additionalTitlesToRename = renameAllOperations.filter(op => op.needsTitleRename).length;
+    console.log(`\n[--rename-all] Additional renames:`);
+    console.log(`  Series to rename:         ${additionalSeriesToRename}`);
+    console.log(`  Titles to rename:         ${additionalTitlesToRename}`);
   }
   
   // ========================================
@@ -1031,6 +1209,65 @@ async function runCleanup() {
       }
       
       console.log(`   ✅ Merged ${op.duplicates.length} duplicates into canonical series`);
+    }
+    
+    // Execute rename-all operations
+    if (options.renameAll && renameAllOperations.length > 0) {
+      console.log('\n' + '─'.repeat(60));
+      console.log('EXECUTING RENAME-ALL OPERATIONS');
+      console.log('─'.repeat(60));
+      
+      for (const op of renameAllOperations) {
+        console.log(`\n   Processing: "${op.currentName}"`);
+        
+        // Rename the title first (if needed)
+        if (op.needsTitleRename && op.currentTitle) {
+          try {
+            console.log(`   Renaming title: "${op.currentTitle.title}" → "${op.newTitleName}"`);
+            await renameTournamentSeriesTitle(op.currentTitle.id, op.newTitleName);
+            titlesRenamed++;
+          } catch (err) {
+            console.error(`   ❌ Error renaming title: ${err.message}`);
+            errors++;
+          }
+        }
+        
+        // Rename the series
+        if (op.needsRename) {
+          try {
+            console.log(`   Renaming series: "${op.currentName}" → "${op.newName}"`);
+            await renameTournamentSeries(op.series.id, op.newName);
+            seriesRenamed++;
+            
+            // Also update all games pointing to this series with the new name
+            const games = await getGamesBySeriesId(op.series.id);
+            if (games.length > 0) {
+              console.log(`   Updating ${games.length} games with new series name...`);
+              for (const game of games) {
+                try {
+                  await updateGameSeriesId(
+                    game.id,
+                    op.series.id,
+                    op.newName,
+                    op.series.tournamentSeriesTitleId
+                  );
+                  gamesUpdated++;
+                  process.stdout.write('.');
+                } catch (err) {
+                  console.error(`\n   ❌ Error updating game ${game.id}: ${err.message}`);
+                  errors++;
+                }
+              }
+              console.log('');
+            }
+          } catch (err) {
+            console.error(`   ❌ Error renaming series: ${err.message}`);
+            errors++;
+          }
+        }
+        
+        console.log(`   ✅ Renamed successfully`);
+      }
     }
     
     console.log('\n' + '='.repeat(70));
