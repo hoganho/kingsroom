@@ -1,13 +1,16 @@
 /**
  * ===================================================================
- * Save Handler (v2.2.0)
+ * Save Handler (v2.3.0)
  * ===================================================================
  * 
  * PASSTHROUGH to gameDataEnricher Lambda (with saveToDatabase: true).
  * 
- * VERSION: 2.2.0
+ * VERSION: 2.3.0
  * 
  * CHANGELOG:
+ * - v2.3.0: Added gameActualStartDateTime field passthrough
+ *           BUG FIX: This field was being extracted by html-parser but
+ *           not passed through to the enricher, causing null values in DB
  * - v2.2.0: Skip saving NOT _IN_USE and NOT_PUBLISHED tournaments
  *           These are empty slots or hidden tournaments - no Game record needed
  *           ScrapeURL tracks them for re-checking later
@@ -136,7 +139,7 @@ const handleSave = async (options, context) => {
     
     const { lambdaClient, ddbDocClient } = context;
     
-    console.log(`[SaveHandler] v2.2.0 Delegating to gameDataEnricher for ${sourceUrl}`);
+    console.log(`[SaveHandler] v2.3.0 Delegating to gameDataEnricher for ${sourceUrl}`);
     
     // Parse data if string
     let parsedData;
@@ -212,6 +215,8 @@ const handleSave = async (options, context) => {
             gameVariant: parsedData.gameVariant || 'NLHE',
             gameStartDateTime: ensureISODate(parsedData.gameStartDateTime),
             gameEndDateTime: parsedData.gameEndDateTime ? ensureISODate(parsedData.gameEndDateTime) : null,
+            // v2.3.0: Added gameActualStartDateTime - was missing before!
+            gameActualStartDateTime: parsedData.gameActualStartDateTime ? ensureISODate(parsedData.gameActualStartDateTime) : null,
             registrationStatus: parsedData.registrationStatus || null,
             gameFrequency: parsedData.gameFrequency || null,
             buyIn: parsedData.buyIn || 0,

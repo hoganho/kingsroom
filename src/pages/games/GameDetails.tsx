@@ -752,15 +752,15 @@ export const GameDetails = () => {
         <div className="flex items-center space-x-3">
           {game.sourceUrl && (
             <>
-              <button
+            <button
                 onClick={() => {
-                  if (game.entityId && game.tournamentId) {
-                    openS3File(game.entityId, game.tournamentId).catch(() => {
-                      // Error is already handled by the hook
+                    if (game.sourceUrl) {
+                    openS3File(game.sourceUrl).catch(() => {
+                        // Error is already handled by the hook
                     });
-                  } else {
-                    alert('Missing entity ID or tournament ID for S3 lookup');
-                  }
+                    } else {
+                    alert('No source URL available for S3 lookup');
+                    }
                 }}
                 disabled={s3Loading}
                 className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"

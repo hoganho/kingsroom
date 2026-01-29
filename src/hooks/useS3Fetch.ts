@@ -1,4 +1,12 @@
 // src/hooks/useS3Fetch.ts
+//
+// VERSION 2.0.0 - Enhanced URL-based lookup
+// 
+// CHANGES:
+// - Replaced sourceSystem + tournamentId lookup with direct URL lookup
+// - Uses scrapeURLByURL GSI for O(1) exact match
+// - No more entityId filtering or limit issues
+// - Simpler, more reliable, better performance
 
 import { useState, useCallback } from 'react';
 import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
@@ -7,19 +15,17 @@ import { fetchAuthSession } from 'aws-amplify/auth';
 import { getClient } from '../utils/apiClient';
 import { getS3Config } from '../config/s3Config';
 
-// Source system for ScrapeURL lookups
-const SOURCE_SYSTEM = 'KINGSROOM_WEB';
-
-// GraphQL query to fetch ScrapeURL by sourceSystem and tournamentId
-const GET_SCRAPE_URL_FOR_S3 = /* GraphQL */ `
-  query GetScrapeURLForS3($sourceSystem: String!, $tournamentId: ModelIntKeyConditionInput) {
-    scrapeURLsBySourceSystem(sourceSystem: $sourceSystem, tournamentId: $tournamentId, limit: 1) {
+// GraphQL query to fetch ScrapeURL by URL (direct 1:1 lookup)
+const GET_SCRAPE_URL_BY_URL = /* GraphQL */ `
+  query GetScrapeURLByURL($url: AWSURL!) {
+    scrapeURLByURL(url: $url) {
       items {
         id
         tournamentId
         entityId
         latestS3Key
         s3StoragePrefix
+        url
       }
     }
   }
@@ -27,11 +33,11 @@ const GET_SCRAPE_URL_FOR_S3 = /* GraphQL */ `
 
 interface UseS3FetchReturn {
   /** Fetch and open an S3 file in a new browser window */
-  openS3File: (entityId: string, tournamentId: number) => Promise<void>;
+  openS3File: (sourceUrl: string) => Promise<void>;
   /** Get a pre-signed URL for an S3 key (without opening) */
   getPresignedUrl: (s3Key: string) => Promise<string>;
-  /** Look up the S3 key for a game by entityId and tournamentId */
-  lookupS3Key: (entityId: string, tournamentId: number) => Promise<string | null>;
+  /** Look up the S3 key for a game by its sourceUrl */
+  lookupS3Key: (sourceUrl: string) => Promise<string | null>;
   /** Whether a fetch operation is currently in progress */
   isLoading: boolean;
   /** Any error from the last fetch attempt */
@@ -75,29 +81,49 @@ export async function getPresignedS3Url(s3Key: string, expiresIn: number = 3600)
 }
 
 /**
- * Look up the S3 key for a game using the ScrapeURL table
- * @param entityId - The entity ID
- * @param tournamentId - The tournament ID
+ * Look up the S3 key for a game using its sourceUrl
+ * Uses the scrapeURLByURL GSI for direct O(1) lookup
+ * 
+ * @param sourceUrl - The game's source URL (e.g., "https://kingslive.com.au/76-2/?id=475")
  * @returns The S3 key if found, null otherwise
  */
-export async function lookupS3KeyForGame(entityId: string, tournamentId: number): Promise<string | null> {
+export async function lookupS3KeyForGame(sourceUrl: string): Promise<string | null> {
+  if (!sourceUrl) {
+    console.warn('[lookupS3KeyForGame] No sourceUrl provided');
+    return null;
+  }
+
   const client = getClient();
   
-  const response = await client.graphql({
-    query: GET_SCRAPE_URL_FOR_S3,
-    variables: { 
-      sourceSystem: SOURCE_SYSTEM,
-      tournamentId: { eq: tournamentId }
-    }
-  });
+  console.log('[lookupS3KeyForGame] Looking up by URL:', sourceUrl);
+  
+  try {
+    const response = await client.graphql({
+      query: GET_SCRAPE_URL_BY_URL,
+      variables: { url: sourceUrl }
+    });
 
-  if ('data' in response && response.data?.scrapeURLsBySourceSystem?.items?.length > 0) {
-    const scrapeUrl = response.data.scrapeURLsBySourceSystem.items[0];
-    
-    // Verify entityId matches (in case there are multiple entities with same tournamentId)
-    if (scrapeUrl.entityId === entityId && scrapeUrl.latestS3Key) {
-      return scrapeUrl.latestS3Key;
+    if ('data' in response && response.data?.scrapeURLByURL?.items?.length > 0) {
+      const scrapeUrl = response.data.scrapeURLByURL.items[0];
+      
+      console.log('[lookupS3KeyForGame] Found ScrapeURL:', {
+        id: scrapeUrl.id,
+        tournamentId: scrapeUrl.tournamentId,
+        entityId: scrapeUrl.entityId,
+        hasS3Key: !!scrapeUrl.latestS3Key
+      });
+      
+      if (scrapeUrl.latestS3Key) {
+        return scrapeUrl.latestS3Key;
+      }
+      
+      console.warn('[lookupS3KeyForGame] ScrapeURL found but no latestS3Key');
+    } else {
+      console.warn('[lookupS3KeyForGame] No ScrapeURL found for URL:', sourceUrl);
     }
+  } catch (err) {
+    console.error('[lookupS3KeyForGame] GraphQL error:', err);
+    throw err;
   }
   
   return null;
@@ -112,10 +138,12 @@ export async function lookupS3KeyForGame(entityId: string, tournamentId: number)
  * const { openS3File, isLoading, error } = useS3Fetch();
  * 
  * const handleViewS3 = async () => {
- *   try {
- *     await openS3File(game.entityId, game.tournamentId);
- *   } catch (err) {
- *     console.error('Failed to open S3 file');
+ *   if (game.sourceUrl) {
+ *     try {
+ *       await openS3File(game.sourceUrl);
+ *     } catch (err) {
+ *       console.error('Failed to open S3 file');
+ *     }
  *   }
  * };
  * ```
@@ -145,12 +173,12 @@ export function useS3Fetch(): UseS3FetchReturn {
     }
   }, []);
 
-  const lookupS3Key = useCallback(async (entityId: string, tournamentId: number): Promise<string | null> => {
+  const lookupS3Key = useCallback(async (sourceUrl: string): Promise<string | null> => {
     setError(null);
     setIsLoading(true);
 
     try {
-      const s3Key = await lookupS3KeyForGame(entityId, tournamentId);
+      const s3Key = await lookupS3KeyForGame(sourceUrl);
       return s3Key;
     } catch (err: any) {
       console.error('[useS3Fetch] Failed to lookup S3 key:', err);
@@ -162,9 +190,9 @@ export function useS3Fetch(): UseS3FetchReturn {
     }
   }, []);
 
-  const openS3File = useCallback(async (entityId: string, tournamentId: number): Promise<void> => {
-    if (!entityId || !tournamentId) {
-      const errorMsg = 'Missing entity ID or tournament ID for S3 lookup';
+  const openS3File = useCallback(async (sourceUrl: string): Promise<void> => {
+    if (!sourceUrl) {
+      const errorMsg = 'No source URL provided for S3 lookup';
       setError(errorMsg);
       throw new Error(errorMsg);
     }
@@ -173,11 +201,11 @@ export function useS3Fetch(): UseS3FetchReturn {
     setIsLoading(true);
 
     try {
-      // Look up the S3 key
-      const s3Key = await lookupS3KeyForGame(entityId, tournamentId);
+      // Look up the S3 key by source URL
+      const s3Key = await lookupS3KeyForGame(sourceUrl);
       
       if (!s3Key) {
-        throw new Error('No S3 file found for this game');
+        throw new Error('No S3 file found for this game. The HTML may not have been cached yet.');
       }
 
       // Generate pre-signed URL and open
