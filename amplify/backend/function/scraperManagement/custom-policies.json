@@ -82,6 +82,14 @@
   },
   {
     "Action": [
+      "lambda:InvokeFunction"
+    ],
+    "Resource": [
+      "arn:aws:lambda:ap-southeast-2:*:function:gameIdTracker-*"
+    ]
+  },
+  {
+    "Action": [
       "cloudwatch:PutMetricData"
     ],
     "Resource": [

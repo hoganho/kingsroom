@@ -79,11 +79,14 @@ const ALIAS_EXPANSIONS = {
 /**
  * Venue-specific series aliases - maps alias patterns to canonical series names
  * These are checked first for highest priority matching
+ * 
+ * NOTE: KC @ Churchills maps to "Kings Cup" (not "Kings Cup @ Churchills")
+ * because Churchills is just one venue where Kings Cup is held.
  */
 const VENUE_SERIES_ALIASES = {
-  'kc @ churchills': 'Kings Cup @ Churchills',
-  'kc@churchills': 'Kings Cup @ Churchills',
-  'kc at churchills': 'Kings Cup @ Churchills',
+  'kc @ churchills': 'Kings Cup',
+  'kc@churchills': 'Kings Cup',
+  'kc at churchills': 'Kings Cup',
   'dragon lunar': 'Chinese New Year Lunar Series',
   'cny lunar': 'Chinese New Year Lunar Series',
   'cny lunar series': 'Chinese New Year Lunar Series',
@@ -160,8 +163,8 @@ const expandAliases = (name) => {
  * Order matters: more specific patterns first
  */
 const KNOWN_SERIES_PATTERNS = [
-  // Venue-specific series (after alias expansion, these will match)
-  /\b(Kings?\s+Cup\s+@\s+Churchills)\b/i,
+  // Venue-specific series - NOTE: "Kings Cup @ Churchills" is NOT here
+  // because we want it to resolve to "Kings Cup" via alias expansion
   /\b(Chinese\s+New\s+Year\s+Lunar\s+Series)\b/i,
   
   // Specific named series (add your venue-specific ones here)

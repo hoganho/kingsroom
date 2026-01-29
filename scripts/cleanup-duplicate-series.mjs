@@ -558,6 +558,37 @@ async function deleteSeriesMetrics(metricsId) {
 }
 
 /**
+ * Update TournamentSeriesMetrics.seriesName for a given series
+ */
+async function updateMetricsSeriesName(seriesId, newSeriesName) {
+  // First get all metrics for this series
+  const metrics = await getMetricsBySeriesId(seriesId);
+  
+  if (metrics.length === 0) {
+    return 0;
+  }
+  
+  let updated = 0;
+  for (const metric of metrics) {
+    try {
+      await docClient.send(new UpdateCommand({
+        TableName: getTableName('TournamentSeriesMetrics'),
+        Key: { id: metric.id },
+        UpdateExpression: 'SET seriesName = :name',
+        ExpressionAttributeValues: {
+          ':name': newSeriesName,
+        },
+      }));
+      updated++;
+    } catch (err) {
+      console.error(`   ⚠️  Failed to update metric ${metric.id}: ${err.message}`);
+    }
+  }
+  
+  return updated;
+}
+
+/**
  * Delete a TournamentSeries record
  */
 async function deleteTournamentSeries(seriesId) {
@@ -1116,6 +1147,12 @@ async function runCleanup() {
           canonicalName = op.cleanCanonicalName;
           seriesRenamed++;
           
+          // Update metrics with new series name
+          const metricsCount = await updateMetricsSeriesName(canonicalId, canonicalName);
+          if (metricsCount > 0) {
+            console.log(`   Updated ${metricsCount} metrics records with new name`);
+          }
+          
           if (op.canonical.games && op.canonical.games.length > 0) {
             console.log(`   Updating ${op.canonical.games.length} existing games in canonical...`);
             for (const game of op.canonical.games) {
@@ -1217,6 +1254,8 @@ async function runCleanup() {
       console.log('EXECUTING RENAME-ALL OPERATIONS');
       console.log('─'.repeat(60));
       
+      let metricsUpdated = 0;
+      
       for (const op of renameAllOperations) {
         console.log(`\n   Processing: "${op.currentName}"`);
         
@@ -1238,6 +1277,13 @@ async function runCleanup() {
             console.log(`   Renaming series: "${op.currentName}" → "${op.newName}"`);
             await renameTournamentSeries(op.series.id, op.newName);
             seriesRenamed++;
+            
+            // Update metrics with new series name
+            const metricsCount = await updateMetricsSeriesName(op.series.id, op.newName);
+            if (metricsCount > 0) {
+              console.log(`   Updated ${metricsCount} metrics records with new name`);
+              metricsUpdated += metricsCount;
+            }
             
             // Also update all games pointing to this series with the new name
             const games = await getGamesBySeriesId(op.series.id);
@@ -1267,6 +1313,10 @@ async function runCleanup() {
         }
         
         console.log(`   ✅ Renamed successfully`);
+      }
+      
+      if (metricsUpdated > 0) {
+        console.log(`\n   📊 Total metrics updated: ${metricsUpdated}`);
       }
     }
     

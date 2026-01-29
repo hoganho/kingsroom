@@ -16,6 +16,9 @@
         "create",
         "read",
         "update"
+      ],
+      "gameIdTracker": [
+        "read"
       ]
     },
     "storage": {
