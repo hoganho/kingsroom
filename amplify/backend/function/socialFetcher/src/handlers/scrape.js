@@ -43,6 +43,45 @@ function normalizeToISO(dateString) {
 }
 
 /**
+ * Get canonical path from a Facebook CDN URL (strips query params).
+ * This allows detecting duplicate images that have different query parameters.
+ * 
+ * Facebook often returns the same image with different query parameters:
+ * - full_picture: https://scontent.fbcdn.net/v/t1.6435-9/123_n.jpg?_nc_cat=111&ccb=1-7
+ * - attachment:   https://scontent.fbcdn.net/v/t1.6435-9/123_n.jpg?stp=dst-jpg_p720x720&_nc_cat=111
+ * 
+ * Both have the same pathname: /v/t1.6435-9/123_n.jpg
+ * 
+ * @param {string} url - Full URL
+ * @returns {string} Just the pathname (e.g., "/v/t1.6435-9/123_n.jpg")
+ */
+function getCanonicalImagePath(url) {
+  if (!url) return '';
+  try {
+    const urlObj = new URL(url);
+    return urlObj.pathname;
+  } catch {
+    return url; // Return original if parsing fails
+  }
+}
+
+/**
+ * Check if an image URL is a duplicate of any URL already in the array.
+ * Uses canonical path comparison to detect duplicates with different query params.
+ * 
+ * @param {string[]} existingUrls - Array of URLs already collected
+ * @param {string} newUrl - New URL to check
+ * @returns {boolean} True if newUrl is a duplicate
+ */
+function isImageDuplicate(existingUrls, newUrl) {
+  if (!existingUrls || existingUrls.length === 0) return false;
+  if (!newUrl) return true; // Treat null/undefined as duplicate to skip
+  
+  const newPath = getCanonicalImagePath(newUrl);
+  return existingUrls.some(existingUrl => getCanonicalImagePath(existingUrl) === newPath);
+}
+
+/**
  * Trigger a scrape for a specific account
  * Entry point for GraphQL mutations and direct invokes
  */
@@ -452,6 +491,8 @@ async function savePost(account, fbPost) {
   
   // ============================================
   // FIXED: Collect ALL image URLs for S3 storage
+  // Uses canonical path comparison to deduplicate
+  // (Facebook returns same image with different query params)
   // ============================================
   const imageUrlsToStore = [];
   
@@ -465,15 +506,16 @@ async function savePost(account, fbPost) {
     for (const attachment of fbPost.attachments.data) {
       // Direct attachment image
       if (attachment.media?.image?.src) {
-        // Avoid duplicates - full_picture is often the same as the first attachment
-        if (!imageUrlsToStore.includes(attachment.media.image.src)) {
+        // FIXED: Use canonical path comparison instead of .includes()
+        // full_picture and attachment often have same image with different query params
+        if (!isImageDuplicate(imageUrlsToStore, attachment.media.image.src)) {
           imageUrlsToStore.push(attachment.media.image.src);
         }
       }
       // Subattachments (for albums/multiple images)
       if (attachment.subattachments?.data) {
         for (const sub of attachment.subattachments.data) {
-          if (sub.media?.image?.src && !imageUrlsToStore.includes(sub.media.image.src)) {
+          if (sub.media?.image?.src && !isImageDuplicate(imageUrlsToStore, sub.media.image.src)) {
             imageUrlsToStore.push(sub.media.image.src);
           }
         }
