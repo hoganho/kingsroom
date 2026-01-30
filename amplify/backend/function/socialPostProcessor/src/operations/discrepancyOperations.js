@@ -1,6 +1,8 @@
 /**
  * Scrape Discrepancy Operations
- * Version: 3.0.0
+ * Version: 3.1.0
+ * 
+ * FIXED: Added actual scraper Lambda invocation (was TODO)
  * 
  * Handles detection and management of scrape discrepancies:
  * - Games referenced in social posts that don't exist in the database
@@ -13,9 +15,11 @@
 
 const { DynamoDB } = require('@aws-sdk/client-dynamodb');
 const { DynamoDBDocument } = require('@aws-sdk/lib-dynamodb');
+const { LambdaClient, InvokeCommand } = require('@aws-sdk/client-lambda');  // ADDED
 const { v4: uuidv4 } = require('uuid');
 
 const dynamoDB = DynamoDBDocument.from(new DynamoDB({}));
+const lambdaClient = new LambdaClient({ region: process.env.AWS_REGION || 'ap-southeast-2' });  // ADDED
 
 // Table names from environment
 const GAME_TABLE = process.env.API_KINGSROOM_GAMETABLE_NAME;
@@ -23,6 +27,9 @@ const SOCIAL_POST_TABLE = process.env.API_KINGSROOM_SOCIALPOSTTABLE_NAME;
 const SOCIAL_POST_GAME_LINK_TABLE = process.env.API_KINGSROOM_SOCIALPOSTGAMELINKTABLE_NAME;
 const SOCIAL_POST_GAME_DATA_TABLE = process.env.API_KINGSROOM_SOCIALPOSTGAMEDATATABLE_NAME;
 const ENTITY_TABLE = process.env.API_KINGSROOM_ENTITYTABLE_NAME;
+
+// ADDED: Scraper function name - add this to your Lambda environment variables
+const SCRAPER_FUNCTION_NAME = process.env.SCRAPER_FUNCTION_NAME || process.env.FUNCTION_SCRAPERJOB_NAME;
 
 // Discrepancy types
 const DISCREPANCY_TYPES = {
@@ -134,6 +141,82 @@ async function getSocialPostWithEntity(socialPostId) {
   } catch (error) {
     console.error('[DISCREPANCY] Error getting social post:', error);
     return null;
+  }
+}
+
+// =============================================================================
+// ADDED: Invoke tournament scraper Lambda
+// =============================================================================
+
+/**
+ * Invoke the tournament scraper Lambda to scrape a specific tournament
+ * 
+ * @param {Object} params - Scrape parameters
+ * @param {number} params.tournamentId - Tournament ID to scrape
+ * @param {string} params.tournamentUrl - Tournament URL (sourceUrl)
+ * @param {string} params.entityId - Entity ID for context
+ * @param {string} params.linkId - Discrepancy link ID for tracking
+ * @param {string} params.jobId - Rescrape job ID
+ * @returns {Object} - Result with success status
+ */
+async function invokeTournamentScraper({ tournamentId, tournamentUrl, entityId, linkId, jobId }) {
+  if (!SCRAPER_FUNCTION_NAME) {
+    console.warn('[DISCREPANCY] Scraper function name not configured');
+    console.warn('[DISCREPANCY] Set SCRAPER_FUNCTION_NAME or FUNCTION_SCRAPERJOB_NAME environment variable');
+    return { 
+      success: false, 
+      error: 'Scraper function not configured',
+      skipped: true 
+    };
+  }
+
+  console.log(`[DISCREPANCY] Invoking scraper: ${SCRAPER_FUNCTION_NAME}`);
+  console.log(`[DISCREPANCY] Tournament ID: ${tournamentId}, URL: ${tournamentUrl}`);
+
+  try {
+    const payload = {
+      mode: 'single',
+      startId: tournamentId,
+      endId: tournamentId,
+      entityId,
+      triggerSource: 'SOCIAL_DISCREPANCY',
+      forceRefresh: true,
+      saveToDatabase: true,
+      metadata: {
+        triggerLinkId: linkId,
+        triggerType: 'scrape_discrepancy',
+        rescrapeJobId: jobId,
+        sourceUrl: tournamentUrl
+      }
+    };
+
+    const response = await lambdaClient.send(new InvokeCommand({
+      FunctionName: SCRAPER_FUNCTION_NAME,
+      InvocationType: 'Event',  // Async invocation
+      Payload: JSON.stringify(payload)
+    }));
+
+    if (response.StatusCode === 202) {
+      console.log(`[DISCREPANCY] Scraper invoked successfully for tournament ${tournamentId}`);
+      return { 
+        success: true, 
+        invoked: true,
+        statusCode: response.StatusCode 
+      };
+    } else {
+      console.warn(`[DISCREPANCY] Scraper invocation returned status: ${response.StatusCode}`);
+      return { 
+        success: false, 
+        error: `Unexpected status code: ${response.StatusCode}` 
+      };
+    }
+
+  } catch (error) {
+    console.error('[DISCREPANCY] Error invoking scraper:', error);
+    return { 
+      success: false, 
+      error: error.message 
+    };
   }
 }
 
@@ -313,9 +396,30 @@ async function triggerDiscrepancyRescrape(input) {
       }
     });
     
-    // TODO: Trigger actual scraper job here
-    // This would invoke the scraper Lambda or add to SQS queue
-    console.log(`[DISCREPANCY] Would trigger scraper job: ${rescrapeJobId} for URL: ${link.extractedTournamentUrl}`);
+    // =========================================================================
+    // FIXED: Actually trigger the scraper Lambda
+    // =========================================================================
+    let scraperResult = { success: false, skipped: true };
+    
+    if (link.extractedTournamentId) {
+      scraperResult = await invokeTournamentScraper({
+        tournamentId: link.extractedTournamentId,
+        tournamentUrl: link.extractedTournamentUrl,
+        entityId: link.entityId || entityId,
+        linkId: link.id,
+        jobId: rescrapeJobId
+      });
+      
+      if (scraperResult.success) {
+        console.log(`[DISCREPANCY] Scraper triggered successfully for tournament ${link.extractedTournamentId}`);
+      } else if (scraperResult.skipped) {
+        console.warn(`[DISCREPANCY] Scraper invocation skipped: ${scraperResult.error}`);
+      } else {
+        console.error(`[DISCREPANCY] Scraper invocation failed: ${scraperResult.error}`);
+      }
+    } else {
+      console.warn(`[DISCREPANCY] Cannot trigger scraper: no tournamentId available`);
+    }
     
     return {
       success: true,
@@ -325,6 +429,9 @@ async function triggerDiscrepancyRescrape(input) {
       tournamentId: link.extractedTournamentId,
       linkCreated,
       deduplicated,
+      scraperInvoked: scraperResult.success || false,
+      scraperSkipped: scraperResult.skipped || false,
+      scraperError: scraperResult.error || null,
       message: linkCreated 
         ? 'Created new discrepancy link and triggered rescrape'
         : 'Triggered rescrape for existing link'
@@ -393,7 +500,7 @@ async function resolveDiscrepancy(input) {
       updateExpressions.push('linkType = :linkType');
       updateExpressions.push('hasScrapeDiscrepancy = :false');
       expressionValues[':gameId'] = gameId;
-      expressionValues[':linkType'] = 'MANUAL';
+      expressionValues[':linkType'] = 'MANUAL_LINKED';
       expressionValues[':false'] = false;
     }
     
@@ -584,12 +691,15 @@ async function scanForDiscrepancies(input = {}) {
         linksCreated++;
         
         // Trigger rescrape if requested
-        if (autoTriggerRescrape) {
-          await triggerDiscrepancyRescrape({
+        if (autoTriggerRescrape && data.tournamentId) {
+          const rescrapeResult = await triggerDiscrepancyRescrape({
             linkId,
             forceRefresh: false
           });
-          rescrapesTriggered++;
+          
+          if (rescrapeResult.success && rescrapeResult.scraperInvoked) {
+            rescrapesTriggered++;
+          }
         }
       }
       
@@ -798,18 +908,12 @@ async function getScrapeDiscrepancy(linkId) {
     }
     
     const link = result.Item;
-    
-    // Get entity names
     const entityName = link.entityId ? await getEntityName(link.entityId) : null;
     const gameEntityName = link.detectedGameEntityId ? await getEntityName(link.detectedGameEntityId) : null;
-    
-    // Get social post
-    const socialPost = await getSocialPostWithEntity(link.socialPostId);
     
     return {
       linkId: link.id,
       socialPostId: link.socialPostId,
-      socialPost,
       extractedTournamentId: link.extractedTournamentId,
       extractedTournamentUrl: link.extractedTournamentUrl,
       scrapeDiscrepancyType: link.scrapeDiscrepancyType,
@@ -818,7 +922,6 @@ async function getScrapeDiscrepancy(linkId) {
       entityName,
       gameId: link.gameId !== 'PENDING_SCRAPE' ? link.gameId : null,
       gameStatus: link.detectedGameStatus,
-      gameName: null, // Would need to fetch game
       detectedGameEntityId: link.detectedGameEntityId,
       detectedGameEntityName: gameEntityName,
       rescrapeRequested: link.rescrapeRequested,
@@ -843,11 +946,11 @@ async function getScrapeDiscrepancy(linkId) {
  * @param {string} entityId - Optional entity filter
  * @returns {Object} - ScrapeDiscrepancyStats
  */
-async function getScrapeDiscrepancyStats(entityId = null) {
+async function getScrapeDiscrepancyStats(entityId) {
   console.log('[DISCREPANCY] getScrapeDiscrepancyStats called for entity:', entityId);
   
   try {
-    // Scan all discrepancy links
+    // Build filter
     const filterParts = ['hasScrapeDiscrepancy = :true'];
     const expressionValues = { ':true': true };
     
@@ -893,37 +996,21 @@ async function getScrapeDiscrepancyStats(entityId = null) {
     for (const item of items) {
       // Count by resolution
       const resolution = item.discrepancyResolution || 'UNRESOLVED';
-      if (resolution === 'UNRESOLVED') {
-        unresolvedCount++;
-      } else if (resolution === 'RESCRAPE_REQUESTED') {
-        resolvingCount++;
-      } else {
-        resolvedCount++;
-      }
+      if (resolution === 'UNRESOLVED') unresolvedCount++;
+      else if (resolution === 'RESCRAPE_REQUESTED') resolvingCount++;
+      else resolvedCount++;
       
       // Count by type
       switch (item.scrapeDiscrepancyType) {
-        case DISCREPANCY_TYPES.GAME_NOT_IN_DATABASE:
-          gameNotInDatabaseCount++;
-          break;
-        case DISCREPANCY_TYPES.GAME_STATUS_NOT_FOUND:
-          gameStatusNotFoundCount++;
-          break;
-        case DISCREPANCY_TYPES.GAME_STATUS_NOT_PUBLISHED:
-          gameStatusNotPublishedCount++;
-          break;
-        case DISCREPANCY_TYPES.ENTITY_MISMATCH:
-          entityMismatchCount++;
-          break;
-        case DISCREPANCY_TYPES.STATUS_MISMATCH:
-          statusMismatchCount++;
-          break;
+        case 'GAME_NOT_IN_DATABASE': gameNotInDatabaseCount++; break;
+        case 'GAME_STATUS_NOT_FOUND': gameStatusNotFoundCount++; break;
+        case 'GAME_STATUS_NOT_PUBLISHED': gameStatusNotPublishedCount++; break;
+        case 'ENTITY_MISMATCH': entityMismatchCount++; break;
+        case 'STATUS_MISMATCH': statusMismatchCount++; break;
       }
       
       // Count pending rescrapes
-      if (item.rescrapeRequested) {
-        pendingRescrapes++;
-      }
+      if (item.rescrapeRequested) pendingRescrapes++;
       
       // Count by entity
       if (item.entityId) {
@@ -970,6 +1057,8 @@ module.exports = {
   getScrapeDiscrepancies,
   getScrapeDiscrepancy,
   getScrapeDiscrepancyStats,
+  // ADDED: Export scraper invocation for use elsewhere
+  invokeTournamentScraper,
   // Export constants for use elsewhere
   DISCREPANCY_TYPES,
   RESOLUTION_STATUSES

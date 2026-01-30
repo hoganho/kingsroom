@@ -263,7 +263,7 @@ const processSocialPost = async (input) => {
     matchThreshold = DEFAULT_AUTO_LINK_THRESHOLD,
     // NEW v3.0.0: Discrepancy options
     createDiscrepancyLinks = true,
-    triggerRescrapeOnDiscrepancy = false
+    triggerRescrapeOnDiscrepancy = true
   } = input;
   
   console.log(`[PROCESS] Starting processing for post: ${socialPostId}`);

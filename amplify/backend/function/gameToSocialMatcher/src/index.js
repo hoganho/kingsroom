@@ -144,6 +144,9 @@ const MATCH_TRIGGER_STATUSES = ['FINISHED', 'COMPLETED', 'RUNNING', 'REGISTERING
 // Default threshold for auto-linking
 const DEFAULT_AUTO_LINK_THRESHOLD = 80;
 
+// Game statuses that indicate the game wasn't available before
+const INVALID_GAME_STATUSES = ['NOT_FOUND', 'NOT_PUBLISHED', 'CANCELLED', 'ERROR'];
+
 // ===================================================================
 // HELPERS
 // ===================================================================
@@ -696,12 +699,17 @@ const matchGameToSocialPosts = async (game, options = {}) => {
 // ===================================================================
 
 /**
- * Handle DynamoDB Stream events from GameFinancialSnapshot table
+ * Handle DynamoDB stream events from GameFinancialSnapshot table
  * 
  * Triggered AFTER gameFinancialsProcessor completes (sequential).
  * GameFinancialSnapshot only exists for valid, processed games.
  * 
  * This is the primary trigger mechanism.
+ * 
+ * UPDATED v3.1.0:
+ * - Added MODIFY event handling for discrepancy resolution
+ * - When game status changes from NOT_FOUND/NOT_PUBLISHED to valid,
+ *   resolve any pending discrepancy links
  */
 const handleStreamEvent = async (event) => {
   console.log(`[GAME-TO-SOCIAL] Processing ${event.Records?.length || 0} stream records from GameFinancialSnapshot`);
@@ -711,8 +719,8 @@ const handleStreamEvent = async (event) => {
     skipped: 0,
     errors: 0,
     linksCreated: 0,
-    discrepanciesResolved: 0,  // NEW v3.0.0
-    gamesProcessed: new Set(),  // Track unique games (avoid duplicates in batch)
+    discrepanciesResolved: 0,
+    gamesProcessed: new Set(),
     ticketDataStats: {
       gamesWithTicketMatches: 0,
       totalTicketsFromPosts: 0,
@@ -724,90 +732,200 @@ const handleStreamEvent = async (event) => {
   for (const record of event.Records || []) {
     const eventName = record.eventName;
     
-    // Only process INSERT events (new snapshots)
-    // MODIFY events mean the snapshot was updated, game already processed
-    if (eventName !== 'INSERT') {
-      console.log(`[GAME-TO-SOCIAL] Skipping ${eventName} event`);
-      results.skipped++;
-      continue;
-    }
-    
     try {
-      const snapshotImage = record.dynamodb?.NewImage;
-      if (!snapshotImage) {
-        results.skipped++;
-        continue;
-      }
-      
-      const snapshot = unmarshall(snapshotImage);
-      const gameId = snapshot.gameId;
-      
-      if (!gameId) {
-        console.log(`[GAME-TO-SOCIAL] Snapshot missing gameId, skipping`);
-        results.skipped++;
-        continue;
-      }
-      
-      // Skip if we already processed this game in this batch
-      if (results.gamesProcessed.has(gameId)) {
-        console.log(`[GAME-TO-SOCIAL] Game ${gameId} already processed in this batch, skipping`);
-        results.skipped++;
-        continue;
-      }
-      
-      // Fetch the full game record
-      const game = await getGame(gameId);
-      if (!game) {
-        console.log(`[GAME-TO-SOCIAL] Game ${gameId} not found, skipping`);
-        results.skipped++;
-        continue;
-      }
-      
-      // Check if this game should trigger social matching
-      const eligibility = shouldMatchGame(game);
-      if (!eligibility.should) {
-        console.log(`[GAME-TO-SOCIAL] Skipping game ${game.id}: ${eligibility.reason}`);
-        results.skipped++;
-        continue;
-      }
-      
-      console.log(`[GAME-TO-SOCIAL] Processing game ${game.id} (${game.gameStatus}) - triggered by snapshot ${snapshot.id}`);
-      
-      // Match this game to social posts
-      const matchResult = await matchGameToSocialPosts(game, {
-        autoLinkThreshold: DEFAULT_AUTO_LINK_THRESHOLD,
-        skipLinking: false,
-        includeTicketData: true,
-        includeReconciliationPreview: true,
-        resolveDiscrepancies: true  // NEW v3.0.0
-      });
-      
-      results.processed++;
-      results.linksCreated += matchResult.linksCreated || 0;
-      results.discrepanciesResolved += matchResult.discrepanciesResolved || 0;  // NEW v3.0.0
-      results.gamesProcessed.add(gameId);
-      
-      // Track ticket data stats
-      if (matchResult.ticketDataSummary) {
-        if (matchResult.ticketDataSummary.postsWithTicketData > 0) {
-          results.ticketDataStats.gamesWithTicketMatches++;
+      // =========================================================
+      // INSERT events: Full processing (new snapshots)
+      // =========================================================
+      if (eventName === 'INSERT') {
+        const snapshotImage = record.dynamodb?.NewImage;
+        if (!snapshotImage) {
+          results.skipped++;
+          continue;
         }
-        results.ticketDataStats.totalTicketsFromPosts += matchResult.ticketDataSummary.totalTicketsFromPosts || 0;
-        results.ticketDataStats.reconciliationIssues += matchResult.ticketDataSummary.postsWithReconciliationIssues || 0;
+        
+        const snapshot = unmarshall(snapshotImage);
+        const gameId = snapshot.gameId;
+        
+        if (!gameId) {
+          console.log(`[GAME-TO-SOCIAL] Snapshot missing gameId, skipping`);
+          results.skipped++;
+          continue;
+        }
+        
+        // Skip if we already processed this game in this batch
+        if (results.gamesProcessed.has(gameId)) {
+          console.log(`[GAME-TO-SOCIAL] Game ${gameId} already processed in this batch, skipping`);
+          results.skipped++;
+          continue;
+        }
+        
+        // Fetch the full game record
+        const game = await getGame(gameId);
+        if (!game) {
+          console.log(`[GAME-TO-SOCIAL] Game ${gameId} not found, skipping`);
+          results.skipped++;
+          continue;
+        }
+        
+        // Check if this game should trigger social matching
+        const eligibility = shouldMatchGame(game);
+        if (!eligibility.should) {
+          console.log(`[GAME-TO-SOCIAL] Skipping game ${game.id}: ${eligibility.reason}`);
+          results.skipped++;
+          continue;
+        }
+        
+        console.log(`[GAME-TO-SOCIAL] Processing game ${game.id} (${game.gameStatus}) - triggered by snapshot INSERT ${snapshot.id}`);
+        
+        // Match this game to social posts
+        const matchResult = await matchGameToSocialPosts(game, {
+          autoLinkThreshold: DEFAULT_AUTO_LINK_THRESHOLD,
+          skipLinking: false,
+          includeTicketData: true,
+          includeReconciliationPreview: true,
+          resolveDiscrepancies: true
+        });
+        
+        results.processed++;
+        results.linksCreated += matchResult.linksCreated || 0;
+        results.discrepanciesResolved += matchResult.discrepanciesResolved || 0;
+        results.gamesProcessed.add(gameId);
+        
+        // Track ticket data stats
+        if (matchResult.ticketDataSummary) {
+          if (matchResult.ticketDataSummary.postsWithTicketData > 0) {
+            results.ticketDataStats.gamesWithTicketMatches++;
+          }
+          results.ticketDataStats.totalTicketsFromPosts += matchResult.ticketDataSummary.totalTicketsFromPosts || 0;
+          results.ticketDataStats.reconciliationIssues += matchResult.ticketDataSummary.postsWithReconciliationIssues || 0;
+        }
+        
+        results.details.push({
+          gameId: game.id,
+          gameName: game.name,
+          snapshotId: snapshot.id,
+          eventName,
+          candidatesFound: matchResult.candidatesFound,
+          linksCreated: matchResult.linksCreated,
+          linksSkipped: matchResult.linksSkipped,
+          discrepanciesResolved: matchResult.discrepanciesResolved,
+          ticketDataSummary: matchResult.ticketDataSummary,
+          success: matchResult.success
+        });
+        
+        continue;
       }
       
-      results.details.push({
-        gameId: game.id,
-        gameName: game.name,
-        snapshotId: snapshot.id,
-        eventName,
-        candidatesFound: matchResult.candidatesFound,
-        linksCreated: matchResult.linksCreated,
-        linksSkipped: matchResult.linksSkipped,
-        discrepanciesResolved: matchResult.discrepanciesResolved,  // NEW v3.0.0
-        ticketDataSummary: matchResult.ticketDataSummary,
-        success: matchResult.success
-      });
+      // =========================================================
+      // MODIFY events: Check for status change → resolve discrepancies only
+      // NEW v3.1.0: Handle game status transitions
+      // 
+      // NOTE: This requires your DynamoDB stream to be configured with
+      // StreamViewType: NEW_AND_OLD_IMAGES
+      // If you only have NEW_IMAGE, we'll skip status comparison and
+      // just check if the game is now valid with pending discrepancies.
+      // =========================================================
+      if (eventName === 'MODIFY') {
+        const oldImage = record.dynamodb?.OldImage;
+        const newImage = record.dynamodb?.NewImage;
+        
+        if (!newImage) {
+          results.skipped++;
+          continue;
+        }
+        
+        const newSnapshot = unmarshall(newImage);
+        const gameId = newSnapshot.gameId;
+        
+        if (!gameId) {
+          results.skipped++;
+          continue;
+        }
+        
+        // Skip if we already processed this game in this batch
+        if (results.gamesProcessed.has(gameId)) {
+          console.log(`[GAME-TO-SOCIAL] Game ${gameId} already processed in this batch, skipping`);
+          results.skipped++;
+          continue;
+        }
+        
+        // Fetch the full game record to get current status
+        const game = await getGame(gameId);
+        if (!game) {
+          console.log(`[GAME-TO-SOCIAL] Game ${gameId} not found, skipping`);
+          results.skipped++;
+          continue;
+        }
+        
+        // Only process if game is now in a valid status
+        const isNowValid = MATCH_TRIGGER_STATUSES.includes(game.gameStatus);
+        if (!isNowValid) {
+          console.log(`[GAME-TO-SOCIAL] MODIFY event: Game ${gameId} status ${game.gameStatus} not valid for matching`);
+          results.skipped++;
+          continue;
+        }
+        
+        // If we have old image, check if status actually changed
+        let statusChange = null;
+        if (oldImage) {
+          const oldSnapshot = unmarshall(oldImage);
+          // Check snapshot's cached gameStatus, or we could compare other fields
+          const oldStatus = oldSnapshot.gameStatus;
+          const wasInvalid = INVALID_GAME_STATUSES.includes(oldStatus);
+          
+          if (oldStatus && !wasInvalid) {
+            // Status was already valid, no need to resolve discrepancies
+            console.log(`[GAME-TO-SOCIAL] MODIFY event: Game ${gameId} was already valid (${oldStatus}), skipping`);
+            results.skipped++;
+            continue;
+          }
+          
+          statusChange = `${oldStatus || 'unknown'} → ${game.gameStatus}`;
+        }
+        
+        console.log(`[GAME-TO-SOCIAL] MODIFY event: Game ${gameId} is now valid (${game.gameStatus}), checking for discrepancies`);
+        
+        // Only resolve discrepancies, don't do full matching
+        // (Full matching was already done on INSERT or will be done separately)
+        const discrepancyResult = await resolveDiscrepancyLinks(game, {});
+        
+        if (discrepancyResult.resolved > 0) {
+          console.log(`[GAME-TO-SOCIAL] Resolved ${discrepancyResult.resolved} discrepancies for game ${gameId} via MODIFY event`);
+          results.discrepanciesResolved += discrepancyResult.resolved;
+          results.processed++;
+          results.gamesProcessed.add(gameId);
+          
+          results.details.push({
+            gameId: game.id,
+            gameName: game.name,
+            snapshotId: newSnapshot.id,
+            eventName,
+            statusChange: statusChange || `? → ${game.gameStatus}`,
+            discrepanciesFound: discrepancyResult.found,
+            discrepanciesResolved: discrepancyResult.resolved,
+            discrepanciesFailed: discrepancyResult.failed,
+            success: true
+          });
+        } else {
+          console.log(`[GAME-TO-SOCIAL] No discrepancies to resolve for game ${gameId}`);
+          results.skipped++;
+        }
+        
+        continue;
+      }
+      
+      // =========================================================
+      // REMOVE events: Skip (game deleted)
+      // =========================================================
+      if (eventName === 'REMOVE') {
+        console.log(`[GAME-TO-SOCIAL] Skipping REMOVE event`);
+        results.skipped++;
+        continue;
+      }
+      
+      // Unknown event type
+      console.log(`[GAME-TO-SOCIAL] Unknown event type: ${eventName}`);
+      results.skipped++;
       
     } catch (error) {
       console.error('[GAME-TO-SOCIAL] Error processing record:', error);

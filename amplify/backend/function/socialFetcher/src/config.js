@@ -3,6 +3,13 @@
  * 
  * Centralizes all configuration, environment variables, and constants.
  * Import this module to get access to table names, API settings, etc.
+ * 
+ * VERSION: 2.0.0
+ * 
+ * CHANGES:
+ * - Added fallback env var names for processor function
+ * - Added scraper function config for discrepancy resolution
+ * - Added cold-start logging to help diagnose missing config
  */
 
 // ============================================
@@ -13,7 +20,7 @@ const { DynamoDBDocumentClient } = require('@aws-sdk/lib-dynamodb');
 const { S3Client } = require('@aws-sdk/client-s3');
 const { LambdaClient } = require('@aws-sdk/client-lambda');
 
-const REGION = process.env.REGION || 'ap-southeast-2';
+const REGION = process.env.REGION || process.env.AWS_REGION || 'ap-southeast-2';
 
 // Singleton clients - initialized once on cold start
 let _ddbClient = null;
@@ -41,6 +48,18 @@ const getLambdaClient = () => {
     _lambdaClient = new LambdaClient({ region: REGION });
   }
   return _lambdaClient;
+};
+
+// ============================================
+// Helper: Get first defined env var from list
+// ============================================
+const getEnvVar = (...names) => {
+  for (const name of names) {
+    if (process.env[name]) {
+      return process.env[name];
+    }
+  }
+  return undefined;
 };
 
 // ============================================
@@ -79,10 +98,22 @@ const config = {
   },
   
   // Post Processor Lambda
+  // UPDATED: Added fallback env var names
   processor: {
-    functionName: process.env.SOCIAL_POST_PROCESSOR_FUNCTION,
+    functionName: getEnvVar(
+      'SOCIAL_POST_PROCESSOR_FUNCTION',      // Primary (your custom name)
+      'FUNCTION_SOCIALPOSTPROCESSOR_NAME'    // Amplify auto-generated format
+    ),
     autoProcess: process.env.AUTO_PROCESS_POSTS !== 'false',
     maxParallel: parseInt(process.env.MAX_PARALLEL_PROCESSING || '5', 10),
+  },
+  
+  // Tournament Scraper Lambda (NEW - for discrepancy resolution)
+  scraper: {
+    functionName: getEnvVar(
+      'SCRAPER_FUNCTION_NAME',
+      'FUNCTION_SCRAPERJOB_NAME'
+    ),
   },
   
   // Notifications
@@ -92,6 +123,22 @@ const config = {
     recipientEmail: process.env.NOTIFICATION_RECIPIENT_EMAIL || 'hogan.ho@gmail.com',
   },
 };
+
+// ============================================
+// Cold Start Logging (helps diagnose issues)
+// ============================================
+console.log('[Config] ========================================');
+console.log('[Config] socialFetcher Configuration');
+console.log('[Config] ========================================');
+console.log('[Config] Region:', REGION);
+console.log('[Config] Processor Function:', config.processor.functionName || '❌ NOT SET');
+console.log('[Config] Auto Process:', config.processor.autoProcess);
+if (!config.processor.functionName) {
+  console.warn('[Config] ⚠️ WARNING: Processor function not configured!');
+  console.warn('[Config] Posts will NOT be auto-processed after fetching.');
+  console.warn('[Config] Set SOCIAL_POST_PROCESSOR_FUNCTION environment variable.');
+}
+console.log('[Config] ========================================');
 
 // ============================================
 // Scraping Configuration
@@ -131,20 +178,27 @@ const StopReason = {
 // ============================================
 const validateConfig = () => {
   const errors = [];
+  const warnings = [];
   
   if (!config.tables.socialAccount) {
-    errors.push('Missing SOCIAL_ACCOUNT_TABLE environment variable');
+    errors.push('Missing API_KINGSROOM_SOCIALACCOUNTTABLE_NAME environment variable');
   }
   if (!config.tables.socialPost) {
-    errors.push('Missing SOCIAL_POST_TABLE environment variable');
+    errors.push('Missing API_KINGSROOM_SOCIALPOSTTABLE_NAME environment variable');
   }
   if (!config.facebook.accessToken) {
     errors.push('Missing FB_ACCESS_TOKEN environment variable');
   }
   
+  // Warnings (won't fail validation but should be addressed)
+  if (!config.processor.functionName) {
+    warnings.push('SOCIAL_POST_PROCESSOR_FUNCTION not set - posts will not be auto-processed');
+  }
+  
   return {
     valid: errors.length === 0,
     errors,
+    warnings,
   };
 };
 
@@ -156,5 +210,6 @@ module.exports = {
   getDocClient,
   getS3Client,
   getLambdaClient,
+  getEnvVar,
   REGION,
 };

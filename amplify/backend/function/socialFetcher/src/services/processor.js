@@ -2,6 +2,8 @@
  * Post Processor Service
  * 
  * Handles invoking the socialPostProcessor Lambda to classify posts.
+ * 
+ * FIXED: Changed 'postIds' to 'socialPostIds' to match what socialPostProcessor expects
  */
 
 const { InvokeCommand } = require('@aws-sdk/client-lambda');
@@ -21,6 +23,7 @@ const MAX_PARALLEL = config.processor.maxParallel;
 async function invokeProcessor(postIds, options = {}) {
   if (!PROCESSOR_FUNCTION) {
     console.warn('[Processor] Function name not configured');
+    console.warn('[Processor] Expected env var or config.processor.functionName to be set');
     return { success: false, message: 'Processor not configured' };
   }
 
@@ -28,14 +31,17 @@ async function invokeProcessor(postIds, options = {}) {
     return { success: true, processed: 0 };
   }
 
-  console.log(`[Processor] Invoking for ${postIds.length} posts`);
+  console.log(`[Processor] Invoking ${PROCESSOR_FUNCTION} for ${postIds.length} posts`);
 
   try {
+    // FIXED: Changed 'postIds' to 'socialPostIds' to match socialPostProcessor handler
     const payload = {
-      postIds,
+      socialPostIds: postIds,  // ← FIXED: was 'postIds', now 'socialPostIds'
       source: 'socialFetcher',
       ...options,
     };
+
+    console.log('[Processor] Payload:', JSON.stringify(payload, null, 2));
 
     const response = await getLambdaClient().send(new InvokeCommand({
       FunctionName: PROCESSOR_FUNCTION,
@@ -64,7 +70,7 @@ async function invokeProcessor(postIds, options = {}) {
  */
 async function processPostsInBatches(postIds, batchSize = 10) {
   if (!AUTO_PROCESS) {
-    console.log('[Processor] Auto-processing disabled');
+    console.log('[Processor] Auto-processing disabled (config.processor.autoProcess = false)');
     return { success: true, skipped: true };
   }
 
