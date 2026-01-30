@@ -412,15 +412,26 @@ const processSocialPost = async (input) => {
     // Remove fields that shouldn't be in the record
     delete extractionRecord.extractedPrizes;  // Already stringified above
     
-    // CRITICAL: Remove null GSI key fields - DynamoDB GSIs can't have null partition keys
+    // CRITICAL: Remove null/empty GSI key fields - DynamoDB GSIs can't have null partition keys
     // The byTournamentId GSI will simply not include records without this field
     if (extractionRecord.extractedTournamentId == null) {
       delete extractionRecord.extractedTournamentId;
     }
     // FIX: Also check extractedTournamentUrl for byExtractedUrl GSI
-    if (extractionRecord.extractedTournamentUrl == null) {
+    // Check for null, undefined, AND empty string
+    if (!extractionRecord.extractedTournamentUrl) {
+      console.log('[PROCESS] Removing null/empty extractedTournamentUrl from record');
       delete extractionRecord.extractedTournamentUrl;
     }
+
+    // Debug: Log the fields being saved (to verify no null GSI keys)
+    console.log('[PROCESS] Saving SocialPostGameData with keys:', {
+      id: extractionRecord.id,
+      hasExtractedTournamentId: 'extractedTournamentId' in extractionRecord,
+      extractedTournamentId: extractionRecord.extractedTournamentId,
+      hasExtractedTournamentUrl: 'extractedTournamentUrl' in extractionRecord,
+      extractedTournamentUrl: extractionRecord.extractedTournamentUrl
+    });
 
     // Debug: Check for NaN/Infinity values
     findNaN(extractionRecord);

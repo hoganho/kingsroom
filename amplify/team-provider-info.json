@@ -182,7 +182,7 @@
       "function": {
         "autoScraper": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
-          "s3Key": "amplify-builds/autoScraper-4479522f62457a597741-build.zip"
+          "s3Key": "amplify-builds/autoScraper-7048743554506d6e7571-build.zip"
         },
         "deleteGameFunction": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
@@ -198,7 +198,7 @@
         },
         "gameFinancialsProcessor": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
-          "s3Key": "amplify-builds/gameFinancialsProcessor-6154556f496971786e65-build.zip"
+          "s3Key": "amplify-builds/gameFinancialsProcessor-6e444f46573334545773-build.zip"
         },
         "gameIdTracker": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
@@ -248,7 +248,7 @@
         },
         "scraperManagement": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
-          "s3Key": "amplify-builds/scraperManagement-4b55616341796d4e2b50-build.zip"
+          "s3Key": "amplify-builds/scraperManagement-6e6634642f4976586646-build.zip"
         },
         "socialDataAggregator": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
@@ -257,7 +257,7 @@
         },
         "socialFetcher": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
-          "s3Key": "amplify-builds/socialFetcher-7a48716e596d45784554-build.zip",
+          "s3Key": "amplify-builds/socialFetcher-314642756a7630393731-build.zip",
           "fbAccessToken": "2409157512601402|ZPBbZDM3ctYIb9CbLAtSdH_2KW8",
           "socialPostProcessorFunction": "socialPostProcessor-prod",
           "appsyncEndpoint": "https://ee4nnfa2mzg5pasbzvlo4ogxui.appsync-api.ap-southeast-2.amazonaws.com/graphql",
@@ -265,7 +265,7 @@
         },
         "socialPostProcessor": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
-          "s3Key": "amplify-builds/socialPostProcessor-424970646f7231683357-build.zip"
+          "s3Key": "amplify-builds/socialPostProcessor-48542b78777978594e4c-build.zip"
         },
         "socialPostStreamHandler": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
@@ -277,7 +277,7 @@
         },
         "userLastActiveUpdater": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
-          "s3Key": "amplify-builds/userLastActiveUpdater-44594d4a766855664559-build.zip"
+          "s3Key": "amplify-builds/userLastActiveUpdater-2f77755a2b6e6e64594b-build.zip"
         },
         "userManagement": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
@@ -291,11 +291,11 @@
         },
         "venueDetailsUpdater": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
-          "s3Key": "amplify-builds/venueDetailsUpdater-684431795a4162714431-build.zip"
+          "s3Key": "amplify-builds/venueDetailsUpdater-596a766f4f782b365346-build.zip"
         },
         "webScraperFunction": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
-          "s3Key": "amplify-builds/webScraperFunction-3864684f584671507435-build.zip",
+          "s3Key": "amplify-builds/webScraperFunction-35427153564d7659344b-build.zip",
           "playerProcessorQueueUrl": "https://sqs.ap-southeast-2.amazonaws.com/495599763953/GameProcessingQueue-prod.fifo",
           "scraperS3Bucket": "kingsroom-storage-prod",
           "saveGameFunctionName": "saveGameFunction-prod"

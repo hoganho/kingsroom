@@ -1051,6 +1051,15 @@ async function executeJob(event) {
           // STOPPED_NOT_FOUND is a normal completion (reached end of ID range)
           const isSuccess = isSuccessStopReason(finalStatus);
           
+          // Get entity name for the notification
+          let entityName = null;
+          try {
+            const entity = await getEntity(entityId);
+            entityName = entity.entityName || entity.name || null;
+          } catch (entityErr) {
+            console.warn('[NOTIFICATION] Could not fetch entity name:', entityErr.message);
+          }
+          
           // Build game details from results tracking arrays (if available)
           // These arrays are populated by scrapingEngine v1.18.0+
           const gameDetails = {
@@ -1091,6 +1100,7 @@ async function executeJob(event) {
             status: isSuccess ? 'success' : 'failure',
             triggerSource: 'EVENTBRIDGE',
             durationMs: durationSeconds * 1000,
+            entityName: entityName,
             summary: {
               jobId,
               entityId,

@@ -1,7 +1,11 @@
 /**
  * SES Notification Utility for Scheduled Lambda Functions
  * 
- * VERSION: 2.0.0
+ * VERSION: 2.1.0
+ * 
+ * UPDATED v2.1.0:
+ * - NEW: Entity name included in email subject and body
+ * - Subject format: [ENV] ✅ lambdaName [EntityName] - STATUS (TRIGGER)
  * 
  * UPDATED v2.0.0:
  * - NEW: Enhanced formatting for game details (created, updated, skipped)
@@ -156,6 +160,7 @@ function extractIdFromUrl(url) {
  * @param {number} [options.durationMs] - Execution duration in milliseconds
  * @param {Object} [options.gameDetails] - Detailed game lists { created, updated, skipped }
  * @param {Array} [options.processedURLs] - URLs processed with reasons
+ * @param {string} [options.entityName] - Human-readable entity name
  */
 async function sendNotification(options) {
   if (!NOTIFICATIONS_ENABLED) {
@@ -172,6 +177,7 @@ async function sendNotification(options) {
     durationMs = null,
     gameDetails = null,
     processedURLs = null,
+    entityName = null,
   } = options;
 
   // Auto-determine status from stopReason if not explicitly set
@@ -183,12 +189,18 @@ async function sendNotification(options) {
 
   const timestamp = new Date().toISOString();
   const statusEmoji = status === 'success' ? '✅' : '❌';
-  const subject = `[${ENV}] ${statusEmoji} ${lambdaName} - ${status.toUpperCase()} (${triggerSource})`;
+  
+  // Include entity name in subject if provided
+  const entityPart = entityName ? ` [${entityName}]` : '';
+  const subject = `[${ENV}] ${statusEmoji} ${lambdaName}${entityPart} - ${status.toUpperCase()} (${triggerSource})`;
 
   // Build email body
   const lines = [];
   lines.push(`Environment: ${ENV}`);
   lines.push(`Lambda: ${lambdaName}`);
+  if (entityName) {
+    lines.push(`Entity: ${entityName}`);
+  }
   lines.push(`Status: ${status.toUpperCase()}`);
   lines.push(`Trigger: ${triggerSource}`);
   lines.push(`Time: ${timestamp}`);
