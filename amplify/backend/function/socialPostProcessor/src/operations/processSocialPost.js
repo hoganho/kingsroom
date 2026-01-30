@@ -417,6 +417,10 @@ const processSocialPost = async (input) => {
     if (extractionRecord.extractedTournamentId == null) {
       delete extractionRecord.extractedTournamentId;
     }
+    // FIX: Also check extractedTournamentUrl for byExtractedUrl GSI
+    if (extractionRecord.extractedTournamentUrl == null) {
+      delete extractionRecord.extractedTournamentUrl;
+    }
 
     // Debug: Check for NaN/Infinity values
     findNaN(extractionRecord);

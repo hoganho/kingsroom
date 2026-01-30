@@ -265,7 +265,7 @@
         },
         "socialPostProcessor": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
-          "s3Key": "amplify-builds/socialPostProcessor-65514675443532336f6d-build.zip"
+          "s3Key": "amplify-builds/socialPostProcessor-424970646f7231683357-build.zip"
         },
         "socialPostStreamHandler": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
