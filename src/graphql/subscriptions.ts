@@ -1256,6 +1256,7 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -1549,6 +1550,7 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
           lastGameDate
           nextScheduledDate
           expectedInstanceCount
+          backfillGameInstance
           isSignature
           isBeginnerFriendly
           isBounty
@@ -1855,6 +1857,7 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -3556,6 +3559,7 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -3849,6 +3853,7 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
           lastGameDate
           nextScheduledDate
           expectedInstanceCount
+          backfillGameInstance
           isSignature
           isBeginnerFriendly
           isBounty
@@ -4155,6 +4160,7 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -5474,6 +5480,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -7309,6 +7316,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           lastGameDate
           nextScheduledDate
           expectedInstanceCount
+          backfillGameInstance
           isSignature
           isBeginnerFriendly
           isBounty
@@ -7982,6 +7990,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -8444,6 +8453,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -9937,6 +9947,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -11009,6 +11020,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -11738,6 +11750,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -11896,6 +11909,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -13167,6 +13181,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -14134,6 +14149,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -14824,6 +14840,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
         lastGameDate
         nextScheduledDate
         expectedInstanceCount
+        backfillGameInstance
         isSignature
         isBeginnerFriendly
         isBounty
@@ -16116,6 +16133,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -16409,6 +16427,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           lastGameDate
           nextScheduledDate
           expectedInstanceCount
+          backfillGameInstance
           isSignature
           isBeginnerFriendly
           isBounty
@@ -16715,6 +16734,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -18009,6 +18029,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -18451,6 +18472,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           lastGameDate
           nextScheduledDate
           expectedInstanceCount
+          backfillGameInstance
           isSignature
           isBeginnerFriendly
           isBounty
@@ -18664,6 +18686,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -19432,6 +19455,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -20938,6 +20962,7 @@ export const onDashboardCacheUpdate = /* GraphQL */ `subscription OnDashboardCac
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -21231,6 +21256,7 @@ export const onDashboardCacheUpdate = /* GraphQL */ `subscription OnDashboardCac
           lastGameDate
           nextScheduledDate
           expectedInstanceCount
+          backfillGameInstance
           isSignature
           isBeginnerFriendly
           isBounty
@@ -21537,6 +21563,7 @@ export const onDashboardCacheUpdate = /* GraphQL */ `subscription OnDashboardCac
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -22763,6 +22790,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -24598,6 +24626,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           lastGameDate
           nextScheduledDate
           expectedInstanceCount
+          backfillGameInstance
           isSignature
           isBeginnerFriendly
           isBounty
@@ -25271,6 +25300,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -25733,6 +25763,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -27226,6 +27257,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -28298,6 +28330,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -29027,6 +29060,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -29185,6 +29219,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -30456,6 +30491,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -31423,6 +31459,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -32113,6 +32150,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
         lastGameDate
         nextScheduledDate
         expectedInstanceCount
+        backfillGameInstance
         isSignature
         isBeginnerFriendly
         isBounty
@@ -33405,6 +33443,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -33698,6 +33737,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           lastGameDate
           nextScheduledDate
           expectedInstanceCount
+          backfillGameInstance
           isSignature
           isBeginnerFriendly
           isBounty
@@ -34004,6 +34044,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -35298,6 +35339,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -35740,6 +35782,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           lastGameDate
           nextScheduledDate
           expectedInstanceCount
+          backfillGameInstance
           isSignature
           isBeginnerFriendly
           isBounty
@@ -35953,6 +35996,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -36721,6 +36765,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -37968,6 +38013,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -39803,6 +39849,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           lastGameDate
           nextScheduledDate
           expectedInstanceCount
+          backfillGameInstance
           isSignature
           isBeginnerFriendly
           isBounty
@@ -40476,6 +40523,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -40938,6 +40986,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -42431,6 +42480,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -43503,6 +43553,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -44232,6 +44283,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -44390,6 +44442,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -45661,6 +45714,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -46628,6 +46682,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -47318,6 +47373,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
         lastGameDate
         nextScheduledDate
         expectedInstanceCount
+        backfillGameInstance
         isSignature
         isBeginnerFriendly
         isBounty
@@ -48610,6 +48666,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -48903,6 +48960,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           lastGameDate
           nextScheduledDate
           expectedInstanceCount
+          backfillGameInstance
           isSignature
           isBeginnerFriendly
           isBounty
@@ -49209,6 +49267,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -50503,6 +50562,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -50945,6 +51005,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           lastGameDate
           nextScheduledDate
           expectedInstanceCount
+          backfillGameInstance
           isSignature
           isBeginnerFriendly
           isBounty
@@ -51158,6 +51219,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -51926,6 +51988,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -53173,6 +53236,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -55008,6 +55072,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           lastGameDate
           nextScheduledDate
           expectedInstanceCount
+          backfillGameInstance
           isSignature
           isBeginnerFriendly
           isBounty
@@ -55681,6 +55746,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -56143,6 +56209,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -57636,6 +57703,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -58708,6 +58776,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -59437,6 +59506,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -59595,6 +59665,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -60866,6 +60937,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -61833,6 +61905,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -62523,6 +62596,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
         lastGameDate
         nextScheduledDate
         expectedInstanceCount
+        backfillGameInstance
         isSignature
         isBeginnerFriendly
         isBounty
@@ -63815,6 +63889,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -64108,6 +64183,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           lastGameDate
           nextScheduledDate
           expectedInstanceCount
+          backfillGameInstance
           isSignature
           isBeginnerFriendly
           isBounty
@@ -64414,6 +64490,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -65708,6 +65785,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -66150,6 +66228,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           lastGameDate
           nextScheduledDate
           expectedInstanceCount
+          backfillGameInstance
           isSignature
           isBeginnerFriendly
           isBounty
@@ -66363,6 +66442,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -67131,6 +67211,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -68639,6 +68720,7 @@ export const onCreateDashboardCache = /* GraphQL */ `subscription OnCreateDashbo
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -68932,6 +69014,7 @@ export const onCreateDashboardCache = /* GraphQL */ `subscription OnCreateDashbo
           lastGameDate
           nextScheduledDate
           expectedInstanceCount
+          backfillGameInstance
           isSignature
           isBeginnerFriendly
           isBounty
@@ -69238,6 +69321,7 @@ export const onCreateDashboardCache = /* GraphQL */ `subscription OnCreateDashbo
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -70725,6 +70809,7 @@ export const onUpdateDashboardCache = /* GraphQL */ `subscription OnUpdateDashbo
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -71018,6 +71103,7 @@ export const onUpdateDashboardCache = /* GraphQL */ `subscription OnUpdateDashbo
           lastGameDate
           nextScheduledDate
           expectedInstanceCount
+          backfillGameInstance
           isSignature
           isBeginnerFriendly
           isBounty
@@ -71324,6 +71410,7 @@ export const onUpdateDashboardCache = /* GraphQL */ `subscription OnUpdateDashbo
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -72811,6 +72898,7 @@ export const onDeleteDashboardCache = /* GraphQL */ `subscription OnDeleteDashbo
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -73104,6 +73192,7 @@ export const onDeleteDashboardCache = /* GraphQL */ `subscription OnDeleteDashbo
           lastGameDate
           nextScheduledDate
           expectedInstanceCount
+          backfillGameInstance
           isSignature
           isBeginnerFriendly
           isBounty
@@ -73410,6 +73499,7 @@ export const onDeleteDashboardCache = /* GraphQL */ `subscription OnDeleteDashbo
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -75153,6 +75243,7 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -75446,6 +75537,7 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
           lastGameDate
           nextScheduledDate
           expectedInstanceCount
+          backfillGameInstance
           isSignature
           isBeginnerFriendly
           isBounty
@@ -75752,6 +75844,7 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -77475,6 +77568,7 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -77768,6 +77862,7 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
           lastGameDate
           nextScheduledDate
           expectedInstanceCount
+          backfillGameInstance
           isSignature
           isBeginnerFriendly
           isBounty
@@ -78074,6 +78169,7 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -79797,6 +79893,7 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -80090,6 +80187,7 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
           lastGameDate
           nextScheduledDate
           expectedInstanceCount
+          backfillGameInstance
           isSignature
           isBeginnerFriendly
           isBounty
@@ -80396,6 +80494,7 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -82097,6 +82196,7 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -82390,6 +82490,7 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
           lastGameDate
           nextScheduledDate
           expectedInstanceCount
+          backfillGameInstance
           isSignature
           isBeginnerFriendly
           isBounty
@@ -82696,6 +82797,7 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -84410,6 +84512,7 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -84703,6 +84806,7 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
           lastGameDate
           nextScheduledDate
           expectedInstanceCount
+          backfillGameInstance
           isSignature
           isBeginnerFriendly
           isBounty
@@ -85009,6 +85113,7 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -86723,6 +86828,7 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty
@@ -87016,6 +87122,7 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
           lastGameDate
           nextScheduledDate
           expectedInstanceCount
+          backfillGameInstance
           isSignature
           isBeginnerFriendly
           isBounty
@@ -87322,6 +87429,7 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
+            backfillGameInstance
             isSignature
             isBeginnerFriendly
             isBounty

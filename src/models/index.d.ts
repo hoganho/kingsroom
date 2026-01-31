@@ -7307,6 +7307,7 @@ type EagerRecurringGame = {
   readonly lastGameDate?: string | null;
   readonly nextScheduledDate?: string | null;
   readonly expectedInstanceCount?: number | null;
+  readonly backfillGameInstance?: boolean | null;
   readonly isSignature?: boolean | null;
   readonly isBeginnerFriendly?: boolean | null;
   readonly isBounty?: boolean | null;
@@ -7373,6 +7374,7 @@ type LazyRecurringGame = {
   readonly lastGameDate?: string | null;
   readonly nextScheduledDate?: string | null;
   readonly expectedInstanceCount?: number | null;
+  readonly backfillGameInstance?: boolean | null;
   readonly isSignature?: boolean | null;
   readonly isBeginnerFriendly?: boolean | null;
   readonly isBounty?: boolean | null;

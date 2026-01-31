@@ -1,0 +1,36 @@
+
+RECURRING GAME BACKFILL FLAG UPDATE REPORT
+==========================================
+Generated: 2026-01-31T09:00:36.076Z
+Environment: PROD
+Dry Run: YES
+
+SCAN STATISTICS
+---------------
+Total RecurringGame records: 41
+Already set to false: 0
+Already set to true: 0
+Null/undefined (needed update): 41
+
+UPDATE RESULTS
+--------------
+Successfully updated: 41
+Failed: 0
+
+
+
+WHAT THIS SCRIPT DOES
+---------------------
+Sets backfillGameInstance=false for all RecurringGame records that don't
+already have this field set. This ensures:
+
+1. Existing recurring games won't be included in automatic backfill
+2. Only games explicitly marked with backfillGameInstance=true will have
+   schedule instances automatically created
+3. You can selectively enable backfill for specific games through the admin UI
+
+NEXT STEPS
+----------
+1. Review the games that need backfill enabled
+2. Enable backfillGameInstance=true for those specific games
+3. Run the backfill process to create schedule instances

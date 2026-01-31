@@ -4,16 +4,19 @@
  * Handles scheduled and manual backfill of RecurringGameInstance records.
  * Creates UNKNOWN instances for all gaps between last recorded instance and current date.
  * 
- * VERSION 1.0.0
+ * VERSION 1.1.0 - Added backfillGameInstance filter
  * 
  * Features:
  * - Invokable via EventBridge (daily scheduled)
  * - Invokable via GraphQL mutation (manual trigger)
- * - Processes ALL active, non-paused recurring games
+ * - Processes ONLY recurring games with backfillGameInstance=true
  * - Uses lastGameDate or firstGameDate as start reference
  * - Creates UNKNOWN instances for missing dates
  * - Supports filtering by venueId, entityId, or recurringGameId
  * - Dry-run mode for preview
+ * 
+ * IMPORTANT: Only recurring games with backfillGameInstance=true will be processed.
+ * This allows selective backfill for specific games rather than all games.
  * 
  * Location: amplify/backend/function/gameDataEnricher/src/resolution/backfill-scheduler.js
  */
@@ -135,12 +138,41 @@ function getTodayDate() {
     return new Date().toISOString().split('T')[0];
 }
 
+/**
+ * Check if a recurring game is eligible for backfill
+ * @param {Object} recurringGame - The recurring game record
+ * @returns {boolean} - True if eligible for backfill
+ */
+function isEligibleForBackfill(recurringGame) {
+    // Must have backfillGameInstance explicitly set to true
+    if (recurringGame.backfillGameInstance !== true) {
+        return false;
+    }
+    
+    // Must be active
+    if (recurringGame.isActive === false) {
+        return false;
+    }
+    
+    // Must not be paused
+    if (recurringGame.isPaused === true) {
+        return false;
+    }
+    
+    // Must not be deleted
+    if (recurringGame._deleted === true) {
+        return false;
+    }
+    
+    return true;
+}
+
 // ============================================================================
 // MAIN BACKFILL FUNCTION
 // ============================================================================
 
 /**
- * Backfill RecurringGameInstance records for all active recurring games
+ * Backfill RecurringGameInstance records for recurring games with backfillGameInstance=true
  * 
  * @param {Object} input - Input parameters
  * @param {string} [input.venueId] - Optional: Filter to specific venue
@@ -177,6 +209,7 @@ async function backfillRecurringGameInstances(input = {}) {
         endDate,
         recurringGamesProcessed: 0,
         recurringGamesSkipped: 0,
+        recurringGamesNotEligible: 0, // NEW: Track games without backfillGameInstance=true
         totalExpectedInstances: 0,
         existingInstancesFound: 0,
         gapsFound: 0,
@@ -189,7 +222,7 @@ async function backfillRecurringGameInstances(input = {}) {
     
     try {
         // ====================================================================
-        // 1. GET ACTIVE RECURRING GAMES
+        // 1. GET RECURRING GAMES WITH backfillGameInstance=true
         // ====================================================================
         
         let recurringGames = [];
@@ -200,15 +233,35 @@ async function backfillRecurringGameInstances(input = {}) {
                 TableName: recurringGameTable,
                 Key: { id: recurringGameId },
             }));
-            if (result.Item && result.Item.isActive !== false && !result.Item.isPaused) {
-                recurringGames = [result.Item];
+            
+            if (result.Item) {
+                // Check if eligible for backfill (including backfillGameInstance=true)
+                if (isEligibleForBackfill(result.Item)) {
+                    recurringGames = [result.Item];
+                } else {
+                    console.log(`[backfillRecurringGameInstances] Recurring game ${recurringGameId} not eligible for backfill (backfillGameInstance=${result.Item.backfillGameInstance}, isActive=${result.Item.isActive}, isPaused=${result.Item.isPaused})`);
+                    stats.recurringGamesNotEligible = 1;
+                    return {
+                        ...stats,
+                        message: `Recurring game ${recurringGameId} is not eligible for backfill. Ensure backfillGameInstance=true, isActive=true, and isPaused=false.`,
+                    };
+                }
+            } else {
+                return {
+                    ...stats,
+                    message: `Recurring game ${recurringGameId} not found.`,
+                };
             }
         } else {
-            // Scan for all active, non-paused games
+            // Scan for games with backfillGameInstance=true (and active, not paused)
             let scanParams = {
                 TableName: recurringGameTable,
-                FilterExpression: '(attribute_not_exists(isActive) OR isActive = :true) AND (attribute_not_exists(isPaused) OR isPaused = :false)',
+                FilterExpression: 'backfillGameInstance = :backfillEnabled AND (attribute_not_exists(isActive) OR isActive = :true) AND (attribute_not_exists(isPaused) OR isPaused = :false) AND (attribute_not_exists(#deleted) OR #deleted = :false)',
+                ExpressionAttributeNames: {
+                    '#deleted': '_deleted',
+                },
                 ExpressionAttributeValues: {
+                    ':backfillEnabled': true,  // KEY FILTER: Only process games with backfillGameInstance=true
                     ':true': true,
                     ':false': false,
                 },
@@ -236,12 +289,12 @@ async function backfillRecurringGameInstances(input = {}) {
             } while (lastEvaluatedKey);
         }
         
-        console.log(`[backfillRecurringGameInstances] Found ${recurringGames.length} active recurring games`);
+        console.log(`[backfillRecurringGameInstances] Found ${recurringGames.length} recurring games with backfillGameInstance=true`);
         
         if (recurringGames.length === 0) {
             return {
                 ...stats,
-                message: 'No active recurring games found matching criteria',
+                message: 'No recurring games with backfillGameInstance=true found matching criteria. Enable backfillGameInstance for games you want to include in automatic backfill.',
             };
         }
         
@@ -378,8 +431,8 @@ async function backfillRecurringGameInstances(input = {}) {
         
         stats.completedAt = new Date().toISOString();
         stats.message = dryRun 
-            ? `Dry run complete. Would create ${stats.instancesCreated} instances for ${stats.gapsFound} gaps.`
-            : `Created ${stats.instancesCreated} instances for ${stats.gapsFound} gaps across ${stats.recurringGamesProcessed} recurring games.`;
+            ? `Dry run complete. Would create ${stats.instancesCreated} instances for ${stats.gapsFound} gaps across ${stats.recurringGamesProcessed} recurring games (with backfillGameInstance=true).`
+            : `Created ${stats.instancesCreated} instances for ${stats.gapsFound} gaps across ${stats.recurringGamesProcessed} recurring games (with backfillGameInstance=true).`;
         
         console.log(`[backfillRecurringGameInstances] Complete:`, JSON.stringify(stats, null, 2));
         
@@ -402,12 +455,12 @@ async function backfillRecurringGameInstances(input = {}) {
 
 /**
  * Handle EventBridge scheduled event
- * Runs backfill for all active recurring games
+ * Runs backfill for all recurring games with backfillGameInstance=true
  */
 async function handleScheduledBackfill(event) {
     console.log('[handleScheduledBackfill] Triggered by EventBridge:', JSON.stringify(event));
     
-    // Run full backfill with defaults
+    // Run full backfill with defaults (only processes games with backfillGameInstance=true)
     const result = await backfillRecurringGameInstances({
         dryRun: false,
     });
@@ -416,6 +469,7 @@ async function handleScheduledBackfill(event) {
     console.log('[handleScheduledBackfill] Summary:', {
         success: result.success,
         recurringGamesProcessed: result.recurringGamesProcessed,
+        recurringGamesNotEligible: result.recurringGamesNotEligible,
         gapsFound: result.gapsFound,
         instancesCreated: result.instancesCreated,
         errors: result.errors,
@@ -454,4 +508,5 @@ module.exports = {
     getBackfillStartDate,
     getExpectedDates,
     getWeekKey,
+    isEligibleForBackfill,
 };

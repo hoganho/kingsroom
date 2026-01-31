@@ -1,0 +1,80 @@
+
+RECURRING GAME BACKFILL FLAG UPDATE REPORT
+==========================================
+Generated: 2026-01-31T09:05:06.440Z
+Environment: PROD
+Dry Run: NO
+
+SCAN STATISTICS
+---------------
+Total RecurringGame records: 41
+Already set to false: 0
+Already set to true: 0
+Null/undefined (needed update): 41
+
+UPDATE RESULTS
+--------------
+Successfully updated: 0
+Failed: 41
+
+
+ERRORS
+------
+e64ba5f4-2099-4062-9559-d476b335e5c5 (Kings Bounty Survivor Top 13 Players Are $500 Bounties): Invalid UpdateExpression: Syntax error; token: "_", near: ", _lastChangedAt"
+fb4d2226-1b6b-4816-9339-962985a7e766 (NEWCASTLE PLO HR CHAMPS Dealer Dealt): Invalid UpdateExpression: Syntax error; token: "_", near: ", _lastChangedAt"
+99b9064e-0ef6-41c8-845b-dd3441232dd3 (Wednesday PLO4 At KR STG): Invalid UpdateExpression: Syntax error; token: "_", near: ", _lastChangedAt"
+eb315129-5e26-4a58-8d03-1736114c9ad4 (VIP PLAY PASS TURBO 1 X $450 HR SEAT 1 X $250 Main FOR EVERY $700 IN THE POOL): Invalid UpdateExpression: Syntax error; token: "_", near: ", _lastChangedAt"
+848ea603-fd5c-4c05-aea5-0a524444bced (1KHR $116 470 $2380 POTS $150 GOC): Invalid UpdateExpression: Syntax error; token: "_", near: ", _lastChangedAt"
+8b194b4f-33ec-479f-9074-5812c2d4bc20 (8-Max SHOTCLOCK): Invalid UpdateExpression: Syntax error; token: "_", near: ", _lastChangedAt"
+f5294ecc-c4a2-4310-88b1-3904183aac52 (MONDAY Night CASH GAME St George Leagues): Invalid UpdateExpression: Syntax error; token: "_", near: ", _lastChangedAt"
+a13ce9dd-2442-421e-926b-3e8e305ce489 (THE ACCELERATOR 20 15 10 Min Levels): Invalid UpdateExpression: Syntax error; token: "_", near: ", _lastChangedAt"
+bf90d4f7-eab3-482b-ba53-8db5def55f40 (Friday Night CASH GAME St George Leagues): Invalid UpdateExpression: Syntax error; token: "_", near: ", _lastChangedAt"
+8821115f-143b-46de-98e4-2318ab18d5f8 (East Leaderboard Jackpot Game Single Re-Entry Until End Of Level 6): Invalid UpdateExpression: Syntax error; token: "_", near: ", _lastChangedAt"
+93d0cbd6-fb01-4670-9a72-908d930683a6 (Optiver): Invalid UpdateExpression: Syntax error; token: "_", near: ", _lastChangedAt"
+c619af28-4ca5-4d7b-ae54-9a12a82a9b20 (DEALERS CHOICE Dealer Dealt): Invalid UpdateExpression: Syntax error; token: "_", near: ", _lastChangedAt"
+92588f51-be6e-463d-b567-b45a14608bba (Churchill'S SHOTCLOCK SUNDAY Poker Churchills Sports Bar 5 Times A Week): Invalid UpdateExpression: Syntax error; token: "_", near: ", _lastChangedAt"
+145bb3e7-1f46-476f-86a2-9451aff11f36 (Monday St George Leagues Club): Invalid UpdateExpression: Syntax error; token: "_", near: ", _lastChangedAt"
+673ec81d-a01f-479a-9bb9-bfa7075806b6 (Colossus Satty 1 In 6): Invalid UpdateExpression: Syntax error; token: "_", near: ", _lastChangedAt"
+931091b1-2b97-4242-8d88-d6a7463d558c (Hillside Hotel Mondays): Invalid UpdateExpression: Syntax error; token: "_", near: ", _lastChangedAt"
+90217796-8949-4725-a6da-e688e0cae257 (BIG PLO Dealer Dealt): Invalid UpdateExpression: Syntax error; token: "_", near: ", _lastChangedAt"
+310b89b4-a5d2-455c-b467-76136d2d6976 (Tuesday HighRoller Poker Churchills Sports Bar 5 Times A Week): Invalid UpdateExpression: Syntax error; token: "_", near: ", _lastChangedAt"
+069c39e9-1510-4b9b-82f8-01b1e70f57e5 (Wednesday Night CASH GAME): Invalid UpdateExpression: Syntax error; token: "_", near: ", _lastChangedAt"
+fc5e8a94-e2ef-4159-a5e0-c23d6808724e (Optiver): Invalid UpdateExpression: Syntax error; token: "_", near: ", _lastChangedAt"
+3b9e1c52-46f9-45f8-a4c6-ac0f938ae8d1 (1KHR $119 000 RECORD PP): Invalid UpdateExpression: Syntax error; token: "_", near: ", _lastChangedAt"
+b267a3cf-9b0b-40ca-b171-9967ed245726 (DEALERS CHOICE Dealer Dealt): Invalid UpdateExpression: Syntax error; token: "_", near: ", _lastChangedAt"
+a956e2a5-5d64-49d3-b5d3-67ba3d334873 (Bella Vista Hotel Tuesdays): Invalid UpdateExpression: Syntax error; token: "_", near: ", _lastChangedAt"
+1f451531-9bec-4f00-972a-40ac97a215b3 (Easts $10k GTD): Invalid UpdateExpression: Syntax error; token: "_", near: ", _lastChangedAt"
+b74ef713-b55c-448c-ad09-9c5552010ee9 (Churchills $10k GTD): Invalid UpdateExpression: Syntax error; token: "_", near: ", _lastChangedAt"
+50e1b655-2ad0-4885-9560-16873a589158 (Friday Night CASH GAME St George Leagues): Invalid UpdateExpression: Syntax error; token: "_", near: ", _lastChangedAt"
+6a229cef-e7e4-4ab5-bb25-165d30bdd80e (TAG TEAM Partner Up To Take This Event Downnnn): Invalid UpdateExpression: Syntax error; token: "_", near: ", _lastChangedAt"
+c61ff0f4-d896-4330-92ea-34031cd57f49 (BIG O Dealer Dealt): Invalid UpdateExpression: Syntax error; token: "_", near: ", _lastChangedAt"
+af81c670-93bb-4117-b770-feae6769f1e4 (KING PLAYING CARDS BIG BOUNTY Dealt - $100 Per Bounty - Reigning Champ - Badawi Chalhoub): Invalid UpdateExpression: Syntax error; token: "_", near: ", _lastChangedAt"
+d396893e-0ddb-494d-ab3c-2a51ede77bfb (450 HYPER SATY 1 X $450 HR Seat For Every $450 In The Pool): Invalid UpdateExpression: Syntax error; token: "_", near: ", _lastChangedAt"
+197250ef-bfa7-4de9-9230-30e1334565cb (PLO 4 5 BOMB Dealer Dealt): Invalid UpdateExpression: Syntax error; token: "_", near: ", _lastChangedAt"
+451beb51-a233-4152-a195-72769faeab56 (DEALERS CHOICE MIXED GAMES Dealer Dealt): Invalid UpdateExpression: Syntax error; token: "_", near: ", _lastChangedAt"
+902eb0a9-01a0-41e8-95f7-70b77a214781 (MEGA FREEROLL TURBO SATY 1 X Main $250 1 X $450HR Seat GTD - $25 Re-Entries): Invalid UpdateExpression: Syntax error; token: "_", near: ", _lastChangedAt"
+1c44aae7-4021-4234-b19b-2a920cb31343 (Thursday Night CASH GAME St George Leagues): Invalid UpdateExpression: Syntax error; token: "_", near: ", _lastChangedAt"
+3ff909d7-36e8-47de-aa14-b09b5ff745e8 (8-MAX FREEZEOUT 8 Handed Play): Invalid UpdateExpression: Syntax error; token: "_", near: ", _lastChangedAt"
+7a42b132-12b8-4aba-946e-d4662e39a012 (Friday St George Leagues Club): Invalid UpdateExpression: Syntax error; token: "_", near: ", _lastChangedAt"
+2bd04caa-5510-4d47-9156-f0b86767b3d6 (Wenty's Wednesday GTD): Invalid UpdateExpression: Syntax error; token: "_", near: ", _lastChangedAt"
+afea4f77-dfaa-4273-8da6-29ce54825d7a (BEDE'S MEMORIAL GAME JUNCTION $1750 Guaranteed THE JUNCTION INN HOTEL): Invalid UpdateExpression: Syntax error; token: "_", near: ", _lastChangedAt"
+25a331e3-ff27-42b7-82c2-baca6ab73ef2 (PLO NLH Rotation): Invalid UpdateExpression: Syntax error; token: "_", near: ", _lastChangedAt"
+40a6a0f8-9911-4af9-bf42-4598b7ea4d65 (Thursday St George Leagues Club): Invalid UpdateExpression: Syntax error; token: "_", near: ", _lastChangedAt"
+d4e9210d-ed83-41af-9d19-1c74ce866349 (PINEAPPLE Pre Flop Discard - No BB Ante): Invalid UpdateExpression: Syntax error; token: "_", near: ", _lastChangedAt"
+
+
+WHAT THIS SCRIPT DOES
+---------------------
+Sets backfillGameInstance=false for all RecurringGame records that don't
+already have this field set. This ensures:
+
+1. Existing recurring games won't be included in automatic backfill
+2. Only games explicitly marked with backfillGameInstance=true will have
+   schedule instances automatically created
+3. You can selectively enable backfill for specific games through the admin UI
+
+NEXT STEPS
+----------
+1. Review the games that need backfill enabled
+2. Enable backfillGameInstance=true for those specific games
+3. Run the backfill process to create schedule instances

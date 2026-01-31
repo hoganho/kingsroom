@@ -4639,6 +4639,13 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "backfillGameInstance": {
+                    "name": "backfillGameInstance",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "isSignature": {
                     "name": "isSignature",
                     "isArray": false,
@@ -33980,5 +33987,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "87670687989dcb33cbe13790a82f8c09"
+    "version": "5dba09982ff99d430c4b21cf600fbef3"
 };
