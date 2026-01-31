@@ -486,6 +486,7 @@ enum SocialPostProcessingStatus {
   SKIPPED              # Skipped (e.g., COMMENT type, duplicate)
   MANUAL_REVIEW        # Flagged for human review
   PREVIEW
+  PENDING_SCRAPE
 }
 
 # How a social post was linked to a game

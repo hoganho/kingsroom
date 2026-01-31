@@ -20212,7 +20212,8 @@ export const schema = {
                 "FAILED",
                 "SKIPPED",
                 "MANUAL_REVIEW",
-                "PREVIEW"
+                "PREVIEW",
+                "PENDING_SCRAPE"
             ]
         },
         "SocialPostLinkType": {
@@ -26570,6 +26571,265 @@ export const schema = {
                     "name": "totalCount",
                     "isArray": false,
                     "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "VenueBackfillStats": {
+            "name": "VenueBackfillStats",
+            "fields": {
+                "venueId": {
+                    "name": "venueId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "gapsFound": {
+                    "name": "gapsFound",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "instancesCreated": {
+                    "name": "instancesCreated",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                }
+            }
+        },
+        "EntityBackfillStats": {
+            "name": "EntityBackfillStats",
+            "fields": {
+                "entityId": {
+                    "name": "entityId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "gapsFound": {
+                    "name": "gapsFound",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "instancesCreated": {
+                    "name": "instancesCreated",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                }
+            }
+        },
+        "BackfillDetailItem": {
+            "name": "BackfillDetailItem",
+            "fields": {
+                "type": {
+                    "name": "type",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "message": {
+                    "name": "message",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "recurringGameId": {
+                    "name": "recurringGameId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "recurringGameName": {
+                    "name": "recurringGameName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "expectedDate": {
+                    "name": "expectedDate",
+                    "isArray": false,
+                    "type": "AWSDate",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "BackfillRecurringGameInstancesResult": {
+            "name": "BackfillRecurringGameInstancesResult",
+            "fields": {
+                "success": {
+                    "name": "success",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "dryRun": {
+                    "name": "dryRun",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "startedAt": {
+                    "name": "startedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "completedAt": {
+                    "name": "completedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "endDate": {
+                    "name": "endDate",
+                    "isArray": false,
+                    "type": "AWSDate",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "recurringGamesProcessed": {
+                    "name": "recurringGamesProcessed",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "recurringGamesSkipped": {
+                    "name": "recurringGamesSkipped",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalExpectedInstances": {
+                    "name": "totalExpectedInstances",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "existingInstancesFound": {
+                    "name": "existingInstancesFound",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "gapsFound": {
+                    "name": "gapsFound",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "instancesCreated": {
+                    "name": "instancesCreated",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "errors": {
+                    "name": "errors",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "message": {
+                    "name": "message",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "error": {
+                    "name": "error",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "byVenue": {
+                    "name": "byVenue",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "byEntity": {
+                    "name": "byEntity",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "details": {
+                    "name": "details",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "BackfillDetailItem"
+                    },
+                    "isRequired": true,
+                    "attributes": [],
+                    "isArrayNullable": true
+                }
+            }
+        },
+        "BackfillStatusResult": {
+            "name": "BackfillStatusResult",
+            "fields": {
+                "available": {
+                    "name": "available",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "lastRun": {
+                    "name": "lastRun",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "lastRunResult": {
+                    "name": "lastRunResult",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "nextScheduledRun": {
+                    "name": "nextScheduledRun",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "scheduleExpression": {
+                    "name": "scheduleExpression",
+                    "isArray": false,
+                    "type": "String",
                     "isRequired": false,
                     "attributes": []
                 }
@@ -33720,5 +33980,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "dcc59694ad8f9e0f3dbddb594ae8e27d"
+    "version": "87670687989dcb33cbe13790a82f8c09"
 };

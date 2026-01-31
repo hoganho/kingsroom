@@ -1,11 +1,12 @@
 /**
  * gameDataEnricher Lambda - index.js
  * 
- * VERSION 3.0.1 - Fixed direct Lambda invocation support
- * CHANGE: When invoked directly with {input: ...} and no fieldName, defaults to enrichGameData
+ * VERSION 4.0.0 - Added EventBridge trigger and backfill operations
  * 
- * VERSION 3.0.0 - Consolidated all recurring game operations
- * REPLACES: recurringGameAdmin Lambda entirely
+ * CHANGES FROM v3.0.1:
+ * - Added EventBridge scheduled event handling for automatic backfill
+ * - Added backfillRecurringGameInstances mutation
+ * - Added getBackfillStatus query
  * 
  * Operations:
  * - enrichGameData (original)
@@ -14,6 +15,7 @@
  *                     cleanupOrphanedRecurringGames, reResolveRecurringAssignment, reResolveRecurringAssignmentsForVenue)
  * - Instance tracking (detectRecurringGameGaps, reconcileRecurringInstances, recordMissedInstance, 
  *                      updateInstanceStatus, getVenueComplianceReport, getWeekInstances, listInstancesNeedingReview)
+ * - Backfill operations (backfillRecurringGameInstances, getBackfillStatus) [NEW v4.0.0]
  * 
  * Location: amplify/backend/function/gameDataEnricher/src/index.js
  */
@@ -51,11 +53,52 @@ const {
     listInstancesNeedingReview,
 } = require('./resolution/instance-manager');
 
+// Backfill operations (NEW v4.0.0)
+const {
+    backfillRecurringGameInstances,
+    handleScheduledBackfill,
+    getBackfillStatus,
+} = require('./resolution/backfill-scheduler');
+
+/**
+ * Check if event is from EventBridge scheduled rule
+ */
+function isEventBridgeEvent(event) {
+    return event['detail-type'] === 'Scheduled Event' && event.source === 'aws.events';
+}
+
 /**
  * Main Lambda handler
  */
 exports.handler = async (event, context) => {
     console.log('[GameDataEnricher] Event:', JSON.stringify(event, null, 2));
+    
+    // ================================================================
+    // HANDLE EVENTBRIDGE SCHEDULED EVENTS (NEW v4.0.0)
+    // ================================================================
+    if (isEventBridgeEvent(event)) {
+        console.log('[GameDataEnricher] EventBridge scheduled event detected');
+        try {
+            const result = await handleScheduledBackfill(event);
+            console.log('[GameDataEnricher] Scheduled backfill complete:', JSON.stringify({
+                success: result.success,
+                recurringGamesProcessed: result.recurringGamesProcessed,
+                gapsFound: result.gapsFound,
+                instancesCreated: result.instancesCreated,
+            }));
+            return result;
+        } catch (error) {
+            console.error('[GameDataEnricher] Scheduled backfill error:', error);
+            return {
+                success: false,
+                error: error.message,
+            };
+        }
+    }
+    
+    // ================================================================
+    // HANDLE GRAPHQL RESOLVER EVENTS
+    // ================================================================
     
     // Determine operation from GraphQL field name
     // v3.0.1: Default to 'enrichGameData' when invoked directly with input but no fieldName
@@ -170,11 +213,14 @@ exports.handler = async (event, context) => {
                 );
             
             case 'getVenueComplianceReport':
-                const complianceInput = args.input || args;
+                // Handle both direct args and input object
+                const complianceVenueId = args.venueId || args.input?.venueId;
+                const complianceStartDate = args.startDate || args.input?.startDate;
+                const complianceEndDate = args.endDate || args.input?.endDate;
                 return await getVenueComplianceReport(
-                    complianceInput.venueId,
-                    complianceInput.startDate,
-                    complianceInput.endDate
+                    complianceVenueId,
+                    complianceStartDate,
+                    complianceEndDate
                 );
             
             case 'getWeekInstances':
@@ -193,6 +239,16 @@ exports.handler = async (event, context) => {
                 );
             
             // ================================================================
+            // BACKFILL OPERATIONS (NEW v4.0.0)
+            // ================================================================
+            case 'backfillRecurringGameInstances':
+                const backfillInput = args.input || args;
+                return await backfillRecurringGameInstances(backfillInput);
+            
+            case 'getBackfillStatus':
+                return await getBackfillStatus();
+            
+            // ================================================================
             // UNKNOWN OPERATION
             // ================================================================
             default:
@@ -207,7 +263,7 @@ exports.handler = async (event, context) => {
             success: false,
             error: error.message,
             ...(fieldName?.includes('Stats') ? { total: 0, unprocessed: 0, candidateRecurring: 0, notRecurring: 0, assigned: 0 } : {}),
-            ...(fieldName?.includes('process') ? { processed: 0, assigned: 0, created: 0, deferred: 0, noMatch: 0, errors: 1, dryRun: true, details: [] } : {}),
+            ...(fieldName?.includes('process') || fieldName?.includes('backfill') ? { processed: 0, assigned: 0, created: 0, deferred: 0, noMatch: 0, errors: 1, dryRun: true, details: [] } : {}),
         };
     }
 };

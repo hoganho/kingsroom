@@ -1,6 +1,6 @@
 // src/components/games/recurring-games/RecurringGameAdmin.tsx
 // Comprehensive admin panel for recurring game management
-// VERSION 3.1.0 - Added recurring game selector and confirmation screen for schedule tab
+// VERSION 4.0.0 - Integrated backend backfill service for gap instance creation
 
 import React, { useState, useEffect, useCallback } from 'react';
 import {
@@ -59,7 +59,6 @@ import {
     type DuplicateEntry,
     type GameActionDetail,
     type OrphanedRecurringGame,
-    type RecurringGameDistribution,
     type DetectGapsResult,
     type VenueComplianceReport,
     type ReconcileInstancesResult,
@@ -69,6 +68,10 @@ import {
     type ProcessUnassignedGamesResult,
 } from '../../../services/recurringGameService';
 import { formatAEST } from '../../../utils/dateUtils';
+
+// NEW: Import backfill hook and types (v4.0.0)
+import { useRecurringGameBackfill } from '../../../hooks/useRecurringGameBackfill';
+import type { BackfillRecurringGameInstancesInput } from '../../../services/recurringGameBackfillService';
 
 // ===================================================================
 // TYPES
@@ -250,6 +253,8 @@ export const RecurringGameAdmin: React.FC<RecurringGameAdminProps> = ({
         gapsFound: number;
         recurringGameName: string;
         dateRange: { startDate: string; endDate: string };
+        recurringGamesProcessed?: number;
+        dryRun?: boolean;
     } | null>(null);
 
     // Bulk Processing state (v3.0.0)
@@ -263,6 +268,18 @@ export const RecurringGameAdmin: React.FC<RecurringGameAdminProps> = ({
         requirePatternConfirmation: true,
         batchSize: 10,
     });
+
+    // NEW: Backfill hook (v4.0.0)
+    const {
+        status: backfillStatus,
+        result: backfillResult,
+        isLoading: isBackfillLoading,
+        error: backfillError,
+        loadStatus: loadBackfillStatus,
+        previewBackfill,
+        executeBackfill,
+        clearResult: clearBackfillResult,
+    } = useRecurringGameBackfill();
 
 
     const handleVenueChange = (venueId: string) => {
@@ -281,6 +298,7 @@ export const RecurringGameAdmin: React.FC<RecurringGameAdminProps> = ({
         setRecurringGamesList([]);
         setSelectedRecurringGameId('');
         setScheduleCreationResult(null);
+        clearBackfillResult();
         onVenueChange?.(venueId);
     };
 
@@ -295,8 +313,12 @@ export const RecurringGameAdmin: React.FC<RecurringGameAdminProps> = ({
     useEffect(() => {
         if (selectedVenueId && activeTab === 'schedule') {
             loadRecurringGamesForVenue();
+            // Load backfill status (v4.0.0)
+            loadBackfillStatus().catch(err => {
+                console.log('[RecurringGameAdmin] Backfill status not available:', err.message);
+            });
         }
-    }, [selectedVenueId, activeTab]);
+    }, [selectedVenueId, activeTab, loadBackfillStatus]);
 
     // ===================================================================
     // DATA LOADING FUNCTIONS
@@ -331,25 +353,21 @@ export const RecurringGameAdmin: React.FC<RecurringGameAdminProps> = ({
             if (selectedRecurringGameId) {
                 const selectedGame = recurringGamesList.find(g => g.id === selectedRecurringGameId);
                 if (selectedGame?.firstGameDate) {
-                    const startDate = selectedGame.firstGameDate.split('T')[0]; // Extract date from ISO datetime
+                    const startDate = selectedGame.firstGameDate.split('T')[0];
                     const endDate = new Date().toISOString().split('T')[0];
                     setDateRange({ startDate, endDate });
-                    console.log('[handleSinceFirstGame] Set date range from selected game:', { startDate, endDate });
                 } else {
                     setError('Selected recurring game does not have a first game date recorded');
                 }
             } else {
-                // Use venue-wide first game date
                 const result = await getDateRangeFromFirstGame(selectedVenueId);
                 if (result.success) {
                     setDateRange({ startDate: result.startDate, endDate: result.endDate });
-                    console.log('[handleSinceFirstGame] Set date range:', result);
                 } else {
                     setError(result.error || 'Failed to get first game date');
                 }
             }
         } catch (err: any) {
-            console.error('[handleSinceFirstGame] Error:', err);
             setError(err.message || 'Failed to get first game date');
         } finally {
             setIsLoading(false);
@@ -529,7 +547,6 @@ export const RecurringGameAdmin: React.FC<RecurringGameAdminProps> = ({
     // SCHEDULE/INSTANCE FUNCTIONS
     // ===================================================================
 
-    // Helper to validate date range
     const validateDateRange = (): { valid: boolean; error?: string; daysDiff?: number } => {
         if (!selectedVenueId) {
             return { valid: false, error: 'Please select a venue first' };
@@ -543,7 +560,6 @@ export const RecurringGameAdmin: React.FC<RecurringGameAdminProps> = ({
             return { valid: false, error: 'End date must be after start date' };
         }
         const daysDiff = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
-        // Allow up to 4 years (~1460 days) - weekly games would generate ~200 instances per recurring game
         if (daysDiff > 1460) {
             return { valid: false, error: `Date range is ${daysDiff} days (~${Math.round(daysDiff/365)} years). Please select 4 years or less.`, daysDiff };
         }
@@ -559,15 +575,12 @@ export const RecurringGameAdmin: React.FC<RecurringGameAdminProps> = ({
         setIsLoading(true);
         setError(null);
         try {
-            console.log('[loadComplianceReport] Calling:', { venueId: selectedVenueId, ...dateRange });
             const result = await getVenueComplianceReport(selectedVenueId!, dateRange.startDate, dateRange.endDate);
-            console.log('[loadComplianceReport] Result:', result);
             if (!result.success) {
                 throw new Error((result as any).error || 'Operation failed');
             }
             setComplianceReport(result);
         } catch (err: any) {
-            console.error('[loadComplianceReport] Error:', err);
             const msg = err.errors?.[0]?.message || err.message || 'Failed to load compliance report';
             setError(`Compliance Report: ${msg}`);
         } finally {
@@ -585,19 +598,12 @@ export const RecurringGameAdmin: React.FC<RecurringGameAdminProps> = ({
         setError(null);
         setGapsResult(null);
         try {
-            console.log('[detectGaps] Calling:', { venueId: selectedVenueId, ...dateRange, createInstances: false });
             const result = await detectRecurringGameGaps(selectedVenueId!, dateRange.startDate, dateRange.endDate, false);
-            console.log('[detectGaps] Result:', result);
             if (!result.success) {
                 throw new Error((result as any).error || 'Operation failed');
             }
             setGapsResult(result);
-            if (result.gapsFound === 0) {
-                // No error, but also show a message
-                console.log('[detectGaps] No gaps found - schedule is complete');
-            }
         } catch (err: any) {
-            console.error('[detectGaps] Error:', err);
             const msg = err.errors?.[0]?.message || err.message || 'Failed to detect gaps';
             setError(`Detect Gaps: ${msg}`);
         } finally {
@@ -614,12 +620,9 @@ export const RecurringGameAdmin: React.FC<RecurringGameAdminProps> = ({
         setIsLoading(true);
         setError(null);
         try {
-            console.log('[executeReconcile] Calling:', { venueId: selectedVenueId, ...dateRange, preview });
             const result = await reconcileRecurringInstances(selectedVenueId!, dateRange.startDate, dateRange.endDate, preview);
-            console.log('[executeReconcile] Result:', result);
             setReconcileResult(result);
         } catch (err: any) {
-            console.error('[executeReconcile] Error:', err);
             const msg = err.errors?.[0]?.message || err.message || 'Failed to reconcile instances';
             setError(`Reconcile: ${msg}`);
         } finally {
@@ -631,7 +634,6 @@ export const RecurringGameAdmin: React.FC<RecurringGameAdminProps> = ({
         if (!missedInstanceModal.gap) return;
         setIsLoading(true);
         try {
-            console.log('[handleRecordMissedInstance] Recording:', missedInstanceModal);
             await recordMissedInstance(
                 missedInstanceModal.gap.recurringGameId,
                 missedInstanceModal.gap.expectedDate,
@@ -642,7 +644,6 @@ export const RecurringGameAdmin: React.FC<RecurringGameAdminProps> = ({
             setMissedInstanceModal({ isOpen: false, gap: null, status: 'CANCELLED', reason: '' });
             await detectGaps();
         } catch (err: any) {
-            console.error('[handleRecordMissedInstance] Error:', err);
             const msg = err.errors?.[0]?.message || err.message || 'Failed to record missed instance';
             setError(`Record Instance: ${msg}`);
         } finally {
@@ -650,37 +651,92 @@ export const RecurringGameAdmin: React.FC<RecurringGameAdminProps> = ({
         }
     };
 
-    const createGapInstances = async () => {
+    // ===================================================================
+    // BACKFILL FUNCTIONS (v4.0.0)
+    // ===================================================================
+
+    const buildBackfillInput = (): BackfillRecurringGameInstancesInput => {
+        const input: BackfillRecurringGameInstancesInput = {
+            venueId: selectedVenueId,
+        };
+        
+        if (selectedRecurringGameId) {
+            input.recurringGameId = selectedRecurringGameId;
+        }
+        
+        if (dateRange.startDate) {
+            input.startDate = dateRange.startDate;
+        }
+        if (dateRange.endDate) {
+            input.endDate = dateRange.endDate;
+        }
+        
+        return input;
+    };
+
+    const handlePreviewBackfill = async () => {
         const validation = validateDateRange();
         if (!validation.valid) {
             setError(validation.error || 'Invalid input');
             return;
         }
-        setIsLoading(true);
+        
         setError(null);
         try {
-            console.log('[createGapInstances] Calling with createInstances=true:', { venueId: selectedVenueId, ...dateRange });
-            const result = await detectRecurringGameGaps(selectedVenueId!, dateRange.startDate, dateRange.endDate, true);
-            console.log('[createGapInstances] Result:', result);
-            setGapsResult(result);
+            const input = buildBackfillInput();
+            const result = await previewBackfill(input);
             
-            // Set confirmation result
+            // Update gaps result to show preview
+            if (result.success) {
+                setGapsResult({
+                    success: true,
+                    venueId: selectedVenueId!,
+                    startDate: dateRange.startDate,
+                    endDate: dateRange.endDate,
+                    gapsFound: result.gapsFound,
+                    gaps: [],
+                    instancesCreated: 0,
+                    recurringGamesChecked: result.recurringGamesProcessed,
+                    expectedOccurrences: result.totalExpectedInstances,
+                    confirmedOccurrences: result.existingInstancesFound,
+                    weeksAnalyzed: 0,
+                });
+            }
+        } catch (err: any) {
+            setError(err.message || 'Failed to preview backfill');
+        }
+    };
+
+    const handleExecuteBackfill = async () => {
+        const validation = validateDateRange();
+        if (!validation.valid) {
+            setError(validation.error || 'Invalid input');
+            return;
+        }
+        
+        setError(null);
+        try {
+            const input = buildBackfillInput();
+            const result = await executeBackfill(input);
+            
             const selectedGame = selectedRecurringGameId 
                 ? recurringGamesList.find(g => g.id === selectedRecurringGameId)
                 : null;
+            
             setScheduleCreationResult({
                 success: result.success,
-                instancesCreated: result.instancesCreated || 0,
+                instancesCreated: result.instancesCreated,
                 gapsFound: result.gapsFound,
                 recurringGameName: selectedGame?.name || 'All Recurring Games',
                 dateRange: { ...dateRange },
+                recurringGamesProcessed: result.recurringGamesProcessed,
+                dryRun: false,
             });
+            
+            setGapsResult(null);
+            
         } catch (err: any) {
-            console.error('[createGapInstances] Error:', err);
-            const msg = err.errors?.[0]?.message || err.message || 'Failed to create gap instances';
-            setError(`Create Instances: ${msg}`);
-        } finally {
-            setIsLoading(false);
+            setError(err.message || 'Failed to execute backfill');
         }
     };
 
@@ -734,10 +790,9 @@ export const RecurringGameAdmin: React.FC<RecurringGameAdminProps> = ({
                                     )}
                                 </p>
 
-                                {/* Bulk Stats Summary - Venue & Overall */}
+                                {/* Bulk Stats Summary */}
                                 {bulkStats && (
                                     <div className="space-y-3 mb-4">
-                                        {/* Venue Stats */}
                                         <div>
                                             <div className="text-xs font-medium text-purple-600 dark:text-purple-400 mb-2 uppercase tracking-wide">
                                                 Selected Venue
@@ -762,7 +817,6 @@ export const RecurringGameAdmin: React.FC<RecurringGameAdminProps> = ({
                                             </div>
                                         </div>
                                         
-                                        {/* Overall Stats */}
                                         {bulkStats.overallTotal !== undefined && bulkStats.overallTotal > 0 && (
                                             <div>
                                                 <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wide">
@@ -848,24 +902,14 @@ export const RecurringGameAdmin: React.FC<RecurringGameAdminProps> = ({
                                                         <span className="font-medium text-gray-900 dark:text-gray-100">{pattern.suggestedName}</span>
                                                         <div className="flex gap-2 mt-1">
                                                             <span className="text-xs px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded">{pattern.dayOfWeek}</span>
-                                                            <span className="text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 rounded">{pattern.sessionMode}</span>
+                                                            <span className="text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded">{pattern.sessionMode}</span>
                                                             {pattern.variant && <span className="text-xs px-2 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 rounded">{pattern.variant}</span>}
                                                         </div>
                                                     </div>
-                                                    <div className="text-right">
-                                                        <span className="text-lg font-semibold text-gray-900 dark:text-white">{pattern.gameCount}</span>
-                                                        <div className="text-xs text-gray-500">games</div>
-                                                    </div>
+                                                    <span className="text-sm font-medium text-gray-600 dark:text-gray-400">{pattern.gameCount} games</span>
                                                 </div>
                                             ))}
                                         </div>
-                                    </div>
-                                )}
-                                
-                                {/* Processing Results */}
-                                {bulkResult && (
-                                    <div className="mt-4 pt-4 border-t border-purple-200 dark:border-purple-700">
-                                        <BulkProcessingResultsTable result={bulkResult} onExecute={bulkResult.dryRun ? () => handleProcessUnassigned(false) : undefined} isExecuting={isProcessing} />
                                     </div>
                                 )}
                             </div>
@@ -873,180 +917,195 @@ export const RecurringGameAdmin: React.FC<RecurringGameAdminProps> = ({
                     </div>
                 )}
 
-                {/* Games by Day */}
-                <ExpandableSection title="Recurring Games by Day" defaultOpen>
-                    <div className="grid grid-cols-7 gap-2">
-                        {['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'].map(day => (
-                            <div key={day} className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                                <p className="text-xs text-gray-500 dark:text-gray-400">{day.slice(0, 3)}</p>
-                                <p className="text-lg font-bold text-gray-900 dark:text-gray-100">{stats.recurringGamesByDay[day] || 0}</p>
-                            </div>
-                        ))}
-                    </div>
-                </ExpandableSection>
+                {/* Results Display */}
+                {bulkResult && <BulkProcessingResultsTable result={bulkResult} />}
 
-                {/* Top Recurring Games */}
-                <ExpandableSection title="Top Recurring Games by Instance Count" count={stats.gameDistribution.length}>
-                    <div className="space-y-2 max-h-64 overflow-y-auto">
-                        {stats.gameDistribution.slice(0, 20).map((game: RecurringGameDistribution) => (
-                            <div key={game.id} className="flex items-center justify-between py-2 border-b dark:border-gray-700 last:border-0">
-                                <div>
-                                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{game.name}</p>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400">{game.dayOfWeek}</p>
+                {/* Day Distribution - FIXED: use gameDistribution array */}
+                {stats.gameDistribution && stats.gameDistribution.length > 0 && (
+                    <ExpandableSection title="Day Distribution" count={stats.gameDistribution.length}>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            {stats.gameDistribution.map((dist) => (
+                                <div key={dist.id} className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                                    <p className="font-medium text-gray-900 dark:text-gray-100">{dist.dayOfWeek}</p>
+                                    <p className="text-lg font-bold text-indigo-600">{dist.name}</p>
+                                    <p className="text-xs text-gray-500">{dist.gameCount} games assigned</p>
                                 </div>
-                                <span className="text-sm font-mono text-gray-600 dark:text-gray-300">{game.gameCount} games</span>
-                            </div>
-                        ))}
-                    </div>
-                </ExpandableSection>
+                            ))}
+                        </div>
+                    </ExpandableSection>
+                )}
+            </div>
+        );
+    };
 
-                {/* Orphans Warning */}
-                {stats.orphanedRecurringGames > 0 && (
-                    <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
-                        <div className="flex items-start gap-3">
-                            <ExclamationTriangleIcon className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0" />
-                            <div className="flex-1">
-                                <h4 className="font-medium text-amber-800 dark:text-amber-200">{stats.orphanedRecurringGames} Orphaned Templates</h4>
-                                <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">These recurring game templates have no games assigned.</p>
-                                <ul className="mt-2 space-y-1 text-sm text-amber-700 dark:text-amber-300">
-                                    {stats.orphans.slice(0, 5).map((orphan: OrphanedRecurringGame) => <li key={orphan.id}>• {orphan.name} ({orphan.dayOfWeek})</li>)}
-                                    {stats.orphans.length > 5 && <li className="text-amber-600 dark:text-amber-400">... and {stats.orphans.length - 5} more</li>}
-                                </ul>
-                                <Button variant="secondary" size="sm" className="mt-3" onClick={() => setActiveTab('orphans')}>Manage Orphans</Button>
+    const renderResolveTab = () => {
+        // Compute totals from actions for display
+        const totalChanges = resolveResult 
+            ? countPendingChanges(resolveResult.actions)
+            : 0;
+
+        return (
+            <div className="space-y-6">
+                {/* Thresholds Panel - FIXED: use correct property names */}
+                <div className="bg-white dark:bg-gray-900 border dark:border-gray-800 rounded-lg">
+                    <button
+                        onClick={() => setShowThresholds(!showThresholds)}
+                        className="w-full flex items-center justify-between px-4 py-3 text-left"
+                    >
+                        <div className="flex items-center gap-2">
+                            <AdjustmentsHorizontalIcon className="h-5 w-5 text-gray-500" />
+                            <span className="font-medium text-gray-900 dark:text-gray-100">Resolution Thresholds</span>
+                        </div>
+                        {showThresholds ? <ChevronUpIcon className="h-5 w-5 text-gray-500" /> : <ChevronDownIcon className="h-5 w-5 text-gray-500" />}
+                    </button>
+                    {showThresholds && (
+                        <div className="px-4 pb-4 space-y-4 border-t dark:border-gray-700 pt-4">
+                            <ThresholdSlider 
+                                label="High Confidence" 
+                                value={thresholds.highConfidence} 
+                                min={50} max={100} step={5} 
+                                onChange={(v) => setThresholds(t => ({ ...t, highConfidence: v }))} 
+                                description="Score needed for automatic assignment" 
+                            />
+                            <ThresholdSlider 
+                                label="Medium Confidence" 
+                                value={thresholds.mediumConfidence} 
+                                min={25} max={75} step={5} 
+                                onChange={(v) => setThresholds(t => ({ ...t, mediumConfidence: v }))} 
+                                description="Score needed for suggestion" 
+                            />
+                            <ThresholdSlider 
+                                label="Cross-Day Suggestion" 
+                                value={thresholds.crossDaySuggestion} 
+                                min={40} max={90} step={5} 
+                                onChange={(v) => setThresholds(t => ({ ...t, crossDaySuggestion: v }))} 
+                                description="Score needed for cross-day match suggestion" 
+                            />
+                            <ThresholdSlider 
+                                label="Duplicate Similarity" 
+                                value={thresholds.duplicateSimilarity} 
+                                min={0.5} max={1} step={0.05} 
+                                onChange={(v) => setThresholds(t => ({ ...t, duplicateSimilarity: v }))} 
+                                description="Similarity threshold for duplicate detection" 
+                                isPercent 
+                            />
+                            <Button variant="secondary" size="sm" onClick={() => setThresholds(DEFAULT_ADMIN_THRESHOLDS)}>Reset to Defaults</Button>
+                        </div>
+                    )}
+                </div>
+
+                {/* Actions */}
+                <div className="flex gap-3">
+                    <Button onClick={runResolvePreview} isLoading={isLoading}><EyeIcon className="h-4 w-4 mr-2" />Preview Changes</Button>
+                    {resolveResult && totalChanges > 0 && (
+                        <Button onClick={() => setConfirmModal({ isOpen: true, title: 'Apply Resolution Changes', message: `Apply ${totalChanges} changes?`, action: executeResolve, variant: 'warning' })} variant="primary"><PlayIcon className="h-4 w-4 mr-2" />Apply Changes</Button>
+                    )}
+                </div>
+
+                {/* Results - FIXED: use correct property names */}
+                {resolveResult && (
+                    <div className="space-y-4">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <StatCard title="Total Games" value={resolveResult.totalGames} icon={<ChartBarIcon className="h-5 w-5" />} color="blue" />
+                            <StatCard title="Eligible" value={resolveResult.eligibleGames} icon={<CheckCircleIcon className="h-5 w-5" />} color="green" />
+                            <StatCard title="Processed" value={resolveResult.processed} icon={<ArrowsRightLeftIcon className="h-5 w-5" />} color="purple" />
+                            <StatCard title="Changes" value={totalChanges} icon={<ArrowPathIcon className="h-5 w-5" />} color={totalChanges > 0 ? 'amber' : 'green'} />
+                        </div>
+                        
+                        {/* Action Summary */}
+                        <div className="bg-white dark:bg-gray-900 border dark:border-gray-800 rounded-lg p-4">
+                            <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-3">Action Summary</h4>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                {Object.entries(resolveResult.actions).map(([action, count]) => (
+                                    <div key={action} className="text-center p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                                        <p className="text-lg font-bold text-gray-900 dark:text-gray-100">{count}</p>
+                                        <p className="text-xs text-gray-500">{action.replace(/_/g, ' ')}</p>
+                                    </div>
+                                ))}
                             </div>
                         </div>
+
+                        {resolveResult.details && resolveResult.details.length > 0 && (
+                            <ExpandableSection title="Change Details" count={resolveResult.details.length}>
+                                <div className="space-y-2 max-h-96 overflow-y-auto">
+                                    {resolveResult.details.slice(0, 50).map((detail: GameActionDetail, idx: number) => (
+                                        <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                                            <div className="truncate flex-1 mr-4">
+                                                <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{detail.gameName}</p>
+                                                <p className="text-xs text-gray-500">
+                                                    {detail.matchDetails?.matchType || detail.error || detail.action}
+                                                </p>
+                                            </div>
+                                            <ActionBadge action={detail.action} />
+                                        </div>
+                                    ))}
+                                </div>
+                            </ExpandableSection>
+                        )}
                     </div>
                 )}
             </div>
         );
     };
 
-    const renderResolveTab = () => (
-        <div className="space-y-6">
-            <div className="bg-white dark:bg-gray-900 border dark:border-gray-800 rounded-lg p-4">
-                <button onClick={() => setShowThresholds(!showThresholds)} className="flex items-center justify-between w-full">
-                    <div className="flex items-center gap-2">
-                        <AdjustmentsHorizontalIcon className="h-5 w-5 text-gray-500" />
-                        <span className="font-medium text-gray-900 dark:text-gray-100">Resolution Thresholds</span>
-                    </div>
-                    {showThresholds ? <ChevronUpIcon className="h-5 w-5 text-gray-500" /> : <ChevronDownIcon className="h-5 w-5 text-gray-500" />}
-                </button>
-                {showThresholds && (
-                    <div className="mt-4 space-y-4 pt-4 border-t dark:border-gray-700">
-                        <ThresholdSlider label="High Confidence (Auto-Assign)" value={thresholds.highConfidence} min={50} max={100} onChange={(v) => setThresholds(t => ({ ...t, highConfidence: v }))} description="Scores at or above this threshold will be automatically assigned" />
-                        <ThresholdSlider label="Medium Confidence (Pending Review)" value={thresholds.mediumConfidence} min={30} max={80} onChange={(v) => setThresholds(t => ({ ...t, mediumConfidence: v }))} description="Scores between medium and high will require manual review" />
-                        <ThresholdSlider label="Cross-Day Suggestion" value={thresholds.crossDaySuggestion} min={40} max={90} onChange={(v) => setThresholds(t => ({ ...t, crossDaySuggestion: v }))} description="Threshold for suggesting matches on different days" />
-                        <div className="flex justify-end"><Button variant="secondary" size="sm" onClick={() => setThresholds(DEFAULT_ADMIN_THRESHOLDS)}>Reset to Defaults</Button></div>
-                    </div>
-                )}
-            </div>
-            <div className="flex gap-3">
-                <Button onClick={runResolvePreview} isLoading={isLoading} disabled={!selectedVenueId}><EyeIcon className="h-4 w-4 mr-2" />Preview Changes</Button>
-                {resolveResult && countPendingChanges(resolveResult.actions) > 0 && (
-                    <Button variant="primary" onClick={() => setConfirmModal({ isOpen: true, title: 'Apply Resolution Changes', message: `This will apply ${resolveResult.actions.REASSIGN} reassignments.`, action: executeResolve, variant: 'warning' })}><PlayIcon className="h-4 w-4 mr-2" />Apply Changes</Button>
-                )}
-            </div>
-            {resolveResult && (
-                <div className="space-y-4">
-                    <div className="bg-white dark:bg-gray-900 border dark:border-gray-800 rounded-lg p-4">
-                        <div className="flex items-center justify-between mb-4">
-                            <h3 className="font-medium text-gray-900 dark:text-gray-100">Resolution Preview</h3>
-                            {resolveResult.preview ? <span className="text-xs bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 px-2 py-1 rounded">Preview</span> : <span className="text-xs bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 px-2 py-1 rounded">Applied</span>}
-                        </div>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                            <div><p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{resolveResult.eligibleGames}</p><p className="text-xs text-gray-500">Evaluated</p></div>
-                            <div><p className="text-2xl font-bold text-blue-600">{resolveResult.actions.REASSIGN}</p><p className="text-xs text-gray-500">Reassignments</p></div>
-                            <div><p className="text-2xl font-bold text-green-600">{resolveResult.actions.CONFIRM}</p><p className="text-xs text-gray-500">Confirmed</p></div>
-                            <div><p className="text-2xl font-bold text-amber-600">{resolveResult.actions.SUGGEST_REASSIGN + resolveResult.actions.SUGGEST_CROSS_DAY}</p><p className="text-xs text-gray-500">Need Review</p></div>
-                        </div>
-                    </div>
-                    <ExpandableSection title="Action Breakdown" defaultOpen>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                            {Object.entries(resolveResult.actions).map(([action, count]) => (
-                                <div key={action} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded">
-                                    <ActionBadge action={action} />
-                                    <span className="font-mono text-sm">{count as number}</span>
-                                </div>
-                            ))}
-                        </div>
-                    </ExpandableSection>
-                    <ExpandableSection title="Game Details" count={resolveResult.details.length}>
-                        <div className="space-y-2 max-h-96 overflow-y-auto">
-                            {resolveResult.details.slice(0, 50).map((detail: GameActionDetail) => (
-                                <div key={detail.gameId} className="flex items-center justify-between py-2 border-b dark:border-gray-700 last:border-0">
-                                    <div className="flex-1 min-w-0">
-                                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{detail.gameName}</p>
-                                        {detail.matchDetails && <p className="text-xs text-gray-500">→ {detail.matchDetails.matchedTo} ({detail.matchDetails.score}%)</p>}
-                                    </div>
-                                    <ActionBadge action={detail.action} />
-                                </div>
-                            ))}
-                            {resolveResult.details.length > 50 && <p className="text-sm text-gray-500 text-center py-2">... and {resolveResult.details.length - 50} more</p>}
-                        </div>
-                    </ExpandableSection>
-                </div>
-            )}
-        </div>
-    );
-
     const renderDuplicatesTab = () => (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <div><h3 className="font-medium text-gray-900 dark:text-gray-100">Find Duplicate Templates</h3><p className="text-sm text-gray-500">Identify and merge duplicate recurring game entries</p></div>
-                <Button onClick={loadDuplicates} isLoading={isLoading}><DocumentDuplicateIcon className="h-4 w-4 mr-2" />Scan for Duplicates</Button>
-            </div>
-            <div className="bg-white dark:bg-gray-900 border dark:border-gray-800 rounded-lg p-4">
-                <ThresholdSlider label="Similarity Threshold" value={thresholds.duplicateSimilarity} min={0.5} max={1.0} step={0.05} isPercent onChange={(v) => setThresholds(t => ({ ...t, duplicateSimilarity: v }))} description="Names with similarity at or above this threshold are considered duplicates" />
+            <div className="flex items-center gap-4">
+                <Button onClick={loadDuplicates} isLoading={isLoading}><DocumentDuplicateIcon className="h-4 w-4 mr-2" />Find Duplicates</Button>
+                <div className="flex items-center gap-2">
+                    <label className="text-sm text-gray-600 dark:text-gray-400">Threshold:</label>
+                    <input type="range" min={0.5} max={1} step={0.05} value={thresholds.duplicateSimilarity} onChange={(e) => setThresholds(t => ({ ...t, duplicateSimilarity: parseFloat(e.target.value) }))} className="w-24" />
+                    <span className="text-sm font-mono w-12">{formatSimilarity(thresholds.duplicateSimilarity)}</span>
+                </div>
             </div>
             {duplicates && (
-                <div className="space-y-4">
-                    <div className="bg-white dark:bg-gray-900 border dark:border-gray-800 rounded-lg p-4">
-                        <div className="grid grid-cols-3 gap-4 text-center">
-                            <div><p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{duplicates.totalRecurringGames}</p><p className="text-xs text-gray-500">Total Templates</p></div>
-                            <div><p className="text-2xl font-bold text-amber-600">{duplicates.duplicateGroups}</p><p className="text-xs text-gray-500">Duplicate Groups</p></div>
-                            <div><p className="text-2xl font-bold text-red-600">{duplicates.duplicateEntries}</p><p className="text-xs text-gray-500">Duplicate Entries</p></div>
-                        </div>
+                duplicates.groups.length === 0 ? (
+                    <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4 flex items-center gap-3">
+                        <CheckCircleIcon className="h-6 w-6 text-green-600" />
+                        <p className="text-green-800 dark:text-green-200">No duplicate recurring games found!</p>
                     </div>
-                    {duplicates.groups.length === 0 ? (
-                        <div className="text-center py-8 bg-green-50 dark:bg-green-900/20 rounded-lg"><CheckCircleIcon className="h-12 w-12 mx-auto text-green-600" /><p className="mt-2 text-green-700 dark:text-green-300">No duplicates found!</p></div>
-                    ) : (
-                        <div className="space-y-4">
-                            {duplicates.groups.map((group: DuplicateGroup) => (
-                                <div key={group.canonicalId} className="bg-white dark:bg-gray-900 border dark:border-gray-800 rounded-lg p-4">
-                                    <div className="flex items-start justify-between mb-3">
-                                        <div><p className="font-medium text-gray-900 dark:text-gray-100">{group.canonicalName}</p><p className="text-xs text-gray-500">{group.canonicalDayOfWeek} • {group.canonicalGameCount} games (canonical)</p></div>
-                                        <Button variant="secondary" size="sm" onClick={() => setConfirmModal({ isOpen: true, title: 'Merge Duplicates', message: `Merge ${group.duplicates.length} duplicates into "${group.canonicalName}" and reassign ${group.totalGamesToReassign} games.`, action: async () => executeMerge(group), variant: 'warning' })}>Merge All</Button>
+                ) : (
+                    <div className="space-y-4">
+                        {duplicates.groups.map((group: DuplicateGroup, idx: number) => (
+                            <div key={idx} className="bg-white dark:bg-gray-900 border dark:border-gray-800 rounded-lg p-4">
+                                <div className="flex justify-between items-start mb-3">
+                                    <div>
+                                        <p className="font-medium text-gray-900 dark:text-gray-100">{group.canonicalName}</p>
+                                        <p className="text-xs text-gray-500">Canonical • {group.canonicalDayOfWeek}</p>
                                     </div>
-                                    <div className="space-y-2">
-                                        {group.duplicates.map((dup: DuplicateEntry) => (
-                                            <div key={dup.id} className="flex items-center justify-between py-2 px-3 bg-amber-50 dark:bg-amber-900/20 rounded">
-                                                <div><p className="text-sm text-gray-900 dark:text-gray-100">{dup.name}</p><p className="text-xs text-gray-500">{dup.gameCount} games</p></div>
-                                                <span className="text-xs font-mono text-amber-700 dark:text-amber-300">{formatSimilarity(dup.similarity)} similar</span>
-                                            </div>
-                                        ))}
-                                    </div>
+                                    <Button size="sm" onClick={() => setConfirmModal({ isOpen: true, title: 'Merge Duplicates', message: `Merge ${group.duplicates.length} duplicates into "${group.canonicalName}"?`, action: async () => executeMerge(group), variant: 'warning' })}>Merge All</Button>
                                 </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
+                                <div className="space-y-2">
+                                    {group.duplicates.map((dup: DuplicateEntry) => (
+                                        <div key={dup.id} className="flex justify-between items-center p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                                            <div>
+                                                <p className="text-sm text-gray-900 dark:text-gray-100">{dup.name}</p>
+                                                <p className="text-xs text-gray-500">{formatSimilarity(dup.similarity)} match • {dup.gameCount} games</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )
             )}
         </div>
     );
 
     const renderOrphansTab = () => (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <div><h3 className="font-medium text-gray-900 dark:text-gray-100">Orphaned Templates</h3><p className="text-sm text-gray-500">Recurring game templates with no games assigned</p></div>
-                <div className="flex gap-2">
-                    <Button onClick={loadStats} isLoading={isLoading} variant="secondary"><ArrowPathIcon className="h-4 w-4 mr-2" />Refresh</Button>
-                    {stats && stats.orphanedRecurringGames > 0 && (
-                        <Button variant="destructive" onClick={() => setConfirmModal({ isOpen: true, title: 'Cleanup Orphaned Templates', message: `Deactivate ${stats.orphanedRecurringGames} orphaned templates? This cannot be undone.`, action: executeCleanupOrphans, variant: 'danger' })}><TrashIcon className="h-4 w-4 mr-2" />Cleanup All</Button>
-                    )}
-                </div>
+            <div className="flex gap-3">
+                <Button onClick={loadStats} isLoading={isLoading}><ArrowPathIcon className="h-4 w-4 mr-2" />Refresh</Button>
+                {stats && stats.orphanedRecurringGames > 0 && (
+                    <Button onClick={() => setConfirmModal({ isOpen: true, title: 'Cleanup Orphaned Games', message: `Deactivate ${stats.orphanedRecurringGames} orphaned recurring games?`, action: executeCleanupOrphans, variant: 'danger' })} variant="destructive"><TrashIcon className="h-4 w-4 mr-2" />Cleanup {stats.orphanedRecurringGames} Orphans</Button>
+                )}
             </div>
             {stats && (stats.orphanedRecurringGames === 0 ? (
-                <div className="text-center py-8 bg-green-50 dark:bg-green-900/20 rounded-lg"><CheckCircleIcon className="h-12 w-12 mx-auto text-green-600" /><p className="mt-2 text-green-700 dark:text-green-300">No orphaned templates!</p></div>
+                <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4 flex items-center gap-3">
+                    <CheckCircleIcon className="h-6 w-6 text-green-600" />
+                    <p className="text-green-800 dark:text-green-200">No orphaned recurring games found!</p>
+                </div>
             ) : (
                 <div className="bg-white dark:bg-gray-900 border dark:border-gray-800 rounded-lg overflow-hidden">
                     <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
@@ -1063,12 +1122,10 @@ export const RecurringGameAdmin: React.FC<RecurringGameAdminProps> = ({
     );
 
     const renderScheduleTab = () => {
-        // Filter gaps by selected recurring game if one is selected
         const filteredGaps = gapsResult?.gaps?.filter(gap => 
             !selectedRecurringGameId || gap.recurringGameId === selectedRecurringGameId
         ) || [];
 
-        // Show confirmation screen if schedule was just created
         if (scheduleCreationResult) {
             return (
                 <div className="space-y-6">
@@ -1104,6 +1161,11 @@ export const RecurringGameAdmin: React.FC<RecurringGameAdminProps> = ({
                                     <p className={scheduleCreationResult.success ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300'}>
                                         <span className="font-medium">Instances Created:</span> {scheduleCreationResult.instancesCreated}
                                     </p>
+                                    {scheduleCreationResult.recurringGamesProcessed !== undefined && (
+                                        <p className={scheduleCreationResult.success ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300'}>
+                                            <span className="font-medium">Recurring Games Processed:</span> {scheduleCreationResult.recurringGamesProcessed}
+                                        </p>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -1124,6 +1186,37 @@ export const RecurringGameAdmin: React.FC<RecurringGameAdminProps> = ({
 
         return (
             <div className="space-y-6">
+                {/* Backfill Status Banner */}
+                {backfillStatus?.available && (
+                    <div className="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded-lg p-4">
+                        <div className="flex items-center gap-3">
+                            <ClockIcon className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                            <div className="flex-1">
+                                <p className="text-sm font-medium text-indigo-800 dark:text-indigo-200">
+                                    Automated Backfill Enabled
+                                </p>
+                                <p className="text-xs text-indigo-600 dark:text-indigo-400">
+                                    {backfillStatus.scheduleExpression && (
+                                        <>Schedule: {backfillStatus.scheduleExpression}</>
+                                    )}
+                                    {backfillStatus.lastRun && (
+                                        <> • Last run: {formatAEST(backfillStatus.lastRun)}</>
+                                    )}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {backfillError && (
+                    <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+                        <div className="flex items-center gap-2">
+                            <ExclamationTriangleIcon className="h-5 w-5 text-red-600" />
+                            <p className="text-sm text-red-700 dark:text-red-300">{backfillError}</p>
+                        </div>
+                    </div>
+                )}
+
                 {/* Recurring Game Selector */}
                 <div className="bg-white dark:bg-gray-900 border dark:border-gray-800 rounded-lg p-4">
                     <div className="flex flex-col gap-4">
@@ -1143,9 +1236,6 @@ export const RecurringGameAdmin: React.FC<RecurringGameAdminProps> = ({
                                     </option>
                                 ))}
                             </select>
-                            {recurringGamesList.length === 0 && (
-                                <p className="mt-1 text-xs text-gray-500">Loading recurring games...</p>
-                            )}
                         </div>
                     </div>
                 </div>
@@ -1194,9 +1284,9 @@ export const RecurringGameAdmin: React.FC<RecurringGameAdminProps> = ({
                         <ChartBarIcon className="h-4 w-4 mr-2" />
                         Compliance Report
                     </Button>
-                    <Button onClick={detectGaps} isLoading={isLoading} variant="secondary">
-                        <ExclamationTriangleIcon className="h-4 w-4 mr-2" />
-                        Detect Gaps
+                    <Button onClick={handlePreviewBackfill} isLoading={isBackfillLoading} variant="secondary">
+                        <EyeIcon className="h-4 w-4 mr-2" />
+                        Preview Gaps
                     </Button>
                     <Button onClick={() => executeReconcile(true)} isLoading={isLoading} variant="secondary">
                         <ArrowsRightLeftIcon className="h-4 w-4 mr-2" />
@@ -1229,8 +1319,48 @@ export const RecurringGameAdmin: React.FC<RecurringGameAdminProps> = ({
                     </div>
                 )}
 
+                {/* Backfill Preview Results */}
+                {backfillResult && backfillResult.dryRun && (
+                    <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                        <h3 className="font-medium text-blue-800 dark:text-blue-200 mb-3">Backfill Preview</h3>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center mb-4">
+                            <div>
+                                <p className="text-2xl font-bold text-blue-900 dark:text-blue-100">{backfillResult.recurringGamesProcessed}</p>
+                                <p className="text-xs text-blue-600 dark:text-blue-400">Games Checked</p>
+                            </div>
+                            <div>
+                                <p className="text-2xl font-bold text-blue-900 dark:text-blue-100">{backfillResult.totalExpectedInstances}</p>
+                                <p className="text-xs text-blue-600 dark:text-blue-400">Expected Instances</p>
+                            </div>
+                            <div>
+                                <p className="text-2xl font-bold text-green-600">{backfillResult.existingInstancesFound}</p>
+                                <p className="text-xs text-blue-600 dark:text-blue-400">Already Exist</p>
+                            </div>
+                            <div>
+                                <p className="text-2xl font-bold text-amber-600">{backfillResult.gapsFound}</p>
+                                <p className="text-xs text-blue-600 dark:text-blue-400">Gaps to Fill</p>
+                            </div>
+                        </div>
+                        {backfillResult.gapsFound > 0 && (
+                            <Button 
+                                onClick={() => setConfirmModal({ 
+                                    isOpen: true, 
+                                    title: 'Create Gap Instances', 
+                                    message: `This will create ${backfillResult.gapsFound} UNKNOWN instances. These instances will be marked for review.`, 
+                                    action: handleExecuteBackfill, 
+                                    variant: 'warning' 
+                                })} 
+                                isLoading={isBackfillLoading}
+                            >
+                                <PlayIcon className="h-4 w-4 mr-2" />
+                                Create {backfillResult.gapsFound} UNKNOWN Instances
+                            </Button>
+                        )}
+                    </div>
+                )}
+
                 {/* No Gaps Message */}
-                {gapsResult && filteredGaps.length === 0 && (
+                {gapsResult && filteredGaps.length === 0 && !backfillResult && (
                     <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
                         <div className="flex items-center gap-3">
                             <CheckCircleIcon className="h-6 w-6 text-green-600" />
@@ -1239,7 +1369,7 @@ export const RecurringGameAdmin: React.FC<RecurringGameAdminProps> = ({
                                     {selectedRecurringGameId ? 'No gaps for selected game!' : 'No gaps detected!'}
                                 </p>
                                 <p className="text-sm text-green-600 dark:text-green-400">
-                                    Checked {gapsResult.recurringGamesChecked} recurring games over {gapsResult.weeksAnalyzed} weeks. 
+                                    Checked {gapsResult.recurringGamesChecked} recurring games. 
                                     {gapsResult.expectedOccurrences} expected, {gapsResult.confirmedOccurrences} confirmed.
                                 </p>
                             </div>
@@ -1257,7 +1387,7 @@ export const RecurringGameAdmin: React.FC<RecurringGameAdminProps> = ({
                                     ` of ${gapsResult.gapsFound} total`
                                 })
                             </h3>
-                            <Button size="sm" onClick={createGapInstances} isLoading={isLoading}>
+                            <Button size="sm" onClick={handleExecuteBackfill} isLoading={isBackfillLoading}>
                                 <PlayIcon className="h-4 w-4 mr-2" />
                                 Create UNKNOWN Instances
                             </Button>
@@ -1363,7 +1493,7 @@ export const RecurringGameAdmin: React.FC<RecurringGameAdminProps> = ({
                     <p className="text-sm text-gray-600 dark:text-gray-300">{confirmModal.message}</p>
                     <div className="flex justify-end gap-3 pt-4 border-t dark:border-gray-700">
                         <Button variant="secondary" onClick={() => setConfirmModal(m => ({ ...m, isOpen: false }))}>Cancel</Button>
-                        <Button variant={confirmModal.variant === 'danger' ? 'destructive' : 'primary'} onClick={async () => { await confirmModal.action(); setConfirmModal(m => ({ ...m, isOpen: false })); }} isLoading={isLoading || isProcessing}>Confirm</Button>
+                        <Button variant={confirmModal.variant === 'danger' ? 'destructive' : 'primary'} onClick={async () => { await confirmModal.action(); setConfirmModal(m => ({ ...m, isOpen: false })); }} isLoading={isLoading || isProcessing || isBackfillLoading}>Confirm</Button>
                     </div>
                 </div>
             </Modal>

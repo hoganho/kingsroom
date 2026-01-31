@@ -1,0 +1,158 @@
+# 36-recurring-game-backfill.graphql
+# ===================================================================
+# RECURRING GAME INSTANCE BACKFILL
+# VERSION 1.0.0 - Scheduled and manual backfill of RecurringGameInstance records
+# ===================================================================
+
+# ===================================================================
+# INPUT TYPES
+# ===================================================================
+
+input BackfillRecurringGameInstancesInput {
+  """Filter to specific venue (optional)"""
+  venueId: ID
+  
+  """Filter to specific entity (optional)"""
+  entityId: ID
+  
+  """Filter to specific recurring game (optional)"""
+  recurringGameId: ID
+  
+  """Override start date for backfill (YYYY-MM-DD). Default: uses lastGameDate/firstGameDate per recurring game"""
+  startDate: AWSDate
+  
+  """Override end date for backfill (YYYY-MM-DD). Default: today"""
+  endDate: AWSDate
+  
+  """If true, don't create instances - just report what would be created"""
+  dryRun: Boolean
+  
+  """Maximum number of instances to create (safety limit). Default: 5000"""
+  limit: Int
+}
+
+# ===================================================================
+# RESULT TYPES
+# ===================================================================
+
+type VenueBackfillStats @aws_iam @aws_cognito_user_pools {
+  venueId: ID!
+  gapsFound: Int!
+  instancesCreated: Int!
+}
+
+type EntityBackfillStats @aws_iam @aws_cognito_user_pools {
+  entityId: ID!
+  gapsFound: Int!
+  instancesCreated: Int!
+}
+
+type BackfillDetailItem @aws_iam @aws_cognito_user_pools {
+  type: String!
+  message: String
+  recurringGameId: ID
+  recurringGameName: String
+  expectedDate: AWSDate
+}
+
+type BackfillRecurringGameInstancesResult @aws_iam @aws_cognito_user_pools {
+  """Whether the operation completed successfully"""
+  success: Boolean!
+  
+  """Whether this was a dry run (no instances created)"""
+  dryRun: Boolean!
+  
+  """When the backfill started"""
+  startedAt: AWSDateTime!
+  
+  """When the backfill completed"""
+  completedAt: AWSDateTime
+  
+  """End date used for the backfill"""
+  endDate: AWSDate!
+  
+  """Number of recurring games processed"""
+  recurringGamesProcessed: Int!
+  
+  """Number of recurring games skipped (no dayOfWeek, paused, etc.)"""
+  recurringGamesSkipped: Int!
+  
+  """Total expected instances calculated"""
+  totalExpectedInstances: Int!
+  
+  """Number of instances that already existed"""
+  existingInstancesFound: Int!
+  
+  """Number of gaps found (missing instances)"""
+  gapsFound: Int!
+  
+  """Number of instances created (0 if dryRun)"""
+  instancesCreated: Int!
+  
+  """Number of errors encountered"""
+  errors: Int!
+  
+  """Human-readable summary message"""
+  message: String
+  
+  """Error message if success=false"""
+  error: String
+  
+  """Detailed breakdown by venue (AWSJSON)"""
+  byVenue: AWSJSON
+  
+  """Detailed breakdown by entity (AWSJSON)"""
+  byEntity: AWSJSON
+  
+  """Additional details and warnings"""
+  details: [BackfillDetailItem!]
+}
+
+type BackfillStatusResult @aws_iam @aws_cognito_user_pools {
+  """Whether backfill functionality is available"""
+  available: Boolean!
+  
+  """Last time backfill was run"""
+  lastRun: AWSDateTime
+  
+  """Result of last run (AWSJSON)"""
+  lastRunResult: AWSJSON
+  
+  """Next scheduled run time"""
+  nextScheduledRun: AWSDateTime
+  
+  """Schedule expression (cron format)"""
+  scheduleExpression: String
+}
+
+# ===================================================================
+# MUTATIONS
+# ===================================================================
+
+extend type Mutation {
+  """
+  Backfill RecurringGameInstance records for all active recurring games.
+  Creates UNKNOWN instances for dates where no instance exists.
+  
+  Can be filtered by venueId, entityId, or recurringGameId.
+  Use dryRun=true to preview what would be created.
+  
+  This is also triggered automatically by EventBridge on a daily schedule.
+  """
+  backfillRecurringGameInstances(input: BackfillRecurringGameInstancesInput): BackfillRecurringGameInstancesResult!
+    @function(name: "gameDataEnricher-${env}")
+    @auth(rules: [{ allow: private }])
+}
+
+# ===================================================================
+# QUERIES
+# ===================================================================
+
+extend type Query {
+  """
+  Get the status of the backfill scheduler, including last run info.
+  """
+  getBackfillStatus: BackfillStatusResult!
+    @function(name: "gameDataEnricher-${env}")
+    @auth(rules: [{ allow: private }])
+}

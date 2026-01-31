@@ -123,8 +123,10 @@
 │   │   ├── index.ts
 │   │   ├── ManualPostUploadTab.tsx
 │   │   ├── MatchesTab.tsx
+│   │   ├── ScrapeDiscrepanciesTab.tsx
 │   │   ├── SocialAccountModal.tsx
 │   │   ├── SocialAccountTable.tsx
+│   │   ├── SocialPostCard.tsx
 │   │   ├── SocialPostProcessingModal.tsx
 │   │   ├── SocialPostsTab.tsx
 │   │   └── UnprocessedPostsTab.tsx
@@ -184,7 +186,9 @@
 │   ├── enrichmentOperations.ts
 │   ├── entityOperations.ts
 │   ├── mutations.ts
+│   ├── playerQueries.ts
 │   ├── queries.ts
+│   ├── recurringGameBackfill.ts
 │   ├── schema.json
 │   ├── scraperManagement.ts
 │   ├── subscriptions.ts
@@ -213,6 +217,8 @@
 │   ├── useGameDataEditor.ts
 │   ├── useGameIdTracking.ts
 │   ├── useGameTracker.ts
+│   ├── usePlayer.ts
+│   ├── useRecurringGameBackfill.ts
 │   ├── useS3Fetch.ts
 │   ├── useS3Upload.ts
 │   ├── useScraperManagement.ts
@@ -311,6 +317,7 @@
 │   ├── enrichmentService.ts
 │   ├── financialsService.ts
 │   ├── gameService.ts
+│   ├── recurringGameBackfillService.ts
 │   ├── recurringGameService.ts
 │   └── scrapeURLService.ts
 ├── tags.json
@@ -322,6 +329,7 @@
 │   ├── gameEditor.ts
 │   ├── insights.ts
 │   ├── periodSelection.ts
+│   ├── player.ts
 │   ├── scraper.ts
 │   ├── series.ts
 │   ├── socialPostUpload.ts
@@ -335,6 +343,7 @@
     ├── game-name-utils.ts
     ├── gameDataValidation.ts
     ├── generalHelpers.ts
+    ├── playerHelpers.ts
     ├── processingResultUtils.ts
     ├── reportExport.ts
     ├── scraperAnalytics.ts
@@ -343,6 +352,6 @@
     ├── socialPostParser.ts
     └── statusNormalization.ts
 
-46 directories, 298 files
+46 directories, 307 files
 
 Function List:

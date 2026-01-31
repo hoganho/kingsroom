@@ -387,6 +387,10 @@ export const socialPostsBySocialAccountIdSimple = /* GraphQL */ `
         entityId
         effectiveGameDate
         effectiveGameDateSource
+        linkedGame {
+            id
+            tournamentId
+        }
       }
       nextToken
     }
@@ -444,6 +448,10 @@ export const socialPostsByEntityIdSimple = /* GraphQL */ `
         entityId
         effectiveGameDate
         effectiveGameDateSource
+        linkedGame {
+            id
+            tournamentId
+        }
       }
       nextToken
     }
@@ -501,6 +509,10 @@ export const socialPostsByPostStatusSimple = /* GraphQL */ `
         entityId
         effectiveGameDate
         effectiveGameDateSource
+        linkedGame {
+            id
+            tournamentId
+        }
       }
       nextToken
     }
@@ -543,6 +555,11 @@ export const getSocialPostWithExtractedData = /* GraphQL */ `
       extractedGameDataId
       effectiveGameDate
       effectiveGameDateSource
+      linkedGame {
+        id
+        tournamentId
+        name
+      }
       extractedGameData {
         id
         contentType
@@ -1304,7 +1321,7 @@ export const getTournamentStructureCount = /* GraphQL */ `
  * (or removes _version/_lastChangedAt if you still need playerMetrics)
  */
 export const getScraperJobsReportClean = /* GraphQL */ `
-  query GetScraperJobsReport(
+  query GetScraperJobsReportClean(
     $entityId: ID
     $status: ScraperJobStatus
     $limit: Int

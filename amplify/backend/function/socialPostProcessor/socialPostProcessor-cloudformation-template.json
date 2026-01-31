@@ -91,6 +91,28 @@
             "API_KINGSROOM_GRAPHQLAPIKEYOUTPUT": {
               "Ref": "apikingsroomGraphQLAPIKeyOutput"
             },
+            "SCRAPER_FUNCTION_NAME": {
+              "Fn::Join": [
+                "",
+                [
+                  "autoScraper-",
+                  {
+                    "Ref": "env"
+                  }
+                ]
+              ]
+            },
+            "SCRAPER_MANAGEMENT_FUNCTION_NAME": {
+              "Fn::Join": [
+                "",
+                [
+                  "scraperManagement-",
+                  {
+                    "Ref": "env"
+                  }
+                ]
+              ]
+            },
             "API_KINGSROOM_ENTITYTABLE_NAME": {
               "Fn::ImportValue": {
                 "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:EntityTable:Name"
@@ -464,6 +486,56 @@
         "PolicyDocument": {
           "Version": "2012-10-17",
           "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                "lambda:InvokeFunction"
+              ],
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:lambda:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":function:scraperManagement-",
+                    {
+                      "Ref": "env"
+                    }
+                  ]
+                ]
+              }
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "lambda:InvokeFunction"
+              ],
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:lambda:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":function:autoScraper-",
+                    {
+                      "Ref": "env"
+                    }
+                  ]
+                ]
+              }
+            },
             {
               "Effect": "Allow",
               "Action": [

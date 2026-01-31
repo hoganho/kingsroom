@@ -2,7 +2,7 @@
  * matching/gameMatcher.js
  * Find and rank game matches for social post data
  * 
- * VERSION: 3.0.0
+ * VERSION: 3.1.0
  * 
  * IMPORTANT: Social posts do NOT have entityId.
  * A post could reference zero, one, or multiple entities.
@@ -11,6 +11,11 @@
  * 1. Tournament ID → Direct game lookup (golden signal)
  * 2. Venue from content → Games at that venue in date range
  * 3. Score and rank all candidates
+ * 
+ * UPDATES v3.1.0:
+ * - FIX: Don't return early on discrepancy - continue to venue/date matching
+ * - This allows creating BOTH a PENDING_SCRAPE link AND partial match links
+ * - Discrepancy info is now passed through even when candidates are found
  * 
  * UPDATES v3.0.0:
  * - Added scrape discrepancy detection
@@ -142,6 +147,10 @@ const isGameValidForMatching = (game) => {
 /**
  * Find matching games for extracted post data
  * 
+ * UPDATED v3.1.0: No longer returns early on discrepancy. Instead, saves
+ * discrepancy info and continues to venue/date matching. This allows
+ * creating BOTH a PENDING_SCRAPE link AND partial match links.
+ * 
  * UPDATED v3.0.0: Now returns discrepancy information when tournament ID
  * is found in social post but no valid game exists in database.
  * 
@@ -163,6 +172,12 @@ const findMatchingGames = async (extracted, post, options = {}) => {
   });
   
   // =========================================================================
+  // Track discrepancy to include in final result (even if we find venue/date matches)
+  // NEW in v3.1.0: Don't return early on discrepancy - continue to venue matching
+  // =========================================================================
+  let detectedDiscrepancy = null;
+  
+  // =========================================================================
   // PATH 1: Tournament ID Match (highest confidence)
   // =========================================================================
   if (extracted.extractedTournamentId) {
@@ -178,26 +193,17 @@ const findMatchingGames = async (extracted, post, options = {}) => {
       contentType
     });
     
-    // If discrepancy detected, return it
+    // If discrepancy detected, save it but CONTINUE to venue/date matching
+    // This allows us to both trigger a scrape AND link to partial matches
     if (discrepancy) {
-      console.log(`[MATCHER] Returning discrepancy result: ${discrepancy.discrepancyType}`);
-      
-      return {
-        candidates: [],
-        primaryMatch: null,
-        matchCount: 0,
-        matchContext: {
-          matchMethod: 'tournament_id',
-          tournamentId: extracted.extractedTournamentId,
-          reason: 'discrepancy_detected'
-        },
-        // NEW: Discrepancy info for downstream processing
-        scrapeDiscrepancy: discrepancy
-      };
+      console.log(`[MATCHER] DISCREPANCY DETECTED: ${discrepancy.discrepancyType}`);
+      console.log(`[MATCHER] Will continue to venue/date matching to find partial matches...`);
+      detectedDiscrepancy = discrepancy;
+      // DON'T return early - continue to venue/date matching below
     }
     
-    // Game found with valid status - proceed with normal matching
-    if (tournamentMatches && tournamentMatches.length > 0) {
+    // Game found with valid status - proceed with normal matching (no discrepancy)
+    if (!discrepancy && tournamentMatches && tournamentMatches.length > 0) {
       const exactMatch = tournamentMatches[0];
       
       // Double-check game is valid for matching
@@ -346,7 +352,8 @@ const findMatchingGames = async (extracted, post, options = {}) => {
         searchRange: { searchStart, searchEnd },
         reason: 'no_games_in_range'
       },
-      scrapeDiscrepancy: null
+      // UPDATED v3.1.0: Include discrepancy even when no candidates found
+      scrapeDiscrepancy: detectedDiscrepancy
     };
   }
   
@@ -380,7 +387,8 @@ const findMatchingGames = async (extracted, post, options = {}) => {
         reason: 'no_candidates_above_threshold',
         totalGamesChecked: validGames.length
       },
-      scrapeDiscrepancy: null
+      // UPDATED v3.1.0: Include discrepancy even when no candidates above threshold
+      scrapeDiscrepancy: detectedDiscrepancy
     };
   }
   
@@ -423,6 +431,11 @@ const findMatchingGames = async (extracted, post, options = {}) => {
     console.log(`[MATCHER] Primary match: ${primaryMatch.gameName} (${primaryMatch.matchConfidence}%)`);
   }
   
+  // Log if we have both discrepancy and candidates
+  if (detectedDiscrepancy && formattedCandidates.length > 0) {
+    console.log(`[MATCHER] Returning BOTH discrepancy (${detectedDiscrepancy.discrepancyType}) AND ${formattedCandidates.length} venue/date candidates`);
+  }
+  
   return {
     candidates: formattedCandidates,
     primaryMatch,
@@ -434,7 +447,8 @@ const findMatchingGames = async (extracted, post, options = {}) => {
       venueMatchInfo,
       searchRange: { searchStart, searchEnd }
     },
-    scrapeDiscrepancy: null
+    // UPDATED v3.1.0: Include discrepancy even when candidates are found
+    scrapeDiscrepancy: detectedDiscrepancy
   };
 };
 

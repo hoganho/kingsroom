@@ -34,6 +34,7 @@ const { classifyContent, shouldSkipPost } = require('../extraction/contentClassi
 const { extractGameData } = require('../extraction/dataExtractor');
 const { parsePlacements, createPlacementRecords, extractWinnerInfo } = require('../extraction/placementParser');
 const { findMatchingGames, getAutoLinkCandidates } = require('../matching/gameMatcher');
+const { invokeTournamentScraper } = require('./discrepancyOperations');
 
 // Processing version for tracking
 const PROCESSING_VERSION = '3.0.0';
@@ -212,32 +213,44 @@ const buildClassificationFlags = (classification) => {
  * @param {string} entityId - Entity ID for scraper context
  * @returns {Object} Result with jobId or error
  */
-const triggerRescrapeForDiscrepancy = async (linkId, tournamentId, entityId) => {
+const triggerRescrapeForDiscrepancy = async (linkId, tournamentId, entityId, tournamentUrl = null) => {
   console.log(`[PROCESS] Triggering re-scrape: tournamentId=${tournamentId}, entityId=${entityId}`);
   
   try {
-    // Import scraper invoker dynamically to avoid circular deps
-    const { invokeScraper } = require('../utils/scraperInvoker');
+    // Import from discrepancyOperations which has the scraper invocation logic
+    const { invokeTournamentScraper } = require('./discrepancyOperations');
     
-    const result = await invokeScraper({
-      mode: 'single',
-      startId: tournamentId,
-      endId: tournamentId,
+    // Generate a job ID for tracking
+    const jobId = `rescrape-${Date.now()}-${Math.random().toString(36).substring(7)}`;
+    
+    const result = await invokeTournamentScraper({
+      tournamentId,
+      tournamentUrl,
       entityId,
-      triggerSource: 'SOCIAL_DISCREPANCY',
-      forceRefresh: true,
-      saveToDatabase: true,
-      metadata: {
-        triggerLinkId: linkId,
-        triggerType: 'scrape_discrepancy'
-      }
+      linkId,
+      jobId
     });
     
-    return {
-      success: true,
-      jobId: result.jobId,
-      attemptId: result.attemptId
-    };
+    if (result.success) {
+      return {
+        success: true,
+        jobId,
+        invoked: result.invoked
+      };
+    } else if (result.skipped) {
+      // Scraper not configured - not an error, just skip
+      console.log('[PROCESS] Scraper not configured, skipping re-scrape');
+      return {
+        success: true,
+        skipped: true,
+        reason: result.error
+      };
+    } else {
+      return {
+        success: false,
+        error: result.error
+      };
+    }
   } catch (error) {
     console.error('[PROCESS] Re-scrape invocation failed:', error);
     return {
@@ -577,10 +590,11 @@ const processSocialPost = async (input) => {
             const rescrapeResult = await triggerRescrapeForDiscrepancy(
               linkId,
               discrepancy.extractedTournamentId,
-              post.entityId
+              post.entityId,
+              discrepancy.extractedTournamentUrl  // Pass URL for scraper context
             );
             
-            if (rescrapeResult.success) {
+            if (rescrapeResult.success && !rescrapeResult.skipped) {
               result.rescrapeTriggered = true;
               result.rescrapeJobId = rescrapeResult.jobId;
               
@@ -611,8 +625,8 @@ const processSocialPost = async (input) => {
         result.processingStatus = 'MANUAL_REVIEW';
         result.success = true;
         result.processingTimeMs = Date.now() - startTime;
-        
-        return result;
+        console.log(`[PROCESS] Discrepancy handled, continuing to check for venue/date matches...`);
+
       }
       
       // Save match candidates to extraction record for manual review
@@ -716,17 +730,33 @@ const processSocialPost = async (input) => {
         result.linksSkipped += matchResult.candidates.length - autoLinkCandidates.length;
         
         // Update post status and counts
-        if (result.linksCreated > 0) {
-          const primaryLink = result.linkDetails.find(l => l.isPrimaryGame);
+        // Count regular links (exclude discrepancy PENDING_SCRAPE links)
+        const regularLinks = result.linkDetails.filter(l => l.linkType !== 'PENDING_SCRAPE' && l.linkType !== 'RESCRAPE_REQUESTED');
+        const hasRegularLinks = regularLinks.length > 0;
+        
+        if (hasRegularLinks) {
+          // Has real game links - mark as LINKED
+          const primaryLink = regularLinks.find(l => l.isPrimaryGame) || regularLinks[0];
           await updateSocialPost(socialPostId, {
             processingStatus: 'LINKED',
             linkedGameId: primaryLink?.gameId,
             primaryLinkedGameId: primaryLink?.gameId,
-            linkedGameCount: existingLinks.length + result.linksCreated,
+            linkedGameCount: existingLinks.length + regularLinks.length,
             hasUnverifiedLinks: true,
+            // Also track if there's a pending discrepancy
+            hasScrapeDiscrepancy: result.scrapeDiscrepancyDetected || false,
             processedAt: new Date().toISOString()
           });
           result.processingStatus = 'LINKED';
+        } else if (result.scrapeDiscrepancyDetected) {
+          // Only discrepancy link, no regular matches - mark for manual review
+          // The scrape should create the game, and gameToSocialMatcher will resolve it
+          await updateSocialPost(socialPostId, {
+            processingStatus: 'PENDING_SCRAPE',
+            hasScrapeDiscrepancy: true,
+            processedAt: new Date().toISOString()
+          });
+          result.processingStatus = 'PENDING_SCRAPE';
         } else if (matchResult.candidates.length > 0) {
           // Has candidates but none above threshold - needs manual review
           await updateSocialPost(socialPostId, {

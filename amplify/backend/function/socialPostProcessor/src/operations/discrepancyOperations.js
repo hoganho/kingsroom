@@ -1,8 +1,16 @@
 /**
  * Scrape Discrepancy Operations
- * Version: 3.1.0
+ * Version: 3.3.0
  * 
- * FIXED: Added actual scraper Lambda invocation (was TODO)
+ * UPDATED v3.3.0: Look up entity's defaultVenueId before invoking scraper
+ * - Fixes "No venue available" skip when HTML parser can't match venue
+ * - Entity lookup gets defaultVenueId as fallback for game save
+ * 
+ * UPDATED v3.2.0: Use scraperManagement instead of autoScraper directly
+ * - autoScraper's triggerAutoScraping hardcodes mode='bulk' which scrapes wrong IDs
+ * - scraperManagement creates proper job with mode='range' and respects startId/endId
+ * 
+ * FIXED v3.1.0: Added actual scraper Lambda invocation (was TODO)
  * 
  * Handles detection and management of scrape discrepancies:
  * - Games referenced in social posts that don't exist in the database
@@ -15,11 +23,11 @@
 
 const { DynamoDB } = require('@aws-sdk/client-dynamodb');
 const { DynamoDBDocument } = require('@aws-sdk/lib-dynamodb');
-const { LambdaClient, InvokeCommand } = require('@aws-sdk/client-lambda');  // ADDED
+const { LambdaClient, InvokeCommand } = require('@aws-sdk/client-lambda');
 const { v4: uuidv4 } = require('uuid');
 
 const dynamoDB = DynamoDBDocument.from(new DynamoDB({}));
-const lambdaClient = new LambdaClient({ region: process.env.AWS_REGION || 'ap-southeast-2' });  // ADDED
+const lambdaClient = new LambdaClient({ region: process.env.AWS_REGION || 'ap-southeast-2' });
 
 // Table names from environment
 const GAME_TABLE = process.env.API_KINGSROOM_GAMETABLE_NAME;
@@ -28,8 +36,10 @@ const SOCIAL_POST_GAME_LINK_TABLE = process.env.API_KINGSROOM_SOCIALPOSTGAMELINK
 const SOCIAL_POST_GAME_DATA_TABLE = process.env.API_KINGSROOM_SOCIALPOSTGAMEDATATABLE_NAME;
 const ENTITY_TABLE = process.env.API_KINGSROOM_ENTITYTABLE_NAME;
 
-// ADDED: Scraper function name - add this to your Lambda environment variables
-const SCRAPER_FUNCTION_NAME = process.env.SCRAPER_FUNCTION_NAME || process.env.FUNCTION_SCRAPERJOB_NAME;
+// UPDATED v3.2.0: Use scraperManagement instead of autoScraper
+// scraperManagement creates proper jobs with mode='range' that respects startId/endId
+const SCRAPER_MANAGEMENT_FUNCTION_NAME = process.env.SCRAPER_MANAGEMENT_FUNCTION_NAME 
+  || process.env.FUNCTION_SCRAPERMANAGEMENT_NAME;
 
 // Discrepancy types
 const DISCREPANCY_TYPES = {
@@ -149,70 +159,140 @@ async function getSocialPostWithEntity(socialPostId) {
 // =============================================================================
 
 /**
- * Invoke the tournament scraper Lambda to scrape a specific tournament
+ * Invoke the tournament scraper via scraperManagement Lambda
+ * 
+ * IMPORTANT: We invoke scraperManagement (not autoScraper directly) because:
+ * - scraperManagement creates a proper job record with mode='range'
+ * - It invokes autoScraper with operation='executeJob' which respects the mode
+ * - autoScraper's triggerAutoScraping hardcodes mode='bulk' which scrapes wrong IDs
+ * 
+ * The payload structure matches how AppSync invokes the Lambda:
+ * { typeName, fieldName, arguments: { input: {...} } }
  * 
  * @param {Object} params - Scrape parameters
  * @param {number} params.tournamentId - Tournament ID to scrape
- * @param {string} params.tournamentUrl - Tournament URL (sourceUrl)
+ * @param {string} params.tournamentUrl - Tournament URL (for logging)
  * @param {string} params.entityId - Entity ID for context
- * @param {string} params.linkId - Discrepancy link ID for tracking
- * @param {string} params.jobId - Rescrape job ID
- * @returns {Object} - Result with success status
+ * @param {string} params.linkId - Discrepancy link ID (for logging)
+ * @param {string} params.jobId - Rescrape job ID (for logging)
+ * @returns {Object} - Result with success status and created job info
  */
 async function invokeTournamentScraper({ tournamentId, tournamentUrl, entityId, linkId, jobId }) {
-  if (!SCRAPER_FUNCTION_NAME) {
-    console.warn('[DISCREPANCY] Scraper function name not configured');
-    console.warn('[DISCREPANCY] Set SCRAPER_FUNCTION_NAME or FUNCTION_SCRAPERJOB_NAME environment variable');
+  if (!SCRAPER_MANAGEMENT_FUNCTION_NAME) {
+    console.warn('[DISCREPANCY] Scraper management function name not configured');
+    console.warn('[DISCREPANCY] Set SCRAPER_MANAGEMENT_FUNCTION_NAME or FUNCTION_SCRAPERMANAGEMENT_NAME environment variable');
     return { 
       success: false, 
-      error: 'Scraper function not configured',
+      error: 'Scraper management function not configured',
       skipped: true 
     };
   }
 
-  console.log(`[DISCREPANCY] Invoking scraper: ${SCRAPER_FUNCTION_NAME}`);
-  console.log(`[DISCREPANCY] Tournament ID: ${tournamentId}, URL: ${tournamentUrl}`);
+  console.log(`[DISCREPANCY] Invoking scraper management: ${SCRAPER_MANAGEMENT_FUNCTION_NAME}`);
+  console.log(`[DISCREPANCY] Tournament ID: ${tournamentId}, URL: ${tournamentUrl}, Entity: ${entityId}`);
+
+  // Look up the entity to get defaultVenueId
+  // This ensures the scraper has a fallback venue when it can't match from HTML
+  let defaultVenueId = null;
+  try {
+    if (entityId && ENTITY_TABLE) {
+      const entityResult = await dynamoDB.get({
+        TableName: ENTITY_TABLE,
+        Key: { id: entityId }
+      });
+      
+      if (entityResult.Item?.defaultVenueId) {
+        defaultVenueId = entityResult.Item.defaultVenueId;
+        console.log(`[DISCREPANCY] Using entity's defaultVenueId: ${defaultVenueId}`);
+      } else {
+        console.warn(`[DISCREPANCY] Entity ${entityId} has no defaultVenueId configured`);
+      }
+    }
+  } catch (error) {
+    console.warn(`[DISCREPANCY] Could not look up entity for defaultVenueId: ${error.message}`);
+    // Continue anyway - scraper will skip if no venue can be matched
+  }
 
   try {
+    // Construct GraphQL-style event for scraperManagement
+    // This matches how AppSync invokes the Lambda for Mutation.startScraperJob
+    // The handler destructures: { typeName, fieldName, arguments: args }
+    // Then startScraperJob destructures: { input } from args
     const payload = {
-      mode: 'single',
-      startId: tournamentId,
-      endId: tournamentId,
-      entityId,
-      triggerSource: 'SOCIAL_DISCREPANCY',
-      forceRefresh: true,
-      saveToDatabase: true,
-      metadata: {
-        triggerLinkId: linkId,
-        triggerType: 'scrape_discrepancy',
-        rescrapeJobId: jobId,
-        sourceUrl: tournamentUrl
+      typeName: 'Mutation',
+      fieldName: 'startScraperJob',
+      arguments: {
+        input: {
+          entityId,
+          mode: 'range',                // Use 'range' mode with startId=endId for single tournament
+          startId: tournamentId,
+          endId: tournamentId,
+          triggerSource: 'SOCIAL_DISCREPANCY',
+          triggeredBy: 'socialPostProcessor',
+          forceRefresh: true,
+          saveToDatabase: true,
+          defaultVenueId,               // Pass entity's default venue as fallback
+          skipNotPublished: false,      // We want to scrape even if not published yet
+          skipNotFoundGaps: false,      // Don't skip - we want this specific ID
+          maxConsecutiveNotFound: 1,    // Stop immediately if not found (it's just one ID)
+          maxConsecutiveErrors: 1,      // Stop on first error
+        }
       }
     };
 
+    console.log(`[DISCREPANCY] Payload:`, JSON.stringify(payload, null, 2));
+
+    // Use RequestResponse to wait for job creation and get the job ID
     const response = await lambdaClient.send(new InvokeCommand({
-      FunctionName: SCRAPER_FUNCTION_NAME,
-      InvocationType: 'Event',  // Async invocation
+      FunctionName: SCRAPER_MANAGEMENT_FUNCTION_NAME,
+      InvocationType: 'RequestResponse',  // Sync - wait for job creation
       Payload: JSON.stringify(payload)
     }));
 
-    if (response.StatusCode === 202) {
-      console.log(`[DISCREPANCY] Scraper invoked successfully for tournament ${tournamentId}`);
+    // Parse the response
+    const responsePayload = response.Payload 
+      ? JSON.parse(Buffer.from(response.Payload).toString())
+      : null;
+
+    console.log(`[DISCREPANCY] Response status: ${response.StatusCode}`);
+    
+    // Check for Lambda execution errors
+    if (response.FunctionError) {
+      console.error(`[DISCREPANCY] Lambda error: ${response.FunctionError}`);
+      console.error(`[DISCREPANCY] Error payload:`, responsePayload);
+      return { 
+        success: false, 
+        error: responsePayload?.errorMessage || response.FunctionError 
+      };
+    }
+
+    // Check for successful job creation
+    if (response.StatusCode === 200 && responsePayload?.id) {
+      console.log(`[DISCREPANCY] Scraper job created: ${responsePayload.id}`);
+      console.log(`[DISCREPANCY] Job status: ${responsePayload.status}`);
       return { 
         success: true, 
         invoked: true,
+        scraperJobId: responsePayload.id,
+        jobStatus: responsePayload.status,
         statusCode: response.StatusCode 
       };
-    } else {
-      console.warn(`[DISCREPANCY] Scraper invocation returned status: ${response.StatusCode}`);
+    } else if (responsePayload?.errorMessage) {
+      console.error(`[DISCREPANCY] Scraper management error: ${responsePayload.errorMessage}`);
       return { 
         success: false, 
-        error: `Unexpected status code: ${response.StatusCode}` 
+        error: responsePayload.errorMessage 
+      };
+    } else {
+      console.warn(`[DISCREPANCY] Unexpected response:`, JSON.stringify(responsePayload, null, 2));
+      return { 
+        success: false, 
+        error: `Unexpected response: ${JSON.stringify(responsePayload)}` 
       };
     }
 
   } catch (error) {
-    console.error('[DISCREPANCY] Error invoking scraper:', error);
+    console.error('[DISCREPANCY] Error invoking scraper management:', error);
     return { 
       success: false, 
       error: error.message 

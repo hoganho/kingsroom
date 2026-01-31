@@ -458,7 +458,8 @@ export enum SocialPostProcessingStatus {
   FAILED = "FAILED",
   SKIPPED = "SKIPPED",
   MANUAL_REVIEW = "MANUAL_REVIEW",
-  PREVIEW = "PREVIEW"
+  PREVIEW = "PREVIEW",
+  PENDING_SCRAPE = "PENDING_SCRAPE"
 }
 
 export enum SocialPostLinkType {
@@ -3156,6 +3157,122 @@ type LazyInstancesNeedingReviewResult = {
 export declare type InstancesNeedingReviewResult = LazyLoading extends LazyLoadingDisabled ? EagerInstancesNeedingReviewResult : LazyInstancesNeedingReviewResult
 
 export declare const InstancesNeedingReviewResult: (new (init: ModelInit<InstancesNeedingReviewResult>) => InstancesNeedingReviewResult)
+
+type EagerVenueBackfillStats = {
+  readonly venueId: string;
+  readonly gapsFound: number;
+  readonly instancesCreated: number;
+}
+
+type LazyVenueBackfillStats = {
+  readonly venueId: string;
+  readonly gapsFound: number;
+  readonly instancesCreated: number;
+}
+
+export declare type VenueBackfillStats = LazyLoading extends LazyLoadingDisabled ? EagerVenueBackfillStats : LazyVenueBackfillStats
+
+export declare const VenueBackfillStats: (new (init: ModelInit<VenueBackfillStats>) => VenueBackfillStats)
+
+type EagerEntityBackfillStats = {
+  readonly entityId: string;
+  readonly gapsFound: number;
+  readonly instancesCreated: number;
+}
+
+type LazyEntityBackfillStats = {
+  readonly entityId: string;
+  readonly gapsFound: number;
+  readonly instancesCreated: number;
+}
+
+export declare type EntityBackfillStats = LazyLoading extends LazyLoadingDisabled ? EagerEntityBackfillStats : LazyEntityBackfillStats
+
+export declare const EntityBackfillStats: (new (init: ModelInit<EntityBackfillStats>) => EntityBackfillStats)
+
+type EagerBackfillDetailItem = {
+  readonly type: string;
+  readonly message?: string | null;
+  readonly recurringGameId?: string | null;
+  readonly recurringGameName?: string | null;
+  readonly expectedDate?: string | null;
+}
+
+type LazyBackfillDetailItem = {
+  readonly type: string;
+  readonly message?: string | null;
+  readonly recurringGameId?: string | null;
+  readonly recurringGameName?: string | null;
+  readonly expectedDate?: string | null;
+}
+
+export declare type BackfillDetailItem = LazyLoading extends LazyLoadingDisabled ? EagerBackfillDetailItem : LazyBackfillDetailItem
+
+export declare const BackfillDetailItem: (new (init: ModelInit<BackfillDetailItem>) => BackfillDetailItem)
+
+type EagerBackfillRecurringGameInstancesResult = {
+  readonly success: boolean;
+  readonly dryRun: boolean;
+  readonly startedAt: string;
+  readonly completedAt?: string | null;
+  readonly endDate: string;
+  readonly recurringGamesProcessed: number;
+  readonly recurringGamesSkipped: number;
+  readonly totalExpectedInstances: number;
+  readonly existingInstancesFound: number;
+  readonly gapsFound: number;
+  readonly instancesCreated: number;
+  readonly errors: number;
+  readonly message?: string | null;
+  readonly error?: string | null;
+  readonly byVenue?: string | null;
+  readonly byEntity?: string | null;
+  readonly details?: BackfillDetailItem[] | null;
+}
+
+type LazyBackfillRecurringGameInstancesResult = {
+  readonly success: boolean;
+  readonly dryRun: boolean;
+  readonly startedAt: string;
+  readonly completedAt?: string | null;
+  readonly endDate: string;
+  readonly recurringGamesProcessed: number;
+  readonly recurringGamesSkipped: number;
+  readonly totalExpectedInstances: number;
+  readonly existingInstancesFound: number;
+  readonly gapsFound: number;
+  readonly instancesCreated: number;
+  readonly errors: number;
+  readonly message?: string | null;
+  readonly error?: string | null;
+  readonly byVenue?: string | null;
+  readonly byEntity?: string | null;
+  readonly details?: BackfillDetailItem[] | null;
+}
+
+export declare type BackfillRecurringGameInstancesResult = LazyLoading extends LazyLoadingDisabled ? EagerBackfillRecurringGameInstancesResult : LazyBackfillRecurringGameInstancesResult
+
+export declare const BackfillRecurringGameInstancesResult: (new (init: ModelInit<BackfillRecurringGameInstancesResult>) => BackfillRecurringGameInstancesResult)
+
+type EagerBackfillStatusResult = {
+  readonly available: boolean;
+  readonly lastRun?: string | null;
+  readonly lastRunResult?: string | null;
+  readonly nextScheduledRun?: string | null;
+  readonly scheduleExpression?: string | null;
+}
+
+type LazyBackfillStatusResult = {
+  readonly available: boolean;
+  readonly lastRun?: string | null;
+  readonly lastRunResult?: string | null;
+  readonly nextScheduledRun?: string | null;
+  readonly scheduleExpression?: string | null;
+}
+
+export declare type BackfillStatusResult = LazyLoading extends LazyLoadingDisabled ? EagerBackfillStatusResult : LazyBackfillStatusResult
+
+export declare const BackfillStatusResult: (new (init: ModelInit<BackfillStatusResult>) => BackfillStatusResult)
 
 type EagerAwardTicketResult = {
   readonly success: boolean;

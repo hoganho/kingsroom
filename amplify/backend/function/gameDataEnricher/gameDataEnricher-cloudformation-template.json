@@ -4,8 +4,8 @@
   "Parameters": {
     "CloudWatchRule": {
       "Type": "String",
-      "Default": "NONE",
-      "Description": " Schedule Expression"
+      "Default": "cron(0 6 * * ? *)",
+      "Description": "Schedule Expression for recurring game instance backfill. Default: 06:00 UTC daily (4pm AEST). Set to NONE to disable."
     },
     "deploymentBucketName": {
       "Type": "String"
@@ -36,6 +36,18 @@
           "Ref": "env"
         },
         "NONE"
+      ]
+    },
+    "CloudWatchRuleEnabled": {
+      "Fn::Not": [
+        {
+          "Fn::Equals": [
+            {
+              "Ref": "CloudWatchRule"
+            },
+            "NONE"
+          ]
+        }
       ]
     }
   },
@@ -138,6 +150,58 @@
                   {
                     "Fn::ImportValue": {
                       "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:RecurringGameTable:Name"
+                    }
+                  }
+                ]
+              ]
+            },
+            "API_KINGSROOM_RECURRINGGAMEINSTANCETABLE_NAME": {
+              "Fn::ImportValue": {
+                "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:RecurringGameInstanceTable:Name"
+              }
+            },
+            "API_KINGSROOM_RECURRINGGAMEINSTANCETABLE_ARN": {
+              "Fn::Join": [
+                "",
+                [
+                  "arn:aws:dynamodb:",
+                  {
+                    "Ref": "AWS::Region"
+                  },
+                  ":",
+                  {
+                    "Ref": "AWS::AccountId"
+                  },
+                  ":table/",
+                  {
+                    "Fn::ImportValue": {
+                      "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:RecurringGameInstanceTable:Name"
+                    }
+                  }
+                ]
+              ]
+            },
+            "API_KINGSROOM_GAMETABLE_NAME": {
+              "Fn::ImportValue": {
+                "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:GameTable:Name"
+              }
+            },
+            "API_KINGSROOM_GAMETABLE_ARN": {
+              "Fn::Join": [
+                "",
+                [
+                  "arn:aws:dynamodb:",
+                  {
+                    "Ref": "AWS::Region"
+                  },
+                  ":",
+                  {
+                    "Ref": "AWS::AccountId"
+                  },
+                  ":table/",
+                  {
+                    "Fn::ImportValue": {
+                      "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:GameTable:Name"
                     }
                   }
                 ]
@@ -645,6 +709,47 @@
         ]
       },
       "DependsOn": "LambdaExecutionRole"
+    },
+    "CloudWatchEvent": {
+      "Type": "AWS::Events::Rule",
+      "Condition": "CloudWatchRuleEnabled",
+      "Properties": {
+        "Description": "Daily schedule for recurring game instance backfill - creates UNKNOWN instances for gaps",
+        "ScheduleExpression": {
+          "Ref": "CloudWatchRule"
+        },
+        "State": "ENABLED",
+        "Targets": [
+          {
+            "Arn": {
+              "Fn::GetAtt": [
+                "LambdaFunction",
+                "Arn"
+              ]
+            },
+            "Id": {
+              "Ref": "LambdaFunction"
+            }
+          }
+        ]
+      }
+    },
+    "PermissionForEventsToInvokeLambda": {
+      "Type": "AWS::Lambda::Permission",
+      "Condition": "CloudWatchRuleEnabled",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "LambdaFunction"
+        },
+        "Action": "lambda:InvokeFunction",
+        "Principal": "events.amazonaws.com",
+        "SourceArn": {
+          "Fn::GetAtt": [
+            "CloudWatchEvent",
+            "Arn"
+          ]
+        }
+      }
     }
   },
   "Outputs": {
@@ -678,6 +783,13 @@
           "Arn"
         ]
       }
+    },
+    "CloudWatchEventRule": {
+      "Condition": "CloudWatchRuleEnabled",
+      "Value": {
+        "Ref": "CloudWatchEvent"
+      },
+      "Description": "EventBridge rule for scheduled recurring game instance backfill"
     }
   }
 }

@@ -3,3 +3,9 @@
 
 export { SocialAccountTable } from './SocialAccountTable';
 export { SocialAccountModal } from './SocialAccountModal';
+export { SocialPostCard } from './SocialPostCard';
+export type { 
+  SocialPostCardProps, 
+  SocialPostCardVariant, 
+  ExtendedSocialPost 
+} from './SocialPostCard';
