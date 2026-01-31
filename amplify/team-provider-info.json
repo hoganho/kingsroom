@@ -194,7 +194,7 @@
         },
         "gameDataEnricher": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
-          "s3Key": "amplify-builds/gameDataEnricher-6c6d336d6b442b724e56-build.zip"
+          "s3Key": "amplify-builds/gameDataEnricher-55796f73636748327138-build.zip"
         },
         "gameFinancialsProcessor": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",

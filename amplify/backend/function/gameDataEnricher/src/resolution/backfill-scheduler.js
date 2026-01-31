@@ -4,7 +4,12 @@
  * Handles scheduled and manual backfill of RecurringGameInstance records.
  * Creates UNKNOWN instances for all gaps between last recorded instance and current date.
  * 
- * VERSION 1.1.0 - Added backfillGameInstance filter
+ * VERSION 1.2.0 - Added SES notifications for EventBridge scheduled runs
+ * 
+ * CHANGELOG:
+ * v1.2.0 - Added SES email notifications when triggered by EventBridge
+ * v1.1.0 - Added backfillGameInstance filter
+ * v1.0.0 - Initial release
  * 
  * Features:
  * - Invokable via EventBridge (daily scheduled)
@@ -14,6 +19,7 @@
  * - Creates UNKNOWN instances for missing dates
  * - Supports filtering by venueId, entityId, or recurringGameId
  * - Dry-run mode for preview
+ * - SES email notifications on scheduled runs
  * 
  * IMPORTANT: Only recurring games with backfillGameInstance=true will be processed.
  * This allows selective backfill for specific games rather than all games.
@@ -25,6 +31,17 @@
 
 const { v4: uuidv4 } = require('uuid');
 const { getDocClient, getTableName, QueryCommand, PutCommand, ScanCommand, GetCommand } = require('../utils/db-client');
+
+// SES Notification (optional - gracefully handle if not available)
+let sendNotification = null;
+let isEventBridgeTrigger = null;
+try {
+    const sesNotification = require('../ses-notification');
+    sendNotification = sesNotification.sendNotification;
+    isEventBridgeTrigger = sesNotification.isEventBridgeTrigger;
+} catch (e) {
+    console.warn('[backfill-scheduler] SES notification module not available, notifications disabled');
+}
 
 // Import date utilities - try enhanced version first
 let calculateExpectedDatesEnhanced = null;
@@ -218,6 +235,8 @@ async function backfillRecurringGameInstances(input = {}) {
         details: [],
         byVenue: {},
         byEntity: {},
+        // NEW: Per-game details for notifications
+        gameDetails: [],
     };
     
     try {
@@ -302,6 +321,10 @@ async function backfillRecurringGameInstances(input = {}) {
         // 2. PROCESS EACH RECURRING GAME
         // ====================================================================
         
+        // Fetch entity names for reporting
+        const entityNames = {};
+        const entityTable = getTableName('Entity');
+        
         let totalInstancesCreated = 0;
         
         for (const rg of recurringGames) {
@@ -339,8 +362,38 @@ async function backfillRecurringGameInstances(input = {}) {
                 stats.byVenue[rg.venueId] = { gapsFound: 0, instancesCreated: 0 };
             }
             if (!stats.byEntity[rg.entityId]) {
-                stats.byEntity[rg.entityId] = { gapsFound: 0, instancesCreated: 0 };
+                stats.byEntity[rg.entityId] = { gapsFound: 0, instancesCreated: 0, name: null };
             }
+            
+            // Fetch entity name if not already cached
+            if (rg.entityId && !entityNames[rg.entityId]) {
+                try {
+                    const entityResult = await docClient.send(new GetCommand({
+                        TableName: entityTable,
+                        Key: { id: rg.entityId },
+                        ProjectionExpression: '#name',
+                        ExpressionAttributeNames: { '#name': 'name' },
+                    }));
+                    entityNames[rg.entityId] = entityResult.Item?.name || rg.entityId;
+                    stats.byEntity[rg.entityId].name = entityNames[rg.entityId];
+                } catch (entityErr) {
+                    console.warn(`[backfillRecurringGameInstances] Could not fetch entity name for ${rg.entityId}:`, entityErr.message);
+                    entityNames[rg.entityId] = rg.entityId; // Fallback to ID
+                }
+            }
+            
+            // Track per-game details
+            const gameDetail = {
+                recurringGameId: rg.id,
+                recurringGameName: rg.displayName || rg.name || 'Unnamed',
+                entityId: rg.entityId,
+                entityName: entityNames[rg.entityId] || rg.entityId,
+                venueId: rg.venueId,
+                dayOfWeek: rg.dayOfWeek,
+                instanceDatesCreated: [],
+                gapsFound: 0,
+                existingFound: 0,
+            };
             
             // Calculate expected dates
             const expectedDates = getExpectedDates(rg, gameStartDate, endDate);
@@ -367,6 +420,7 @@ async function backfillRecurringGameInstances(input = {}) {
                     
                     if (instanceResult.Items && instanceResult.Items.length > 0) {
                         stats.existingInstancesFound++;
+                        gameDetail.existingFound++;
                         continue; // Instance already exists
                     }
                 } catch (queryError) {
@@ -378,6 +432,7 @@ async function backfillRecurringGameInstances(input = {}) {
                 stats.gapsFound++;
                 stats.byVenue[rg.venueId].gapsFound++;
                 stats.byEntity[rg.entityId].gapsFound++;
+                gameDetail.gapsFound++;
                 
                 if (!dryRun) {
                     try {
@@ -409,11 +464,13 @@ async function backfillRecurringGameInstances(input = {}) {
                         stats.byVenue[rg.venueId].instancesCreated++;
                         stats.byEntity[rg.entityId].instancesCreated++;
                         totalInstancesCreated++;
+                        gameDetail.instanceDatesCreated.push(expectedDate);
                         
                     } catch (putError) {
                         if (putError.name === 'ConditionalCheckFailedException') {
                             // Instance was created by another process - that's fine
                             stats.existingInstancesFound++;
+                            gameDetail.existingFound++;
                         } else {
                             console.error(`[backfillRecurringGameInstances] Error creating instance:`, putError);
                             stats.errors++;
@@ -425,7 +482,13 @@ async function backfillRecurringGameInstances(input = {}) {
                     stats.byVenue[rg.venueId].instancesCreated++;
                     stats.byEntity[rg.entityId].instancesCreated++;
                     totalInstancesCreated++;
+                    gameDetail.instanceDatesCreated.push(expectedDate);
                 }
+            }
+            
+            // Add game detail to stats (only if instances were created)
+            if (gameDetail.instanceDatesCreated.length > 0) {
+                stats.gameDetails.push(gameDetail);
             }
         }
         
@@ -456,26 +519,137 @@ async function backfillRecurringGameInstances(input = {}) {
 /**
  * Handle EventBridge scheduled event
  * Runs backfill for all recurring games with backfillGameInstance=true
+ * Sends SES notification on completion
  */
 async function handleScheduledBackfill(event) {
     console.log('[handleScheduledBackfill] Triggered by EventBridge:', JSON.stringify(event));
     
-    // Run full backfill with defaults (only processes games with backfillGameInstance=true)
-    const result = await backfillRecurringGameInstances({
-        dryRun: false,
-    });
+    const startTime = Date.now();
+    let result = null;
+    let error = null;
     
-    // Log summary for CloudWatch
-    console.log('[handleScheduledBackfill] Summary:', {
-        success: result.success,
-        recurringGamesProcessed: result.recurringGamesProcessed,
-        recurringGamesNotEligible: result.recurringGamesNotEligible,
-        gapsFound: result.gapsFound,
-        instancesCreated: result.instancesCreated,
-        errors: result.errors,
-    });
+    try {
+        // Run full backfill with defaults (only processes games with backfillGameInstance=true)
+        result = await backfillRecurringGameInstances({
+            dryRun: false,
+        });
+        
+        // Log summary for CloudWatch
+        console.log('[handleScheduledBackfill] Summary:', {
+            success: result.success,
+            recurringGamesProcessed: result.recurringGamesProcessed,
+            recurringGamesNotEligible: result.recurringGamesNotEligible,
+            gapsFound: result.gapsFound,
+            instancesCreated: result.instancesCreated,
+            errors: result.errors,
+        });
+        
+    } catch (err) {
+        console.error('[handleScheduledBackfill] Error:', err);
+        error = err;
+        result = {
+            success: false,
+            error: err.message,
+            recurringGamesProcessed: 0,
+            instancesCreated: 0,
+            gapsFound: 0,
+            errors: 1,
+        };
+    }
+    
+    const durationMs = Date.now() - startTime;
+    
+    // Send SES notification
+    if (sendNotification) {
+        try {
+            // Build venue breakdown for email
+            const venueBreakdown = result.byVenue ? Object.entries(result.byVenue)
+                .filter(([_, v]) => v.instancesCreated > 0)
+                .map(([venueId, v]) => `${venueId}: ${v.instancesCreated} created`)
+                .slice(0, 10) : [];
+            
+            // Format per-game details for email
+            const gameDetails = result.gameDetails || [];
+            const formattedGameDetails = gameDetails.length > 0 
+                ? formatGameDetailsForEmail(gameDetails)
+                : null;
+            
+            await sendNotification({
+                lambdaName: 'recurringGameBackfill',
+                status: result.success ? 'success' : 'failure',
+                triggerSource: 'EVENTBRIDGE',
+                durationMs,
+                error: error ? error.message : (result.error || null),
+                summary: {
+                    recurringGamesProcessed: result.recurringGamesProcessed || 0,
+                    recurringGamesSkipped: result.recurringGamesSkipped || 0,
+                    totalExpectedInstances: result.totalExpectedInstances || 0,
+                    existingInstancesFound: result.existingInstancesFound || 0,
+                    gapsFound: result.gapsFound || 0,
+                    instancesCreated: result.instancesCreated || 0,
+                    errors: result.errors || 0,
+                    endDate: result.endDate || 'N/A',
+                    message: result.message || '',
+                    ...(venueBreakdown.length > 0 && { venueBreakdown: venueBreakdown.join(', ') }),
+                },
+                // Pass formatted game details as custom section
+                customSections: formattedGameDetails ? [{
+                    title: `📅 INSTANCES CREATED BY GAME (${gameDetails.length})`,
+                    content: formattedGameDetails,
+                }] : null,
+            });
+            
+            console.log('[handleScheduledBackfill] SES notification sent');
+        } catch (notifyErr) {
+            // Don't fail the job if notification fails
+            console.error('[handleScheduledBackfill] Failed to send notification:', notifyErr);
+        }
+    }
     
     return result;
+}
+
+/**
+ * Format game details for email notification
+ * @param {Array} gameDetails - Array of game detail objects
+ * @returns {string} Formatted string for email
+ */
+function formatGameDetailsForEmail(gameDetails) {
+    if (!gameDetails || gameDetails.length === 0) return '';
+    
+    const lines = [];
+    
+    // Group by entity for cleaner display
+    const byEntity = {};
+    for (const game of gameDetails) {
+        const entityKey = game.entityName || game.entityId || 'Unknown Entity';
+        if (!byEntity[entityKey]) {
+            byEntity[entityKey] = [];
+        }
+        byEntity[entityKey].push(game);
+    }
+    
+    for (const [entityName, games] of Object.entries(byEntity)) {
+        lines.push(`\n  🏢 ${entityName}`);
+        lines.push('  ' + '─'.repeat(40));
+        
+        for (const game of games) {
+            const gameName = game.recurringGameName || 'Unnamed Game';
+            const dates = game.instanceDatesCreated || [];
+            
+            lines.push(`\n    🎮 ${gameName}`);
+            lines.push(`       Day: ${game.dayOfWeek || 'N/A'}`);
+            lines.push(`       Instances Created: ${dates.length}`);
+            
+            if (dates.length > 0) {
+                // Show dates - limit to 10, then summarize
+                const displayDates = dates.slice(0, 10);
+                lines.push(`       Dates: ${displayDates.join(', ')}${dates.length > 10 ? ` ... +${dates.length - 10} more` : ''}`);
+            }
+        }
+    }
+    
+    return lines.join('\n');
 }
 
 // ============================================================================
@@ -509,4 +683,5 @@ module.exports = {
     getExpectedDates,
     getWeekKey,
     isEligibleForBackfill,
+    formatGameDetailsForEmail,
 };

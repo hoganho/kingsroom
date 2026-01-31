@@ -1,5 +1,9 @@
 [
   {
+    "Action": ["ses:SendEmail", "ses:SendRawEmail"],
+    "Resource": ["arn:aws:ses:ap-southeast-2:*:identity/*"]
+  },
+  {
     "Action": [
       "dynamodb:GetItem",
       "dynamodb:PutItem",
@@ -21,6 +25,14 @@
       "arn:aws:dynamodb:*:*:table/Venue-*/index/*",
       "arn:aws:dynamodb:*:*:table/RecurringGameInstance-*",
       "arn:aws:dynamodb:*:*:table/RecurringGameInstance-*/index/*"
+    ]
+  },
+  {
+    "Action": [
+      "dynamodb:GetItem"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:*:*:table/Entity-*"
     ]
   },
   {
