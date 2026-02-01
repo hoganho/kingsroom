@@ -1,14 +1,18 @@
 /**
- * Data Fetcher (Improved v2)
+ * Data Fetcher (Improved v3)
  * ==========================
  * Fetches data from DynamoDB tables with automatic name resolution.
  * 
  * Key improvements:
- * - Snapshots enriched with venue/game names automatically
+ * - v3: Filters out INITIATING games from financial calculations
+ *       but tracks them as "games not run" for reporting
+ * - v2: Snapshots enriched with venue/game names automatically
  * - Schedule compliance data (cancelled games)
  * - Recurring game trend metrics (pre-calculated)
  * - Series lifecycle data (active/upcoming/completed)
  * - Competitor analysis (schedule clashes, market pressure)
+ * 
+ * @version 3.0.0
  */
 
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
@@ -36,8 +40,216 @@ const getTableName = (baseName) => {
 };
 
 /**
+ * Game statuses that indicate the game actually ran and has valid financial data.
+ * Games with these statuses should be included in financial calculations.
+ */
+const VALID_GAME_STATUSES = [
+  'FINISHED',      // Game completed normally
+  'RUNNING',       // Game in progress (has partial data)
+  'CLOCK_STOPPED', // Game paused but valid
+  'REGISTERING',   // Registration open, may have early data
+];
+
+/**
+ * Game statuses that indicate the game did NOT run.
+ * These should be excluded from financial calculations but tracked for reporting.
+ */
+const NON_RUN_GAME_STATUSES = [
+  'INITIATING',    // Created but never started - NO FINANCIAL IMPACT
+  'SCHEDULED',     // Scheduled but not yet started
+  'CANCELLED',     // Explicitly cancelled
+  'NOT_FOUND',     // Game couldn't be found/scraped
+  'NOT_PUBLISHED', // Not published to players
+];
+
+/**
+ * Filter snapshots to only include games that actually ran.
+ * Returns both valid snapshots and filtered-out games for reporting.
+ * 
+ * @param {Object[]} snapshots - Raw snapshots from DynamoDB
+ * @param {Date} periodEnd - End of the period (to determine if INITIATING is stale)
+ * @returns {{ validSnapshots: Object[], gamesNotRun: Object[] }}
+ */
+function filterSnapshotsByGameStatus(snapshots, periodEnd = new Date()) {
+  const validSnapshots = [];
+  const gamesNotRun = [];
+  
+  for (const snapshot of snapshots) {
+    const gameStatus = snapshot.gameStatus;
+    const gameDate = snapshot.gameStartDateTime ? new Date(snapshot.gameStartDateTime) : null;
+    
+    // If no status, assume valid (legacy data)
+    if (!gameStatus) {
+      validSnapshots.push(snapshot);
+      continue;
+    }
+    
+    // Check if game status indicates it ran
+    if (VALID_GAME_STATUSES.includes(gameStatus)) {
+      validSnapshots.push(snapshot);
+      continue;
+    }
+    
+    // INITIATING games in the past definitely didn't run
+    if (gameStatus === 'INITIATING') {
+      // If game date is in the past, it didn't run
+      if (gameDate && gameDate < periodEnd) {
+        gamesNotRun.push({
+          ...snapshot,
+          notRunReason: 'INITIATING_STALE',
+          notRunDescription: 'Game was created but never started'
+        });
+        continue;
+      }
+      // Future INITIATING games might still run - but shouldn't have financial data anyway
+      // Exclude from calculations but don't flag as "not run"
+      continue;
+    }
+    
+    // Other non-run statuses
+    if (NON_RUN_GAME_STATUSES.includes(gameStatus)) {
+      gamesNotRun.push({
+        ...snapshot,
+        notRunReason: gameStatus,
+        notRunDescription: getNotRunDescription(gameStatus)
+      });
+      continue;
+    }
+    
+    // Unknown status - include but log warning
+    console.warn(`Unknown game status: ${gameStatus} for game ${snapshot.gameId}`);
+    validSnapshots.push(snapshot);
+  }
+  
+  console.log(`Filtered snapshots: ${validSnapshots.length} valid, ${gamesNotRun.length} not run`);
+  
+  return { validSnapshots, gamesNotRun };
+}
+
+/**
+ * Get human-readable description for why a game didn't run.
+ */
+function getNotRunDescription(status) {
+  switch (status) {
+    case 'INITIATING':
+      return 'Game was created but never started';
+    case 'SCHEDULED':
+      return 'Game was scheduled but did not start';
+    case 'CANCELLED':
+      return 'Game was explicitly cancelled';
+    case 'NOT_FOUND':
+      return 'Game could not be found or scraped';
+    case 'NOT_PUBLISHED':
+      return 'Game was not published to players';
+    default:
+      return `Game status: ${status}`;
+  }
+}
+
+/**
+ * Summarize games that didn't run for reporting.
+ */
+function summarizeGamesNotRun(gamesNotRun) {
+  if (gamesNotRun.length === 0) {
+    return {
+      total: 0,
+      byReason: {},
+      byVenue: {},
+      byRecurringGame: {},
+      potentialLostRevenue: 0,
+      details: []
+    };
+  }
+  
+  const byReason = {};
+  const byVenue = {};
+  const byRecurringGame = {};
+  let potentialLostRevenue = 0;
+  
+  for (const game of gamesNotRun) {
+    // Count by reason
+    const reason = game.notRunReason || 'UNKNOWN';
+    byReason[reason] = (byReason[reason] || 0) + 1;
+    
+    // Count by venue
+    const venueId = game.venueId || 'unknown';
+    if (!byVenue[venueId]) {
+      byVenue[venueId] = {
+        venueId,
+        venueName: game.venueName || 'Unknown Venue',
+        count: 0,
+        games: []
+      };
+    }
+    byVenue[venueId].count++;
+    byVenue[venueId].games.push({
+      gameId: game.gameId,
+      gameName: game.gameName,
+      gameDate: game.gameStartDateTime,
+      reason: game.notRunReason
+    });
+    
+    // Count by recurring game
+    if (game.recurringGameId) {
+      const rgId = game.recurringGameId;
+      if (!byRecurringGame[rgId]) {
+        byRecurringGame[rgId] = {
+          recurringGameId: rgId,
+          recurringGameName: game.recurringGameName || game.gameName || 'Unknown',
+          venueId: game.venueId,
+          venueName: game.venueName,
+          count: 0,
+          instances: []
+        };
+      }
+      byRecurringGame[rgId].count++;
+      byRecurringGame[rgId].instances.push({
+        gameId: game.gameId,
+        gameDate: game.gameStartDateTime,
+        reason: game.notRunReason
+      });
+    }
+    
+    // Estimate potential lost revenue (if we have historical average)
+    // Note: This is a rough estimate based on guarantee amount
+    if (game.guaranteeAmount && game.guaranteeAmount > 0) {
+      // Assume typical rake coverage would have generated ~15% of guarantee in revenue
+      potentialLostRevenue += game.guaranteeAmount * 0.15;
+    }
+  }
+  
+  // Convert byVenue and byRecurringGame to arrays sorted by count
+  const venueList = Object.values(byVenue)
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 10);
+  
+  const recurringGameList = Object.values(byRecurringGame)
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 10);
+  
+  return {
+    total: gamesNotRun.length,
+    byReason,
+    byVenue: venueList,
+    byRecurringGame: recurringGameList,
+    potentialLostRevenue: Math.round(potentialLostRevenue),
+    details: gamesNotRun.slice(0, 20).map(g => ({
+      gameId: g.gameId,
+      gameName: g.gameName,
+      venueName: g.venueName,
+      gameDate: g.gameStartDateTime,
+      reason: g.notRunReason,
+      description: g.notRunDescription,
+      // These would have been incorrect costs if included
+      wouldHaveReportedOverlay: g.totalGuaranteeOverlayCost || 0,
+      wouldHaveReportedLoss: g.netProfit < 0 ? g.netProfit : 0
+    }))
+  };
+}
+
+/**
  * Fetch GameFinancialSnapshots for a period WITH NAME RESOLUTION.
- * This is the primary method - use this instead of raw fetches.
+ * Automatically filters out games that didn't actually run (INITIATING, etc.)
  * 
  * GSI: byEntityGameFinancialSnapshot (entityId, gameStartDateTime)
  * 
@@ -45,11 +257,11 @@ const getTableName = (baseName) => {
  * @param {Date} periodStart 
  * @param {Date} periodEnd 
  * @param {boolean} enrichNames - Whether to resolve venue/game names (default: true)
- * @returns {Object[]} Array of enriched snapshots
+ * @returns {Object} { snapshots, gamesNotRun, gamesNotRunSummary }
  */
 async function fetchSnapshotsForPeriod(entityId, periodStart, periodEnd, enrichNames = true) {
   const tableName = getTableName('GameFinancialSnapshot');
-  const snapshots = [];
+  const rawSnapshots = [];
   let lastEvaluatedKey = undefined;
   
   console.log(`Fetching snapshots for entity ${entityId} from ${periodStart.toISOString()} to ${periodEnd.toISOString()}`);
@@ -69,23 +281,50 @@ async function fetchSnapshotsForPeriod(entityId, periodStart, periodEnd, enrichN
       }));
       
       if (result.Items) {
-        snapshots.push(...result.Items);
+        rawSnapshots.push(...result.Items);
       }
       lastEvaluatedKey = result.LastEvaluatedKey;
     } while (lastEvaluatedKey);
     
-    console.log(`Found ${snapshots.length} raw snapshots`);
+    console.log(`Found ${rawSnapshots.length} raw snapshots`);
   } catch (error) {
     console.error('GameFinancialSnapshot fetch failed:', error.message);
     throw error; // Re-throw - snapshots are critical
   }
   
+  // Filter out games that didn't run
+  const { validSnapshots, gamesNotRun } = filterSnapshotsByGameStatus(rawSnapshots, periodEnd);
+  
   // Enrich with names if requested
-  if (enrichNames && snapshots.length > 0) {
-    return await enrichSnapshotsWithNames(snapshots);
+  let enrichedSnapshots = validSnapshots;
+  let enrichedGamesNotRun = gamesNotRun;
+  
+  if (enrichNames && (validSnapshots.length > 0 || gamesNotRun.length > 0)) {
+    // Enrich both valid and not-run games with names for reporting
+    const allToEnrich = [...validSnapshots, ...gamesNotRun];
+    const enrichedAll = await enrichSnapshotsWithNames(allToEnrich);
+    
+    // Split back into valid and not-run
+    enrichedSnapshots = enrichedAll.slice(0, validSnapshots.length);
+    enrichedGamesNotRun = enrichedAll.slice(validSnapshots.length).map((g, i) => ({
+      ...g,
+      notRunReason: gamesNotRun[i].notRunReason,
+      notRunDescription: gamesNotRun[i].notRunDescription
+    }));
   }
   
-  return snapshots;
+  // Generate summary for not-run games
+  const gamesNotRunSummary = summarizeGamesNotRun(enrichedGamesNotRun);
+  
+  if (gamesNotRun.length > 0) {
+    console.log(`Games not run: ${gamesNotRun.length} (${Object.entries(gamesNotRunSummary.byReason).map(([k, v]) => `${k}: ${v}`).join(', ')})`);
+  }
+  
+  return {
+    snapshots: enrichedSnapshots,
+    gamesNotRun: enrichedGamesNotRun,
+    gamesNotRunSummary
+  };
 }
 
 /**
@@ -274,6 +513,9 @@ async function fetchSocialData(entityId, periodStart, periodEnd) {
  * Fetch all data needed for a MetricsPack in one call.
  * This orchestrates all the individual fetchers and handles name resolution.
  * 
+ * IMPORTANT: This now automatically filters out INITIATING games from financial
+ * calculations but tracks them separately for operational reporting.
+ * 
  * @param {string} entityId 
  * @param {Date} periodStart 
  * @param {Date} periodEnd 
@@ -291,19 +533,31 @@ async function fetchAllPackData(entityId, periodStart, periodEnd, compPeriodStar
     businessLocation = null // For competitor analysis scope
   } = options;
   
-  console.log('=== Fetching all pack data (v2) ===');
+  console.log('=== Fetching all pack data (v3 - with INITIATING filter) ===');
   const startTime = Date.now();
   
-  // Fetch current period snapshots with name resolution
-  const snapshots = await fetchSnapshotsForPeriod(entityId, periodStart, periodEnd, true);
+  // Fetch current period snapshots with name resolution AND filtering
+  const currentPeriodData = await fetchSnapshotsForPeriod(entityId, periodStart, periodEnd, true);
+  const { snapshots, gamesNotRun, gamesNotRunSummary } = currentPeriodData;
   
   // Build venue lookup from enriched snapshots (for reuse)
   const venueLookup = buildVenueLookupFromSnapshots(snapshots);
   
-  // Fetch comparison period snapshots (also with names)
+  // Also add venue names from games not run (they have valid venue info)
+  for (const g of gamesNotRun) {
+    if (g.venueId && g.venueName) {
+      venueLookup.set(g.venueId, g.venueName);
+    }
+  }
+  
+  // Fetch comparison period snapshots (also with filtering)
   let compSnapshots = [];
+  let compGamesNotRun = [];
   if (compPeriodStart && compPeriodEnd) {
-    compSnapshots = await fetchSnapshotsForPeriod(entityId, compPeriodStart, compPeriodEnd, true);
+    const compData = await fetchSnapshotsForPeriod(entityId, compPeriodStart, compPeriodEnd, true);
+    compSnapshots = compData.snapshots;
+    compGamesNotRun = compData.gamesNotRun;
+    
     // Merge venue names into lookup
     for (const s of compSnapshots) {
       if (s.venueId && s.venueName) {
@@ -374,26 +628,38 @@ async function fetchAllPackData(entityId, periodStart, periodEnd, compPeriodStar
   }
   
   console.log(`=== All data fetched in ${Date.now() - startTime}ms ===`);
-  console.log(`Snapshots: ${snapshots.length} current, ${compSnapshots.length} comparison`);
+  console.log(`Snapshots: ${snapshots.length} valid, ${gamesNotRun.length} not run`);
+  console.log(`Comparison: ${compSnapshots.length} valid, ${compGamesNotRun.length} not run`);
   console.log(`Player data: ${playerData.entries.length} entries, ${playerData.results.length} results`);
   console.log(`Venues in lookup: ${venueLookup.size}`);
   console.log(`Enhanced modules: ${Object.keys(enhancedData).join(', ')}`);
   
   return {
+    // Valid snapshots only - these go into financial calculations
     snapshots,
     compSnapshots,
+    
+    // Games that didn't run - for operational reporting
+    gamesNotRun,
+    gamesNotRunSummary,
+    compGamesNotRun,
+    
+    // Other data
     venueMetrics,
     playerData,
     socialData,
     venueLookup,
-    // New enhanced data
+    
+    // Enhanced data modules
     scheduleCompliance: enhancedData.scheduleCompliance || null,
     recurringGameTrends: enhancedData.recurringGameTrends || null,
     seriesLifecycle: enhancedData.seriesLifecycle || null,
     competitorAnalysis: enhancedData.competitorAnalysis || null,
+    
     meta: {
       fetchDurationMs: Date.now() - startTime,
       snapshotCount: snapshots.length,
+      gamesNotRunCount: gamesNotRun.length,
       compSnapshotCount: compSnapshots.length,
       playerEntryCount: playerData.entries.length,
       playerResultCount: playerData.results.length,
@@ -407,5 +673,9 @@ module.exports = {
   fetchVenueMetrics,
   fetchPlayerData,
   fetchSocialData,
-  fetchAllPackData
+  fetchAllPackData,
+  filterSnapshotsByGameStatus,
+  summarizeGamesNotRun,
+  VALID_GAME_STATUSES,
+  NON_RUN_GAME_STATUSES
 };

@@ -1,9 +1,9 @@
 /**
- * metricsPackGenerator Lambda Function (Improved v2)
+ * metricsPackGenerator Lambda Function (Improved v3)
  * ===================================================
  * Generates deterministic MetricsPacks from GameFinancialSnapshot data.
  * 
- * KEY IMPROVEMENTS (v4.1.0):
+ * KEY IMPROVEMENTS (v4.2.0):
  * 1. Name Resolution - Venues and games are resolved to human-readable names
  * 2. Schedule Compliance - Includes cancelled/missed game analysis
  * 3. Recurring Game Trends - Per-game trending with brand strength
@@ -11,8 +11,11 @@
  * 5. Competitor Analysis - Schedule clashes, market pressure
  * 6. Opportunity Detection - Growth opportunities from data patterns
  * 7. FIXED: Date validation - Ensures periodStart/periodEnd are always valid ISO strings
+ * 8. NEW: Games Not Run - Tracks INITIATING/CANCELLED games separately (v4.2.0)
+ *    - These are excluded from financial calculations
+ *    - But tracked for operational reporting
  * 
- * @version 4.1.0
+ * @version 4.2.0
  */
 
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
@@ -188,7 +191,7 @@ async function handleDirectInvocation(event) {
 }
 
 // ===================================================================
-// GENERATE METRICS PACK (IMPROVED with name resolution)
+// GENERATE METRICS PACK (with name resolution, date validation, gamesNotRun)
 // ===================================================================
 
 async function handleGenerateMetricsPack(input) {
@@ -209,7 +212,7 @@ async function handleGenerateMetricsPack(input) {
     forceRegenerate 
   } = input;
   
-  console.log(`=== Generating MetricsPack ===`);
+  console.log(`=== Generating MetricsPack (v4.2.0) ===`);
   console.log(`Entity: ${entityId}, Type: ${reportType}`);
   
   // ===================================================================
@@ -313,9 +316,9 @@ async function handleGenerateMetricsPack(input) {
   }
   
   // ===================================================================
-  // FETCH DATA (with automatic name resolution and enhanced modules!)
+  // FETCH DATA (with automatic name resolution, filtering, and enhanced modules!)
   // ===================================================================
-  console.log('Fetching data with name resolution and enhanced modules...');
+  console.log('Fetching data with name resolution, INITIATING filter, and enhanced modules...');
   
   const packData = await fetchAllPackData(
     entityId, 
@@ -333,14 +336,18 @@ async function handleGenerateMetricsPack(input) {
   );
   
   const { 
-    snapshots, 
+    snapshots,           // Valid snapshots only (INITIATING filtered out)
     compSnapshots, 
     venueMetrics, 
     playerData, 
     socialData, 
     venueLookup, 
     meta,
-    // New enhanced data modules
+    // Games that didn't run (INITIATING, CANCELLED, etc.)
+    gamesNotRun,
+    gamesNotRunSummary,
+    compGamesNotRun,
+    // Enhanced data modules
     scheduleCompliance,
     recurringGameTrends,
     seriesLifecycle,
@@ -348,19 +355,24 @@ async function handleGenerateMetricsPack(input) {
   } = packData;
   
   console.log(`Data fetched in ${meta.fetchDurationMs}ms`);
-  console.log(`Snapshots: ${meta.snapshotCount} current, ${meta.compSnapshotCount} comparison`);
+  console.log(`Snapshots: ${meta.snapshotCount} valid, ${meta.gamesNotRunCount || 0} not run`);
+  console.log(`Comparison: ${meta.compSnapshotCount} valid`);
   
   if (snapshots.length === 0) {
     warnings.push('No game data found for this period');
+  }
+  
+  if (gamesNotRunSummary && gamesNotRunSummary.total > 0) {
+    warnings.push(`${gamesNotRunSummary.total} scheduled games did not run (excluded from financials)`);
   }
   
   // Get alert thresholds
   const thresholds = await getAlertThresholds(entityId);
   
   // ===================================================================
-  // CALCULATE METRICS
+  // CALCULATE METRICS (using only valid snapshots)
   // ===================================================================
-  console.log('Calculating KPIs...');
+  console.log('Calculating KPIs from valid games only...');
   
   const strategic = calculateStrategicKPIs({
     snapshots,
@@ -400,7 +412,7 @@ async function handleGenerateMetricsPack(input) {
         recurringGameData: recurringGameTrends,
         competitorData: competitorAnalysis,
         entityAverages: {
-          avgGamesPerVenue: strategic.totalGames / Math.max(venues.length, 1),
+          avgGamesPerVenue: strategic.totalGamesRun / Math.max(venues.length, 1),
           avgProfitPerGame: strategic.avgProfitPerGame
         }
       });
@@ -413,6 +425,7 @@ async function handleGenerateMetricsPack(input) {
   
   // Log enhanced data status
   console.log(`Enhanced data: schedule=${scheduleCompliance?.hasScheduleData}, trends=${recurringGameTrends?.hasRecurringGameData}, series=${seriesLifecycle?.hasSeriesData}, competitor=${competitorAnalysis?.hasCompetitorData}`);
+  console.log(`Games not run: ${gamesNotRunSummary?.total || 0}`);
   
   // ===================================================================
   // BUILD AND STORE PACK
@@ -447,7 +460,7 @@ async function handleGenerateMetricsPack(input) {
       : null,
     comparisonPeriodLabel: comparisonPeriod?.label || null,
     
-    // Main pack data - now with real names and enhanced analytics!
+    // Main pack data - now with real names, enhanced analytics, and gamesNotRun!
     packData: JSON.stringify({
       strategic,
       venues,
@@ -460,7 +473,9 @@ async function handleGenerateMetricsPack(input) {
       recurringGameTrends: recurringGameTrends || null,
       seriesLifecycle: seriesLifecycle || null,
       competitorAnalysis: competitorAnalysis || null,
-      opportunities: opportunities || null
+      opportunities: opportunities || null,
+      // NEW: Games that didn't run (for AI reporting)
+      gamesNotRun: gamesNotRunSummary || null
     }),
     
     socialPulseData: JSON.stringify(socialPulse),
@@ -469,9 +484,10 @@ async function handleGenerateMetricsPack(input) {
     generatedAt: new Date().toISOString(),
     generatedBy: 'LAMBDA',
     generationDurationMs: Date.now() - startTime,
-    version: 4, // Bumped version for enhanced format
+    version: 5, // Bumped version for gamesNotRun support
     snapshotsIncluded: snapshots.length,
     gamesIncluded: snapshots.length,
+    gamesNotRunCount: gamesNotRunSummary?.total || 0,
     venuesIncluded: venues.length,
     dataCompleteness: calculateDataCompleteness(snapshots, venues),
     enhancedModulesIncluded: meta.enhancedModules || [],
@@ -619,8 +635,11 @@ async function handlePreviewAlerts(entityId, reportType) {
   const now = new Date();
   const period = reportType === 'WEEKLY_OPS' ? getWeekBounds(now) : getMonthBounds(now);
   
-  // Fetch with name resolution
-  const snapshots = await fetchSnapshotsForPeriod(entityId, period.start, period.end, true);
+  // Fetch with name resolution and filtering
+  // Note: fetchSnapshotsForPeriod now returns { snapshots, gamesNotRun, gamesNotRunSummary }
+  const result = await fetchSnapshotsForPeriod(entityId, period.start, period.end, true);
+  const snapshots = result.snapshots || result; // Handle both old and new return formats
+  
   const venues = await calculateVenueBreakdown(entityId, snapshots, [], []);
   const thresholds = await getAlertThresholds(entityId);
   

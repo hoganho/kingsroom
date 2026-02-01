@@ -23,11 +23,17 @@ export const listMetricsPacksByEntity = /* GraphQL */ `
         reportType
         periodKey
         periodLabel
+        periodStart
+        periodEnd
         generatedAt
         snapshotsIncluded
         gamesIncluded
         venuesIncluded
         dataCompleteness
+        packData
+        version
+        createdAt
+        updatedAt
       }
       nextToken
     }
@@ -54,13 +60,18 @@ export const listDirectorReportsByEntity = /* GraphQL */ `
         entityId
         reportType
         periodKey
+        periodStart
+        periodEnd
         metricsPackId
         reportData
         status
+        statusMessage
         generatedAt
         modelName
         totalCost
         reportVersion
+        createdAt
+        updatedAt
       }
       nextToken
     }

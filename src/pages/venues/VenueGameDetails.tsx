@@ -1,7 +1,15 @@
 // src/pages/venues/VenueGameDetails.tsx
-// VERSION: 3.13.1 - Average Guarantee label fix
+// VERSION: 3.14.1 - TypeScript fixes
 //
 // CHANGELOG:
+// - v3.14.1: Fixed TypeScript errors
+//           - Removed unused variables (isUnknown, entityId)
+//           - Removed invalid 'description' prop from PageWrapper components
+// - v3.14.0: Refactored to use shared ProfitTrendChart from components/charts
+//           - Removed local PLChart component
+//           - Uses ProfitTrendChart, TrendBadge, TrendChartLegend from shared charts
+//           - Uses convertInstancesToChartData helper for data transformation
+//           - Chart now has better tooltip with date display
 // - v3.13.1: Changed "Typical Guarantee" to "Average Guarantee"
 //           - Always shows field with "N/A" if value is 0 or missing
 // - v3.13.0: P&L table column improvements
@@ -33,37 +41,6 @@
 //           - Single Y-axis (both bars and trendline use same scale)
 //           - Dashed line style for trendline
 //           - Simplified tooltip (no cumulative value)
-// - v3.9.1: Added PP-Disc (Prizepool Discrepancy) column
-//           - New column between PP and GTD in Game History P&L table
-//           - Shows GameFinancialSnapshot.prizepoolPaidDelta value
-//           - Tooltip: "Prizepool discrepancy between calculated for players and advertised"
-//           - Formatted as currency, hidden on smaller screens (lg:table-cell)
-// - v3.9.0: Income statement format for expanded row
-//           - 3-column layout: Revenue | Costs | Summary
-//           - Grouped costs: Staff, Prize/Guarantee, Operating
-//           - Clear calculation: Revenue - Costs = Net Profit
-//           - Per Player metrics section
-//           - Guarantee coverage section
-//           - Only shows line items with values > 0
-// - v3.8.1: Better responsive column handling
-//           - Added game status column with colored badges (INI, FIN, RUN, etc.)
-//           - Reduced row height and column padding
-//           - Responsive column hiding: Margin (sm+), Rev/Costs (md+), Buy-In/PP (lg+), GTD (xl+)
-//           - Smaller text on mobile screens
-// - v3.7.0: Added game status filter
-//           - Multi-select dropdown to filter by gameStatus
-//           - Grays out statuses not present in data
-//           - Auto-selects available statuses by default
-// - v3.6.0: Chart & table improvements
-//           - New combo chart: bars for per-game P/L, line for cumulative P/L
-//           - Table columns reordered: Date, P/L, Margin, Rev, Costs, Buy-In, PP, GTD
-//           - Removed Status icon column and ID column
-//           - Tournament ID now shows in expanded section next to game name
-// - v3.5.0: UX improvements (row click expands, link icon for navigation)
-// - v3.4.0: UI improvements (status icons, date format, column names)
-// - v3.3.0: Removed FE calculations, relies on GameFinancialSnapshot only
-// - v3.1.0: Optimized single-query loading via nested relationships
-// - v3.0.0: BREAKING - Now queries RecurringGameInstance table
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
@@ -82,17 +59,6 @@ import {
   FunnelIcon,
 } from '@heroicons/react/24/outline';
 import { format, parseISO } from 'date-fns';
-import {
-  ComposedChart,
-  Area,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  ReferenceLine,
-} from 'recharts';
 
 import { PageWrapper } from '../../components/layout/PageWrapper';
 import { MultiEntitySelector } from '../../components/entities/MultiEntitySelector';
@@ -100,14 +66,16 @@ import { useEntity } from '../../contexts/EntityContext';
 import { getClient } from '../../utils/apiClient';
 import { MetricCard } from '../../components/ui/MetricCard';
 import { TimeRangeToggle } from '../../components/ui/TimeRangeToggle';
+import { IncomeStatement } from '../../components/financial';
+
+// Import shared chart components
 import { 
+  ProfitTrendChart,
   TrendBadge, 
   TrendChartLegend, 
   TrendInfo, 
-  calculateTrendInfo, 
-  calculateLinearRegression 
-} from '../../components/ui/TrendBadge';
-import { IncomeStatement } from '../../components/financial';
+  ProfitDataPoint,
+} from '../../components/charts';
 
 // ---- Time range utilities ----
 
@@ -548,6 +516,41 @@ function buildSummaryStats(enrichedInstances: EnrichedInstance[]): SummaryStats 
   };
 }
 
+// ---- Convert Instances to Chart Data ----
+// Helper function to convert EnrichedInstance[] to ProfitDataPoint[]
+function convertInstancesToChartData(instances: EnrichedInstance[]): ProfitDataPoint[] {
+  // Sort by date (oldest first for left-to-right timeline)
+  const sorted = [...instances].sort((a, b) => {
+    const dateA = a.instance.expectedDate || '';
+    const dateB = b.instance.expectedDate || '';
+    return dateA.localeCompare(dateB);
+  });
+
+  return sorted.map((inst) => {
+    const hasData = inst.instance.status === 'CONFIRMED' && inst.game && inst.financialSnapshot;
+    const profit = hasData ? (inst.financialSnapshot?.netProfit ?? 0) : null;
+    const isMissing = inst.instance.status !== 'CONFIRMED' || !inst.game;
+    
+    let displayDate = '';
+    try {
+      if (inst.instance.expectedDate) {
+        displayDate = format(parseISO(inst.instance.expectedDate), 'dd MMM');
+      }
+    } catch {
+      displayDate = '';
+    }
+
+    return {
+      id: inst.instance.id,
+      date: displayDate,
+      fullDate: inst.instance.expectedDate,
+      profit,
+      isMissing,
+      status: inst.instance.status || inst.game?.gameStatus,
+    };
+  });
+}
+
 // ---- Game Status Multi-Select Component ----
 
 interface GameStatusMultiSelectProps {
@@ -705,150 +708,6 @@ const GameStatusMultiSelect: React.FC<GameStatusMultiSelectProps> = ({
   );
 };
 
-// ---- P/L Chart Component (Area + Trendline) ----
-
-interface PLChartProps {
-  instances: EnrichedInstance[];
-  onTrendCalculated?: (trendInfo: TrendInfo) => void;
-}
-
-const PLChart: React.FC<PLChartProps> = ({ instances, onTrendCalculated }) => {
-  // Sort by date (oldest first for left-to-right timeline)
-  const { chartData, trendInfo } = useMemo(() => {
-    const sorted = [...instances].sort((a, b) => {
-      const dateA = a.instance.expectedDate || '';
-      const dateB = b.instance.expectedDate || '';
-      return dateA.localeCompare(dateB);
-    });
-
-    // First pass: collect profit data points for regression
-    const profitPoints: { x: number; y: number }[] = [];
-    const baseData = sorted.map((inst, index) => {
-      const hasData = inst.instance.status === 'CONFIRMED' && inst.game && inst.financialSnapshot;
-      const profit = hasData ? (inst.financialSnapshot?.netProfit ?? 0) : 0;
-      const isMissing = inst.instance.status !== 'CONFIRMED' || !inst.game;
-      
-      if (!isMissing) {
-        profitPoints.push({ x: index, y: profit });
-      }
-      
-      let displayDate = '';
-      try {
-        if (inst.instance.expectedDate) {
-          displayDate = format(parseISO(inst.instance.expectedDate), 'dd MMM');
-        }
-      } catch {
-        displayDate = '';
-      }
-      
-      return {
-        id: inst.instance.id,
-        date: displayDate,
-        fullDate: inst.instance.expectedDate,
-        profit: isMissing ? null : profit,
-        isMissing,
-        status: inst.instance.status,
-        index,
-      };
-    });
-
-    // Calculate linear regression and trend info
-    const { slope, intercept } = calculateLinearRegression(profitPoints);
-    const trendInfo = calculateTrendInfo(profitPoints);
-    
-    // Second pass: add trendline values
-    const chartData = baseData.map(item => ({
-      ...item,
-      trendline: slope * item.index + intercept,
-    }));
-
-    return { chartData, trendInfo };
-  }, [instances]);
-
-  // Notify parent of trend calculation
-  useEffect(() => {
-    if (onTrendCalculated) {
-      onTrendCalculated(trendInfo);
-    }
-  }, [trendInfo, onTrendCalculated]);
-
-  if (chartData.length === 0) {
-    return (
-      <div className="flex items-center justify-center h-48 text-gray-400">
-        No data available
-      </div>
-    );
-  }
-
-  // Custom tooltip
-  const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      const data = payload[0]?.payload;
-      return (
-        <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-3 text-sm">
-          <p className="font-medium text-gray-700 mb-1">{data?.fullDate ? format(parseISO(data.fullDate), 'dd MMM yyyy') : label}</p>
-          {data?.isMissing ? (
-            <p className="text-gray-400">No data</p>
-          ) : (
-            <p className={`${data?.profit >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
-              P/L: {formatCurrency(data?.profit)}
-            </p>
-          )}
-        </div>
-      );
-    }
-    return null;
-  };
-
-  return (
-    <ResponsiveContainer width="100%" height={200}>
-      <ComposedChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-        <defs>
-          <linearGradient id="profitGradientGameDetails" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
-            <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
-          </linearGradient>
-        </defs>
-        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-        <XAxis 
-          dataKey="date" 
-          tick={{ fontSize: 11 }} 
-          stroke="#9ca3af"
-          interval="preserveStartEnd"
-        />
-        <YAxis 
-          tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`}
-          tick={{ fontSize: 11 }} 
-          stroke="#9ca3af"
-        />
-        <Tooltip content={<CustomTooltip />} />
-        <ReferenceLine y={0} stroke="#9ca3af" strokeDasharray="3 3" />
-        
-        {/* Area for profit */}
-        <Area
-          type="monotone"
-          dataKey="profit"
-          stroke="#6366f1"
-          strokeWidth={2}
-          fill="url(#profitGradientGameDetails)"
-          connectNulls={false}
-        />
-        
-        {/* Trendline */}
-        <Line 
-          type="linear" 
-          dataKey="trendline" 
-          stroke="#10b981" 
-          strokeWidth={2}
-          strokeDasharray="5 5"
-          dot={false}
-          activeDot={false}
-        />
-      </ComposedChart>
-    </ResponsiveContainer>
-  );
-};
-
 // ---- Game Type Filter Dropdown ----
 
 interface GameTypeFilterProps {
@@ -929,7 +788,7 @@ const GameTypeFilter: React.FC<GameTypeFilterProps> = ({ selectedTypes, onToggle
   );
 };
 
-// ---- Profit Trend Chart Section with Badge ----
+// ---- Profit Trend Chart Section with Badge (using shared component) ----
 
 interface ProfitTrendChartSectionProps {
   instances: EnrichedInstance[];
@@ -946,6 +805,9 @@ const ProfitTrendChartSection: React.FC<ProfitTrendChartSectionProps> = ({
 }) => {
   const [trendInfo, setTrendInfo] = useState<TrendInfo | null>(null);
 
+  // Convert instances to chart data format
+  const chartData = useMemo(() => convertInstancesToChartData(instances), [instances]);
+
   return (
     <Card className="mb-6">
       <div className="flex items-center justify-between mb-3">
@@ -960,7 +822,18 @@ const ProfitTrendChartSection: React.FC<ProfitTrendChartSectionProps> = ({
         </div>
         <TrendChartLegend />
       </div>
-      <PLChart instances={instances} onTrendCalculated={setTrendInfo} />
+      {chartData.length > 0 ? (
+        <ProfitTrendChart 
+          data={chartData} 
+          onTrendCalculated={setTrendInfo}
+          height={200}
+          gradientId="venueGameDetailsProfitGradient"
+        />
+      ) : (
+        <div className="flex items-center justify-center h-48 text-gray-400">
+          No data available
+        </div>
+      )}
     </Card>
   );
 };
@@ -977,7 +850,6 @@ const PLRow: React.FC<PLRowProps> = ({ enrichedInstance, onNavigateToGame }) => 
   const { instance, game, financialSnapshot } = enrichedInstance;
   
   const isConfirmed = instance.status === 'CONFIRMED';
-  const isUnknown = instance.status === 'UNKNOWN' || instance.status === 'NO_SHOW';
   const hasData = isConfirmed && game;
   const hasFinancials = hasData && financialSnapshot;
 
@@ -1000,178 +872,112 @@ const PLRow: React.FC<PLRowProps> = ({ enrichedInstance, onNavigateToGame }) => 
   let displayDate = '-';
   try {
     if (instance.expectedDate) {
-      displayDate = format(parseISO(instance.expectedDate), 'dd-MMM-yy');
+      displayDate = format(parseISO(instance.expectedDate), 'dd MMM yy');
     }
   } catch {
     displayDate = instance.expectedDate || '-';
   }
 
-  // Use snapshot values directly
-  const totalRevenue = financialSnapshot?.totalRevenue ?? 0;
-  const totalCost = financialSnapshot?.totalCost ?? 0;
-  const netProfit = financialSnapshot?.netProfit ?? 0;
-  const profitMargin = financialSnapshot?.profitMargin ?? null;
-
-  // Determine profit/loss color
-  const profitColorClass = netProfit >= 0 ? 'text-blue-600' : 'text-red-600';
-  const marginColorClass = profitMargin !== null && profitMargin >= 0 ? 'text-blue-600' : 'text-red-600';
+  // Calculate values
+  const profit = financialSnapshot?.netProfit ?? 0;
+  const profitColor = profit >= 0 ? 'text-blue-600' : 'text-red-600';
+  const marginColor = (financialSnapshot?.profitMargin ?? 0) >= 0 ? 'text-blue-600' : 'text-red-600';
+  
+  // Format buy-in with rake
+  const formatBuyInWithRake = () => {
+    const buyIn = game?.buyIn ?? 0;
+    const rake = game?.rake ?? 0;
+    if (buyIn === 0) return '-';
+    if (rake === 0) return formatCurrency(buyIn);
+    return `${formatCurrency(buyIn)} (+${formatCurrency(rake)})`;
+  };
 
   return (
     <>
-      {/* Main Row */}
-      <tr
-        className={`
-          border-b border-gray-100 transition-colors
-          ${hasData ? 'hover:bg-gray-50 cursor-pointer' : 'bg-gray-50/50'}
-          ${isExpanded ? 'bg-blue-50/30' : ''}
-        `}
+      <tr 
+        className={`hover:bg-gray-50 cursor-pointer border-b border-gray-100 ${!hasData ? 'bg-gray-50/50' : ''}`}
         onClick={handleRowClick}
       >
-        {/* Expand Toggle */}
-        <td className="pl-2 pr-0 py-1 w-5">
-          {hasData && (
-            <span>
-              {isExpanded ? (
-                <ChevronDownIcon className="h-3.5 w-3.5 text-gray-500" />
-              ) : (
-                <ChevronRightIcon className="h-3.5 w-3.5 text-gray-400" />
-              )}
-            </span>
-          )}
-        </td>
-
-        {/* Date */}
-        <td className="px-1 py-1 whitespace-nowrap">
-          <div className="flex items-center gap-0.5">
-            <span className={`text-xs ${!hasData ? 'text-gray-400' : 'font-medium text-gray-900'}`}>
-              {displayDate}
-            </span>
-            {isUnknown && (
-              <ExclamationTriangleIcon className="h-3 w-3 text-amber-500 flex-shrink-0" title="Needs review" />
-            )}
-          </div>
-        </td>
-
-        {/* Status Badge */}
-        <td className="px-1 py-1">
-          <GameStatusBadge status={game?.gameStatus} />
-        </td>
-
-        {/* P/L */}
-        <td className="px-1 py-1 text-xs text-right whitespace-nowrap">
-          {hasFinancials ? (
-            <span className={`font-medium ${profitColorClass}`}>
-              {formatCurrency(netProfit)}
-            </span>
+        <td className="pl-2 pr-0 py-1.5 w-5">
+          {hasData ? (
+            isExpanded ? (
+              <ChevronDownIcon className="w-4 h-4 text-gray-400" />
+            ) : (
+              <ChevronRightIcon className="w-4 h-4 text-gray-400" />
+            )
           ) : (
-            <span className="text-gray-400">-</span>
+            <span className="w-4 h-4 inline-block" />
           )}
         </td>
-
-        {/* Margin */}
-        <td className="px-1 py-1 text-xs text-right whitespace-nowrap">
-          {hasFinancials && profitMargin !== null ? (
-            <span className={marginColorClass}>
-              {(profitMargin * 100).toFixed(0)}%
-            </span>
-          ) : (
-            <span className="text-gray-400">-</span>
-          )}
+        <td className="px-1 py-1.5 text-xs text-gray-600 whitespace-nowrap">{displayDate}</td>
+        <td className="px-1 py-1.5">
+          <GameStatusBadge status={hasData ? game?.gameStatus : instance.status} />
         </td>
-
-        {/* Revenue */}
-        <td className="px-1 py-1 text-xs text-right whitespace-nowrap hidden sm:table-cell">
-          {hasFinancials ? (
-            <span className="text-emerald-600">{formatCurrency(totalRevenue)}</span>
-          ) : (
-            <span className="text-gray-400">-</span>
-          )}
+        <td className={`px-1 py-1.5 text-xs text-right font-semibold whitespace-nowrap ${profitColor}`}>
+          {hasFinancials ? formatCurrency(profit) : '-'}
         </td>
-
-        {/* Costs */}
-        <td className="px-1 py-1 text-xs text-right whitespace-nowrap hidden sm:table-cell">
-          {hasFinancials ? (
-            <span className="text-red-600">{formatCurrency(totalCost)}</span>
-          ) : (
-            <span className="text-gray-400">-</span>
-          )}
-        </td>
-
-        {/* Guarantee - moved after Costs */}
-        <td className="px-1 py-1 text-xs text-right text-gray-700 whitespace-nowrap hidden xl:table-cell">
-          {hasData && game?.hasGuarantee && game?.guaranteeAmount
-            ? formatCurrency(game.guaranteeAmount)
+        <td className={`px-1 py-1.5 text-xs text-right whitespace-nowrap ${marginColor}`}>
+          {hasFinancials && financialSnapshot?.profitMargin != null 
+            ? `${financialSnapshot.profitMargin.toFixed(0)}%` 
             : '-'}
         </td>
-
-        {/* Buy-In - shows base (+rake) format */}
-        <td className="px-1 py-1 text-xs text-right text-gray-700 whitespace-nowrap hidden lg:table-cell">
-          {hasData && game?.buyIn ? (
-            game?.rake && game.rake > 0 ? (
-              <span>
-                {formatCurrency(game.buyIn - game.rake)}
-                <span className="text-gray-400 ml-0.5">(+{formatCurrency(game.rake)})</span>
-              </span>
-            ) : (
-              formatCurrency(game.buyIn)
-            )
-          ) : '-'}
+        <td className="px-1 py-1.5 text-xs text-right text-emerald-600 whitespace-nowrap hidden sm:table-cell">
+          {hasFinancials ? formatCurrency(financialSnapshot?.totalRevenue) : '-'}
         </td>
-
-        {/* Unique Players / Total Entries */}
-        <td className="px-1 py-1 text-xs text-right text-gray-700 whitespace-nowrap hidden lg:table-cell">
-          {hasData && (game?.totalUniquePlayers != null || game?.totalEntries != null) ? (
-            <span>{game?.totalUniquePlayers ?? 0}/{game?.totalEntries ?? 0}</span>
-          ) : '-'}
+        <td className="px-1 py-1.5 text-xs text-right text-red-600 whitespace-nowrap hidden sm:table-cell">
+          {hasFinancials ? formatCurrency(financialSnapshot?.totalCost) : '-'}
         </td>
-
-        {/* Prizepool */}
-        <td className="px-1 py-1 text-xs text-right text-gray-700 whitespace-nowrap hidden lg:table-cell">
-          {hasData && game?.prizepoolPaid ? formatCurrency(game.prizepoolPaid) : '-'}
+        <td className="px-1 py-1.5 text-xs text-right whitespace-nowrap hidden xl:table-cell">
+          {hasData && game?.guaranteeAmount ? formatCurrency(game.guaranteeAmount) : '-'}
         </td>
-
-        {/* Prizepool Delta */}
-        <td className="px-1 py-1 text-xs text-right text-gray-700 whitespace-nowrap hidden lg:table-cell pr-2">
-          {hasFinancials && financialSnapshot?.prizepoolPaidDelta != null 
+        <td className="px-1 py-1.5 text-xs text-right whitespace-nowrap hidden lg:table-cell">
+          {hasData ? formatBuyInWithRake() : '-'}
+        </td>
+        <td className="px-1 py-1.5 text-xs text-right whitespace-nowrap hidden lg:table-cell" title="Unique Players / Total Entries">
+          {hasData ? `${game?.totalUniquePlayers ?? 0}/${game?.totalEntries ?? 0}` : '-'}
+        </td>
+        <td className="px-1 py-1.5 text-xs text-right whitespace-nowrap hidden lg:table-cell">
+          {hasFinancials ? formatCurrency(financialSnapshot?.prizepoolTotal) : '-'}
+        </td>
+        <td className="px-1 py-1.5 text-xs text-right whitespace-nowrap hidden lg:table-cell pr-2" title="Prizepool discrepancy">
+          {hasFinancials && financialSnapshot?.prizepoolPaidDelta !== null && financialSnapshot?.prizepoolPaidDelta !== undefined
             ? formatCurrency(financialSnapshot.prizepoolPaidDelta) 
             : '-'}
         </td>
       </tr>
 
-      {/* Expanded Details Row - Income Statement Format */}
+      {/* Expanded Details Row */}
       {isExpanded && hasData && (
-        <tr className="bg-slate-50/80 border-b border-gray-200">
-          <td colSpan={12} className="px-3 py-3">
-            {/* Header: Game Info */}
-            <div className="flex items-start justify-between mb-3 pb-2 border-b border-gray-200">
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="font-semibold text-gray-900">{game?.name || 'Unnamed Game'}</span>
-                  <button
-                    onClick={handleNavigateToGame}
-                    className="p-0.5 text-indigo-500 hover:text-indigo-700 hover:bg-indigo-50 rounded"
-                    title="View game details"
-                  >
-                    <ArrowTopRightOnSquareIcon className="h-3.5 w-3.5" />
-                  </button>
-                </div>
-                {game?.tournamentId && (
-                  <span className="text-xs text-gray-400">ID: {game.tournamentId}</span>
-                )}
+        <tr className="bg-gray-50">
+          <td colSpan={12} className="px-4 py-3">
+            {/* Header with game name and navigate button */}
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium text-gray-900">{game?.name || 'Unknown Game'}</span>
+                <button
+                  onClick={handleNavigateToGame}
+                  className="p-0.5 text-indigo-500 hover:text-indigo-700 hover:bg-indigo-50 rounded"
+                  title="View game details"
+                >
+                  <ArrowTopRightOnSquareIcon className="h-3.5 w-3.5" />
+                </button>
               </div>
-              <div className="text-right text-xs text-gray-500">
-                <div>{game?.totalEntries ?? 0} entries ({game?.totalUniquePlayers ?? 0} unique)</div>
-                {(game?.totalRebuys || game?.totalAddons) ? (
-                  <div>{game?.totalRebuys ?? 0} rebuys • {game?.totalAddons ?? 0} add-ons</div>
-                ) : null}
-              </div>
+              {game?.tournamentId && (
+                <span className="text-xs text-gray-400">ID: {game.tournamentId}</span>
+              )}
+            </div>
+            <div className="text-right text-xs text-gray-500">
+              <div>{game?.totalEntries ?? 0} entries ({game?.totalUniquePlayers ?? 0} unique)</div>
+              {(game?.totalRebuys || game?.totalAddons) ? (
+                <div>{game?.totalRebuys ?? 0} rebuys • {game?.totalAddons ?? 0} add-ons</div>
+              ) : null}
             </div>
 
             {/* Income Statement Grid */}
             <IncomeStatement
-                game={game}
-                financialSnapshot={financialSnapshot}
-                showSupplementary={false}
+              game={game}
+              financialSnapshot={financialSnapshot}
+              showSupplementary={false}
             />
 
             {/* Notes */}
@@ -1193,9 +999,8 @@ const PLRow: React.FC<PLRowProps> = ({ enrichedInstance, onNavigateToGame }) => 
 export const VenueGameDetails: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { selectedEntities, entities, loading: entityLoading } = useEntity();
+  const { entities, loading: entityLoading } = useEntity();
 
-  const entityId: string | undefined = selectedEntities[0]?.id;
   const showEntitySelector = entities && entities.length > 1;
 
   const venueId = searchParams.get('venueId') || '';
@@ -1385,47 +1190,25 @@ export const VenueGameDetails: React.FC = () => {
       } while (nextToken);
 
       console.log(`[VenueGameDetails] Loaded ${allInstances.length} instances for recurring game "${recurringGameId}"`);
-      
-      // Debug: Log status distribution
-      const statusCounts = allInstances.reduce((acc, inst) => {
-        acc[inst.status] = (acc[inst.status] || 0) + 1;
-        return acc;
-      }, {} as Record<string, number>);
-      console.log(`[VenueGameDetails] Instance status distribution:`, statusCounts);
 
-      // Check how many have nested game data
-      const withGameData = allInstances.filter(i => i.game).length;
-      const withFinancials = allInstances.filter(i => i.game?.gameFinancialSnapshot).length;
-      console.log(`[VenueGameDetails] Instances with game data: ${withGameData}, with financials: ${withFinancials}`);
+      // Enrich instances with game and financial snapshot data
+      const enriched: EnrichedInstance[] = allInstances.map((instance) => ({
+        instance,
+        game: instance.game || null,
+        financialSnapshot: instance.game?.gameFinancialSnapshot || null,
+      }));
 
-      // 4) Build enriched instances from nested data
-      const enriched: EnrichedInstance[] = allInstances
-        .filter(instance => {
-          // Exclude series games
-          if (instance.game?.isSeries) {
-            return false;
-          }
-          return true;
-        })
-        .map(instance => ({
-          instance,
-          game: instance.game || null,
-          financialSnapshot: instance.game?.gameFinancialSnapshot || null,
-        }));
-
-      console.log(`[VenueGameDetails] Built ${enriched.length} enriched rows`);
-
-      // Sort by expectedDate descending
+      // Sort by expected date (most recent first)
       enriched.sort((a, b) => {
-        const dateA = a.instance.expectedDate ? new Date(a.instance.expectedDate).getTime() : 0;
-        const dateB = b.instance.expectedDate ? new Date(b.instance.expectedDate).getTime() : 0;
-        return dateB - dateA;
+        const dateA = a.instance.expectedDate || '';
+        const dateB = b.instance.expectedDate || '';
+        return dateB.localeCompare(dateA);
       });
 
       setAllEnrichedInstances(enriched);
-    } catch (err: any) {
-      console.error('Error loading venue game details:', err);
-      setError(err?.message ?? 'Failed to load game details');
+    } catch (err) {
+      console.error('[VenueGameDetails] Error fetching data:', err);
+      setError('Failed to load game data');
     } finally {
       setLoading(false);
     }
@@ -1433,34 +1216,38 @@ export const VenueGameDetails: React.FC = () => {
 
   useEffect(() => {
     fetchData();
-  }, [venueId, recurringGameId, entityId, timeRange]);
+  }, [venueId, recurringGameId, timeRange]);
 
+  // Compute summary stats
   const summaryStats = useMemo(() => buildSummaryStats(enrichedInstances), [enrichedInstances]);
 
-  // Loading state
-  if (entityLoading || loading) {
+  if (loading || entityLoading) {
     return (
-      <PageWrapper title="Game Details">
-        <div className="py-20 text-center text-gray-400">
-          Loading game details…
-        </div>
+      <PageWrapper title="Loading...">
+        <Card>
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600" />
+          </div>
+        </Card>
       </PageWrapper>
     );
   }
 
-  // Error state
-  if (error || !venue) {
+  if (error) {
     return (
-      <PageWrapper title="Game Details">
-        <Card className="border-red-200 bg-red-50">
-          <Text className="text-sm text-red-700">{error || 'Data not found'}</Text>
-          <button
-            onClick={() => navigate(-1)}
-            className="mt-4 inline-flex items-center text-sm text-indigo-600 hover:text-indigo-900"
-          >
-            <ArrowLeftIcon className="h-4 w-4 mr-1" />
-            Go Back
-          </button>
+      <PageWrapper title="Error">
+        <Card>
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <ExclamationTriangleIcon className="h-12 w-12 text-amber-500 mb-4" />
+            <Text className="text-red-600 mb-4">{error}</Text>
+            <button
+              onClick={() => navigate(-1)}
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+            >
+              <ArrowLeftIcon className="h-4 w-4" />
+              Go Back
+            </button>
+          </div>
         </Card>
       </PageWrapper>
     );
@@ -1468,51 +1255,49 @@ export const VenueGameDetails: React.FC = () => {
 
   return (
     <PageWrapper title={gameName}>
+      {/* Back Button */}
       <button
         onClick={() => navigate(`/venues/details?venueId=${venueId}`)}
         className="mb-4 inline-flex items-center text-sm text-gray-600 hover:text-gray-900"
       >
-        <ArrowLeftIcon className="h-4 w-4 mr-1" />
-        Back to {venue.name}
+        <ArrowLeftIcon className="w-4 h-4 mr-1" />
+        Back to Venue
       </button>
 
+      {/* Entity Selector */}
+      {showEntitySelector && (
+        <div className="mb-4">
+          <MultiEntitySelector />
+        </div>
+      )}
+
       {/* Filters */}
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-3">
-          {showEntitySelector && (
-            <div className="w-full sm:flex-1 sm:max-w-xs">
-              <MultiEntitySelector />
-            </div>
-          )}
-        </div>
-        <div className="flex items-center gap-3">
-          <TimeRangeToggle value={timeRange} onChange={setTimeRange} />
-          <GameStatusMultiSelect
-            allStatuses={GAME_STATUS_OPTIONS}
-            availableStatuses={availableStatuses}
-            selectedStatuses={selectedGameStatuses}
-            onChange={setSelectedGameStatuses}
-            statusCounts={statusCounts}
-          />
-        </div>
+      <div className="flex flex-wrap items-center gap-4 mb-6">
+        <TimeRangeToggle value={timeRange} onChange={setTimeRange} />
+        <GameStatusMultiSelect
+          allStatuses={GAME_STATUS_OPTIONS}
+          availableStatuses={availableStatuses}
+          selectedStatuses={selectedGameStatuses}
+          onChange={setSelectedGameStatuses}
+          statusCounts={statusCounts}
+        />
       </div>
 
-      {/* Header Card */}
+      {/* Summary Card */}
       <Card className="mb-6">
-        <div>
-          <Text className="text-xs uppercase tracking-wide text-gray-400">
-            Recurring Game at {venue.name}
-          </Text>
-          <h2 className="text-xl font-bold text-gray-900 mt-1">
-            {gameName}
-          </h2>
-          {recurringGame?.dayOfWeek && (
-            <Text className="text-sm text-gray-500 mt-0.5">
-              {recurringGame.dayOfWeek}
-              {recurringGame.startTime && ` at ${recurringGame.startTime}`}
-            </Text>
-          )}
-          <Text className="mt-1 text-sm text-gray-500">
+        <div className="flex items-start justify-between">
+          <div>
+            <Text className="text-lg font-semibold text-gray-900">{gameName}</Text>
+            {venue && (
+              <Text className="text-sm text-gray-500">at {venue.name}</Text>
+            )}
+            {recurringGame?.dayOfWeek && (
+              <Text className="text-sm text-gray-500">
+                {recurringGame.dayOfWeek}s {recurringGame.startTime ? `at ${recurringGame.startTime}` : ''}
+              </Text>
+            )}
+          </div>
+          <Text className="text-sm text-gray-500">
             {summaryStats.totalInstances} instances in selected time range
             {summaryStats.unknownGames > 0 && (
               <span className="ml-2 text-amber-600">

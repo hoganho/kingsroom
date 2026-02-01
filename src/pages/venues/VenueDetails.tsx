@@ -1,7 +1,11 @@
 // src/pages/venues/VenueDetails.tsx
-// VERSION: 3.5.1 - Fixed game type filter classification logic
+// VERSION: 3.6.0 - Refactored to use shared ProfitTrendChart component
 //
 // CHANGELOG:
+// - v3.6.0: Refactored to use shared ProfitTrendChart from components/charts
+//           - Removed local ProfitTrendChart component (~70 lines)
+//           - ProfitTrendChartSection now converts data to ProfitDataPoint format
+//           - All other functionality unchanged
 // - v3.5.1: Fixed game type filter to use correct field combination
 //           - Uses gameType (TOURNAMENT/CASH_GAME) and tournamentType (SATELLITE)
 //           - Added tournamentType to GraphQL query and interface
@@ -57,8 +61,6 @@ import {
   ResponsiveContainer,
   LineChart,
   Line,
-  Area,
-  ComposedChart,
 } from 'recharts';
 import { format, parseISO, startOfMonth } from 'date-fns';
 
@@ -71,13 +73,15 @@ import { MetricCard } from '../../components/ui/MetricCard';
 import { TimeRangeToggle } from '../../components/ui/TimeRangeToggle';
 import { DataTable } from '../../components/ui/DataTable';
 import type { ColumnDef } from '@tanstack/react-table';
+// Import chart components and trend utilities (all from ProfitTrendChart)
 import { 
+  ProfitTrendChart, 
+  ProfitDataPoint,
   TrendBadge, 
   TrendChartLegend, 
   TrendInfo, 
   calculateTrendInfo, 
-  calculateLinearRegression 
-} from '../../components/ui/TrendBadge';
+} from '../../components/charts';
 
 // ============================================
 // TYPES
@@ -877,119 +881,7 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({ schedule, onClick }) => {
   );
 };
 
-// ---- Profit Trend Chart with Trendline ----
-
-interface ProfitTrendChartProps {
-  data: { date: string; profit: number }[];
-  onTrendCalculated?: (trendInfo: TrendInfo) => void;
-}
-
-const ProfitTrendChart: React.FC<ProfitTrendChartProps> = ({ data, onTrendCalculated }) => {
-  // Calculate trendline and trend info
-  const { chartData, trendInfo } = useMemo(() => {
-    if (data.length === 0) {
-      return { chartData: [], trendInfo: calculateTrendInfo([]) };
-    }
-
-    // Prepare data points for regression
-    const profitPoints = data.map((d, index) => ({ x: index, y: d.profit }));
-    const trendInfo = calculateTrendInfo(profitPoints);
-    
-    // Calculate linear regression
-    const { slope, intercept } = calculateLinearRegression(profitPoints);
-    
-    // Add trendline values to data
-    const chartData = data.map((d, index) => ({
-      ...d,
-      trendline: slope * index + intercept,
-    }));
-
-    return { chartData, trendInfo };
-  }, [data]);
-
-  // Notify parent of trend calculation
-  useEffect(() => {
-    if (onTrendCalculated) {
-      onTrendCalculated(trendInfo);
-    }
-  }, [trendInfo, onTrendCalculated]);
-
-  if (chartData.length === 0) {
-    return (
-      <div className="flex items-center justify-center h-48 text-gray-400">
-        No trend data available
-      </div>
-    );
-  }
-
-  return (
-    <ResponsiveContainer width="100%" height={200}>
-      <ComposedChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-        <defs>
-          <linearGradient id="profitGradient" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
-            <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
-          </linearGradient>
-        </defs>
-        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-        <XAxis
-          dataKey="date"
-          tickFormatter={(d) => {
-            try {
-              return format(parseISO(d + '-01'), 'MMM yy');
-            } catch {
-              return d;
-            }
-          }}
-          tick={{ fontSize: 12 }}
-          stroke="#9ca3af"
-        />
-        <YAxis
-          tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`}
-          tick={{ fontSize: 12 }}
-          stroke="#9ca3af"
-        />
-        <Tooltip
-          formatter={(value: number, name: string) => {
-            if (name === 'trendline') return [formatCurrency(value), 'Trend'];
-            return [formatCurrency(value), 'Profit'];
-          }}
-          labelFormatter={(label) => {
-            try {
-              return format(parseISO(label + '-01'), 'MMMM yyyy');
-            } catch {
-              return label;
-            }
-          }}
-          contentStyle={{
-            backgroundColor: 'white',
-            border: '1px solid #e5e7eb',
-            borderRadius: '8px',
-            fontSize: '12px',
-          }}
-        />
-        <Area
-          type="monotone"
-          dataKey="profit"
-          stroke="#6366f1"
-          strokeWidth={2}
-          fill="url(#profitGradient)"
-        />
-        <Line 
-          type="linear" 
-          dataKey="trendline" 
-          stroke="#10b981" 
-          strokeWidth={2}
-          strokeDasharray="5 5"
-          dot={false}
-          activeDot={false}
-        />
-      </ComposedChart>
-    </ResponsiveContainer>
-  );
-};
-
-// ---- Profit Trend Chart Section with Badge ----
+// ---- Profit Trend Chart Section with Badge (UPDATED: uses shared ProfitTrendChart) ----
 
 interface ProfitTrendChartSectionProps {
   data: { date: string; profit: number }[];
@@ -1005,6 +897,23 @@ const ProfitTrendChartSection: React.FC<ProfitTrendChartSectionProps> = ({
   availableGameTypes 
 }) => {
   const [trendInfo, setTrendInfo] = useState<TrendInfo | null>(null);
+
+  // Convert trend data to ProfitDataPoint format for shared chart
+  const chartData: ProfitDataPoint[] = useMemo(() => {
+    return data.map((item, index) => ({
+      id: `month-${index}`,
+      date: (() => {
+        try {
+          return format(parseISO(item.date + '-01'), 'MMM yy');
+        } catch {
+          return item.date;
+        }
+      })(),
+      fullDate: item.date + '-01',
+      profit: item.profit,
+      isMissing: false,
+    }));
+  }, [data]);
 
   return (
     <div>
@@ -1024,7 +933,18 @@ const ProfitTrendChartSection: React.FC<ProfitTrendChartSectionProps> = ({
         <TrendChartLegend />
       </div>
       <Card>
-        <ProfitTrendChart data={data} onTrendCalculated={setTrendInfo} />
+        {chartData.length > 0 ? (
+          <ProfitTrendChart 
+            data={chartData} 
+            onTrendCalculated={setTrendInfo}
+            height={200}
+            gradientId="venueDetailsProfitGradient"
+          />
+        ) : (
+          <div className="flex items-center justify-center h-48 text-gray-400">
+            No trend data available
+          </div>
+        )}
       </Card>
     </div>
   );

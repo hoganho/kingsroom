@@ -177,7 +177,12 @@ export function parsePackData(data: string | PackData | null | undefined): PackD
   if (!data) return null;
   if (typeof data === 'object') return data as PackData;
   try {
-    return JSON.parse(data) as PackData;
+    let parsed = JSON.parse(data);
+    // Handle double-encoded JSON strings (Lambda sometimes double-stringifies)
+    if (typeof parsed === 'string') {
+      parsed = JSON.parse(parsed);
+    }
+    return parsed as PackData;
   } catch (e) {
     console.error('Failed to parse pack data:', e);
     return null;
@@ -188,7 +193,12 @@ export function parseReportData(data: string | DirectorReportData | null | undef
   if (!data) return null;
   if (typeof data === 'object') return data as DirectorReportData;
   try {
-    return JSON.parse(data) as DirectorReportData;
+    let parsed = JSON.parse(data);
+    // Handle double-encoded JSON strings (Lambda sometimes double-stringifies)
+    if (typeof parsed === 'string') {
+      parsed = JSON.parse(parsed);
+    }
+    return parsed as DirectorReportData;
   } catch (e) {
     console.error('Failed to parse report data:', e);
     return null;
