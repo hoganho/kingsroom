@@ -793,7 +793,11 @@
                 "arn:aws:dynamodb:*:*:table/AlertThresholdConfig-*",
                 "arn:aws:dynamodb:*:*:table/AlertThresholdConfig-*/index/*",
                 "arn:aws:dynamodb:*:*:table/Entity-*",
-                "arn:aws:dynamodb:*:*:table/Entity-*/index/*"
+                "arn:aws:dynamodb:*:*:table/Entity-*/index/*",
+                "arn:aws:dynamodb:*:*:table/Game-*",
+                "arn:aws:dynamodb:*:*:table/Game-*/index/*",
+                "arn:aws:dynamodb:*:*:table/RecurringGame-*",
+                "arn:aws:dynamodb:*:*:table/RecurringGame-*/index/*"
               ],
               "Effect": "Allow"
             },

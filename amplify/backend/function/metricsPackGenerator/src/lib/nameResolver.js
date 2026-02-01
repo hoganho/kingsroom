@@ -6,6 +6,10 @@
  * 
  * This solves the "Unknown Venue" / "Unknown Game" problem by resolving
  * IDs to human-readable names BEFORE passing data to calculators.
+ * 
+ * v1.1.0 - Added fetchGameStatuses to get gameStatus from Game table
+ * 
+ * @version 1.1.0
  */
 
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
@@ -292,6 +296,68 @@ async function fetchGameNames(gameIds) {
 }
 
 /**
+ * Fetch game statuses from Game table.
+ * Used to filter out games that didn't actually run (INITIATING, etc.)
+ * 
+ * @param {string[]} gameIds - Array of game IDs
+ * @returns {Map<string, string>} - Map of gameId -> gameStatus
+ */
+async function fetchGameStatuses(gameIds) {
+  if (!gameIds || gameIds.length === 0) return new Map();
+  
+  const uniqueIds = [...new Set(gameIds.filter(id => id && id !== 'unknown'))];
+  if (uniqueIds.length === 0) return new Map();
+  
+  const result = new Map();
+  const CHUNK_SIZE = 100;
+  
+  for (let i = 0; i < uniqueIds.length; i += CHUNK_SIZE) {
+    const chunk = uniqueIds.slice(i, i + CHUNK_SIZE);
+    
+    try {
+      const response = await docClient.send(new BatchGetCommand({
+        RequestItems: {
+          [GAME_TABLE]: {
+            Keys: chunk.map(id => ({ id })),
+            // Only fetch gameStatus to minimize read capacity
+            ProjectionExpression: 'id, gameStatus'
+          }
+        }
+      }));
+
+      const items = response.Responses?.[GAME_TABLE] || [];
+      for (const item of items) {
+        result.set(item.id, item.gameStatus || null);
+      }
+
+      // Handle unprocessed keys (retry once)
+      const unprocessed = response.UnprocessedKeys?.[GAME_TABLE]?.Keys;
+      if (unprocessed && unprocessed.length > 0) {
+        console.warn(`Retrying ${unprocessed.length} unprocessed game status keys`);
+        const retryResponse = await docClient.send(new BatchGetCommand({
+          RequestItems: {
+            [GAME_TABLE]: {
+              Keys: unprocessed,
+              ProjectionExpression: 'id, gameStatus'
+            }
+          }
+        }));
+        const retryItems = retryResponse.Responses?.[GAME_TABLE] || [];
+        for (const item of retryItems) {
+          result.set(item.id, item.gameStatus || null);
+        }
+      }
+    } catch (error) {
+      console.error(`BatchGet game statuses failed:`, error.message);
+      // Continue with partial results
+    }
+  }
+  
+  console.log(`Fetched ${result.size} game statuses`);
+  return result;
+}
+
+/**
  * Create a venue ID to name lookup from already-enriched snapshots.
  * Useful when you need to look up venue names without re-fetching.
  */
@@ -310,6 +376,7 @@ module.exports = {
   fetchVenueNames,
   fetchRecurringGameDetails,
   fetchGameNames,
+  fetchGameStatuses,
   constructGameName,
   buildVenueLookupFromSnapshots,
   batchFetchByIds

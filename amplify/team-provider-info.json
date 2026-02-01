@@ -314,11 +314,11 @@
         },
         "aiReportGenerator": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
-          "s3Key": "amplify-builds/aiReportGenerator-734f736c534d44723979-build.zip"
+          "s3Key": "amplify-builds/aiReportGenerator-563176737a6d62377a54-build.zip"
         },
         "metricsPackGenerator": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
-          "s3Key": "amplify-builds/metricsPackGenerator-774f4b75636859306239-build.zip"
+          "s3Key": "amplify-builds/metricsPackGenerator-5234796e465a474b7a6e-build.zip"
         },
         "refreshPlayerMetrics": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",

@@ -1,10 +1,18 @@
 /**
- * Venue Calculator (Improved)
- * ===========================
+ * Venue Calculator (Improved v2)
+ * ==============================
  * Calculates venue-level metrics and breakdowns.
  * 
  * IMPORTANT: This expects snapshots to already have venueName and gameName
  * populated by the nameResolver. If names are missing, they were not resolved.
+ * 
+ * v2.0.0 Changes:
+ * - Added full games list per venue (not just top/bottom 3)
+ * - Added unique players trending
+ * - Added entries per unique player metrics
+ * - Supports scheduled-only venues (hadScheduledGamesOnly flag)
+ * 
+ * @version 2.0.0
  */
 
 const { sumField, round, calculateGrowthPercent } = require('./kpiCalculator');
@@ -109,17 +117,30 @@ async function calculateVenueBreakdown(entityId, snapshots, venueMetrics = [], c
     const priorPeriodRevenue = sumField(compVenueSnapshots, 'totalRevenue');
     const priorPeriodProfit = sumField(compVenueSnapshots, 'netProfit');
     const priorPeriodEntries = sumField(compVenueSnapshots, 'totalEntries');
+    const priorPeriodUniquePlayers = sumField(compVenueSnapshots, 'totalUniquePlayers');
+    const priorPeriodGames = compVenueSnapshots.length;
     
     // Trends (only if we have comparison data)
     let profitTrendPercent = null;
     let revenueTrendPercent = null;
     let entriesTrendPercent = null;
+    let uniquePlayersTrendPercent = null;
+    let gamesTrendPercent = null;
     
     if (compVenueSnapshots.length > 0) {
       profitTrendPercent = calculateGrowthPercent(totalProfit, priorPeriodProfit);
       revenueTrendPercent = calculateGrowthPercent(totalRevenue, priorPeriodRevenue);
       entriesTrendPercent = calculateGrowthPercent(totalEntries, priorPeriodEntries);
+      uniquePlayersTrendPercent = calculateGrowthPercent(totalUniquePlayers, priorPeriodUniquePlayers);
+      gamesTrendPercent = calculateGrowthPercent(totalGames, priorPeriodGames);
     }
+    
+    // Calculate entries per unique player (engagement metric)
+    const entriesPerPlayer = totalUniquePlayers > 0 ? totalEntries / totalUniquePlayers : 0;
+    const priorEntriesPerPlayer = priorPeriodUniquePlayers > 0 ? priorPeriodEntries / priorPeriodUniquePlayers : 0;
+    const entriesPerPlayerChange = priorEntriesPerPlayer > 0 
+      ? ((entriesPerPlayer - priorEntriesPerPlayer) / priorEntriesPerPlayer) * 100 
+      : null;
     
     const trendCategory = getTrendCategory(profitTrendPercent);
     const overallHealth = getOverallHealth(profitMargin, profitTrendPercent, totalProfit);
@@ -155,6 +176,30 @@ async function calculateVenueBreakdown(entityId, snapshots, venueMetrics = [], c
         date: g.gameStartDateTime
       }));
     
+    // Full games list (all games with essential details for UI display)
+    const gamesList = sortedByProfit.map(g => ({
+      gameId: g.gameId || g.id,
+      gameName: g.gameName || g.gameTitle || 'Game',
+      recurringGameId: g.recurringGameId,
+      recurringGameName: g.recurringGameName || null,
+      date: g.gameStartDateTime,
+      dayOfWeek: g.gameStartDateTime ? new Date(g.gameStartDateTime).toLocaleDateString('en-AU', { weekday: 'short' }) : null,
+      // Financial
+      profit: round(g.netProfit || 0),
+      revenue: round(g.totalRevenue || 0),
+      // Volume
+      entries: g.totalEntries || 0,
+      uniquePlayers: g.totalUniquePlayers || 0,
+      rebuys: g.totalRebuys || 0,
+      // Guarantee
+      guarantee: g.guaranteeAmount || 0,
+      overlay: round(g.totalGuaranteeOverlayCost || 0),
+      coverageRate: g.guaranteeCoverageRate || null,
+      // Status
+      gameStatus: g.gameStatus || null,
+      gameType: g.gameType || null
+    }));
+    
     // Game type breakdown
     const gameTypeBreakdown = {};
     for (const s of venueSnapshots) {
@@ -188,8 +233,10 @@ async function calculateVenueBreakdown(entityId, snapshots, venueMetrics = [], c
       
       // Volume
       totalGames,
+      gamesRun: totalGames, // Alias for consistency with gamesNotRun
       totalEntries,
       totalUniquePlayers,
+      entriesPerPlayer: round(entriesPerPlayer, 2),
       
       // Financial
       totalRevenue: round(totalRevenue),
@@ -201,6 +248,7 @@ async function calculateVenueBreakdown(entityId, snapshots, venueMetrics = [], c
       avgRevenuePerGame: round(avgRevenuePerGame),
       avgProfitPerGame: round(avgProfitPerGame),
       avgEntriesPerGame: round(avgEntriesPerGame, 1),
+      avgPlayersPerGame: totalGames > 0 ? round(totalUniquePlayers / totalGames, 1) : 0,
       
       // Guarantee
       gamesWithGuarantee,
@@ -208,15 +256,23 @@ async function calculateVenueBreakdown(entityId, snapshots, venueMetrics = [], c
       totalOverlayCost: round(totalOverlayCost),
       avgCoverageRate: avgCoverageRate !== null ? round(avgCoverageRate, 1) : null,
       
-      // Trends
+      // Trends - Profit/Revenue
       profitTrendPercent: profitTrendPercent !== null ? round(profitTrendPercent, 1) : null,
       revenueTrendPercent: revenueTrendPercent !== null ? round(revenueTrendPercent, 1) : null,
-      entriesTrendPercent: entriesTrendPercent !== null ? round(entriesTrendPercent, 1) : null,
       trendCategory,
       
-      // Comparison
+      // Trends - Volume/Players (NEW)
+      entriesTrendPercent: entriesTrendPercent !== null ? round(entriesTrendPercent, 1) : null,
+      uniquePlayersTrendPercent: uniquePlayersTrendPercent !== null ? round(uniquePlayersTrendPercent, 1) : null,
+      gamesTrendPercent: gamesTrendPercent !== null ? round(gamesTrendPercent, 1) : null,
+      entriesPerPlayerChange: entriesPerPlayerChange !== null ? round(entriesPerPlayerChange, 1) : null,
+      
+      // Comparison period data
       priorPeriodProfit: compVenueSnapshots.length > 0 ? round(priorPeriodProfit) : null,
       priorPeriodRevenue: compVenueSnapshots.length > 0 ? round(priorPeriodRevenue) : null,
+      priorPeriodEntries: compVenueSnapshots.length > 0 ? priorPeriodEntries : null,
+      priorPeriodUniquePlayers: compVenueSnapshots.length > 0 ? priorPeriodUniquePlayers : null,
+      priorPeriodGames: compVenueSnapshots.length > 0 ? priorPeriodGames : null,
       
       // Health
       overallHealth,
@@ -226,9 +282,12 @@ async function calculateVenueBreakdown(entityId, snapshots, venueMetrics = [], c
       gameTypeBreakdown,
       dayBreakdown,
       
-      // Top/Bottom games (now with real names!)
+      // Top/Bottom games (summary view)
       topGames,
-      bottomGames
+      bottomGames,
+      
+      // Full games list (for detailed UI display)
+      gamesList
     });
   }
   

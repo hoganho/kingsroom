@@ -1,9 +1,11 @@
 /**
- * Data Fetcher (Improved v3)
+ * Data Fetcher (Improved v3.1)
  * ==========================
  * Fetches data from DynamoDB tables with automatic name resolution.
  * 
  * Key improvements:
+ * - v3.1: FIX - Fetch gameStatus from Game table before filtering
+ *         (gameStatus lives on Game, not GameFinancialSnapshot)
  * - v3: Filters out INITIATING games from financial calculations
  *       but tracks them as "games not run" for reporting
  * - v2: Snapshots enriched with venue/game names automatically
@@ -12,12 +14,12 @@
  * - Series lifecycle data (active/upcoming/completed)
  * - Competitor analysis (schedule clashes, market pressure)
  * 
- * @version 3.0.0
+ * @version 3.1.0
  */
 
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
 const { DynamoDBDocumentClient, QueryCommand } = require('@aws-sdk/lib-dynamodb');
-const { enrichSnapshotsWithNames, buildVenueLookupFromSnapshots } = require('./nameResolver');
+const { enrichSnapshotsWithNames, buildVenueLookupFromSnapshots, fetchGameStatuses } = require('./nameResolver');
 const { buildScheduleComplianceData } = require('./scheduleComplianceFetcher');
 const { buildRecurringGameTrendsData } = require('./recurringGameTrendsFetcher');
 const { buildSeriesLifecycleData } = require('./seriesLifecycleFetcher');
@@ -251,6 +253,9 @@ function summarizeGamesNotRun(gamesNotRun) {
  * Fetch GameFinancialSnapshots for a period WITH NAME RESOLUTION.
  * Automatically filters out games that didn't actually run (INITIATING, etc.)
  * 
+ * IMPORTANT: gameStatus lives on the Game table, not GameFinancialSnapshot.
+ * We must fetch it separately before filtering.
+ * 
  * GSI: byEntityGameFinancialSnapshot (entityId, gameStartDateTime)
  * 
  * @param {string} entityId 
@@ -292,8 +297,21 @@ async function fetchSnapshotsForPeriod(entityId, periodStart, periodEnd, enrichN
     throw error; // Re-throw - snapshots are critical
   }
   
-  // Filter out games that didn't run
-  const { validSnapshots, gamesNotRun } = filterSnapshotsByGameStatus(rawSnapshots, periodEnd);
+  // CRITICAL: Fetch gameStatus from Game table BEFORE filtering
+  // gameStatus is on the Game table, not GameFinancialSnapshot
+  const gameIds = rawSnapshots.map(s => s.gameId).filter(Boolean);
+  const gameStatusMap = await fetchGameStatuses(gameIds);
+  
+  // Attach gameStatus to each snapshot
+  const snapshotsWithStatus = rawSnapshots.map(snapshot => ({
+    ...snapshot,
+    gameStatus: snapshot.gameId ? gameStatusMap.get(snapshot.gameId) : null
+  }));
+  
+  console.log(`Attached game statuses: ${gameStatusMap.size} of ${rawSnapshots.length} snapshots have status`);
+  
+  // Now filter based on gameStatus
+  const { validSnapshots, gamesNotRun } = filterSnapshotsByGameStatus(snapshotsWithStatus, periodEnd);
   
   // Enrich with names if requested
   let enrichedSnapshots = validSnapshots;
@@ -533,7 +551,7 @@ async function fetchAllPackData(entityId, periodStart, periodEnd, compPeriodStar
     businessLocation = null // For competitor analysis scope
   } = options;
   
-  console.log('=== Fetching all pack data (v3 - with INITIATING filter) ===');
+  console.log('=== Fetching all pack data (v3.1 - with gameStatus from Game table) ===');
   const startTime = Date.now();
   
   // Fetch current period snapshots with name resolution AND filtering

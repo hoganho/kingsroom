@@ -2,10 +2,11 @@
  * Prompt Template System
  * Builds prompts for different report types
  * 
- * VERSION: 2.0.0 - Updated for MetricsPack v4
+ * VERSION: 2.1.0 - Updated for MetricsPack v6 (Games Not Run tracking)
  * 
  * Changes:
- * - Enhanced module detection and graceful degradation
+ * - v2.1.0: Added gamesNotRun module support for reporting on scheduled games that didn't complete
+ * - v2.0.0: Enhanced module detection and graceful degradation
  * - Pre-flight pack validation
  * - Better error messages for missing data
  */
@@ -24,7 +25,7 @@ const promptBuilders = {
 };
 
 // Current prompt version - increment when making significant changes
-const PROMPT_VERSION = '2.0.0';
+const PROMPT_VERSION = '2.1.0';
 
 /**
  * Build prompts for a given report type
@@ -110,6 +111,7 @@ function validateMetricsPack(metricsPack, reportType) {
     { name: 'competitorAnalysis', check: packData.competitorAnalysis?.hasCompetitorData, requiredFor: ['WEEKLY_OPS', 'MONTHLY_BOARD'] },
     { name: 'opportunities', check: packData.opportunities?.hasOpportunities, requiredFor: ['WEEKLY_OPS', 'MONTHLY_BOARD'] },
     { name: 'seriesLifecycle', check: packData.seriesLifecycle?.hasSeriesData, requiredFor: ['SERIES_PRE', 'SERIES_MID', 'SERIES_POST', 'MONTHLY_BOARD'] },
+    { name: 'gamesNotRun', check: packData.gamesNotRun?.total > 0, requiredFor: ['WEEKLY_OPS', 'MONTHLY_BOARD'] },
   ];
   
   for (const module of enhancedModules) {
@@ -181,17 +183,17 @@ function getReportTypeInfo(reportType) {
       name: 'Weekly Operations Report',
       audience: 'Floor managers, operations team',
       frequency: 'Weekly',
-      focusAreas: ['Tactical issues', 'Problem games', 'Overlay analysis', 'Quick wins'],
+      focusAreas: ['Tactical issues', 'Problem games', 'Overlay analysis', 'Games not run', 'Quick wins'],
       requiredModules: ['strategic', 'venues', 'alerts'],
-      enhancedModules: ['scheduleCompliance', 'recurringGameTrends', 'competitorAnalysis', 'opportunities'],
+      enhancedModules: ['scheduleCompliance', 'recurringGameTrends', 'competitorAnalysis', 'opportunities', 'gamesNotRun'],
     },
     MONTHLY_BOARD: {
       name: 'Monthly Board Report',
       audience: 'Executives, board members',
       frequency: 'Monthly',
-      focusAreas: ['Strategic trends', 'Portfolio health', 'Competitive position', 'Growth opportunities'],
+      focusAreas: ['Strategic trends', 'Portfolio health', 'Competitive position', 'Operational execution', 'Growth opportunities'],
       requiredModules: ['strategic', 'venues', 'alerts'],
-      enhancedModules: ['scheduleCompliance', 'recurringGameTrends', 'competitorAnalysis', 'opportunities', 'seriesLifecycle'],
+      enhancedModules: ['scheduleCompliance', 'recurringGameTrends', 'competitorAnalysis', 'opportunities', 'seriesLifecycle', 'gamesNotRun'],
     },
     SERIES_PRE: {
       name: 'Pre-Series Preparation Report',

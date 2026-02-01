@@ -2,13 +2,14 @@
  * Weekly Operations Report Prompt Template
  * Generates tactical insights for venue managers
  * 
- * VERSION: 2.0.0 - Updated for MetricsPack v4
+ * VERSION: 2.1.0 - Updated for MetricsPack v6 (Games Not Run tracking)
  * 
  * Now uses:
  * - scheduleCompliance (cancellation analysis)
  * - recurringGameTrends (game health, brand strength)
  * - opportunities (schedule gaps, expansion)
  * - competitorAnalysis (clashes, market pressure)
+ * - gamesNotRun (scheduled games that didn't complete - INITIATING, etc.)
  */
 
 /**
@@ -34,9 +35,36 @@ ANALYSIS PRIORITIES:
 2. PROBLEM GAMES - Which games lost money and what to do
 3. OVERLAY COSTS - The biggest controllable cost - analyze every overlay
 4. SCHEDULE COMPLIANCE - Cancelled games cost money and reputation
-5. RECURRING GAME HEALTH - Which regular games are growing vs declining
-6. COMPETITOR ACTIVITY - Schedule clashes and market pressure
-7. QUICK WINS - Opportunities that can be actioned THIS WEEK
+5. GAMES NOT RUN - Games that were scheduled but didn't complete
+6. RECURRING GAME HEALTH - Which regular games are growing vs declining
+7. PLAYER TRENDS - Are unique players growing/declining? Is engagement changing?
+8. COMPETITOR ACTIVITY - Schedule clashes and market pressure
+9. QUICK WINS - Opportunities that can be actioned THIS WEEK
+
+PLAYER & ENTRY TRENDING (Key for Ops):
+When analyzing venues, look at player metrics to spot issues early:
+- uniquePlayersTrendPercent: Is player base growing (+) or shrinking (-)?
+- entriesTrendPercent: Total entries - indicates overall demand
+- entriesPerPlayer: Higher = players entering multiple games = engaged
+- entriesPerPlayerChange: Falling = players are less engaged, need action
+
+Operational insights from player trends:
+- If unique players declining but entries/player rising = core players strong, need acquisition focus
+- If unique players growing but entries/player falling = attracting casuals, need engagement programs  
+- Both declining = urgent action needed - check marketing, promotions, competitor activity
+- Both growing = healthy venue, consider expansion
+
+GAME STATUS INTERPRETATION:
+When discussing games that didn't run, be specific about what happened:
+- INITIATING_STALE: "Set up but didn't start" - often means insufficient registrations or last-minute operational issues
+- CANCELLED: "Cancelled" - explicitly stopped, may indicate demand problems
+- SCHEDULED: Still scheduled - just didn't happen yet in the period
+- NOT_FOUND/NOT_PUBLISHED: Data/system issues - flag for IT
+
+VENUE STATUS NOTES:
+- Venues with "hadScheduledGamesOnly: true" had games planned but none ran
+- This is an operational red flag - investigate why
+- Report as "scheduled activity, no completed games" not as "inactive"
 
 TONE: Direct and operational. Managers need actions, not strategy.
 
@@ -47,7 +75,8 @@ CRITICAL RULES:
 - Use the ACTUAL venue names and game names provided (not "Unknown")
 - Recommendations must be achievable within 1 week
 - Prioritize by profit impact
-- If a data section shows "hasXxxData: false", acknowledge the gap`;
+- If a data section shows "hasXxxData: false", acknowledge the gap
+- Report games not run as operational issues, NOT as financial losses`;
 }
 
 function buildUserPrompt(metricsPack, options = {}) {
@@ -58,7 +87,10 @@ function buildUserPrompt(metricsPack, options = {}) {
     periodEnd, 
     comparisonPeriodLabel,
     dataCompleteness,
-    warnings
+    warnings,
+    gamesNotRunCount,
+    venuesWithGamesRun,
+    venuesScheduledOnly
   } = metricsPack;
   
   // Parse packData if it's a string
@@ -75,6 +107,11 @@ function buildUserPrompt(metricsPack, options = {}) {
   const recurringGameTrends = data.recurringGameTrends || {};
   const competitorAnalysis = data.competitorAnalysis || {};
   const opportunities = data.opportunities || {};
+  const gamesNotRun = data.gamesNotRun || {};
+  
+  // Separate venues into active vs scheduled-only
+  const activeVenues = venues.filter(v => !v.hadScheduledGamesOnly);
+  const scheduledOnlyVenues = venues.filter(v => v.hadScheduledGamesOnly);
   
   // Pre-calculate key metrics for clarity
   const overlayImpact = s.netProfit < 0 && s.overlayCost > 0 
@@ -137,6 +174,44 @@ ${JSON.stringify(scheduleCompliance.atRiskRecurringGames?.slice(0, 5) || [], nul
 RECENT CANCELLATIONS:
 ${JSON.stringify(scheduleCompliance.recentCancellations?.slice(0, 5) || [], null, 2)}
 ` : 'Schedule compliance data not available for this period.'}
+
+══════════════════════════════════════════════════════════════
+SECTION 4B: GAMES NOT RUN (Operational Issues)
+══════════════════════════════════════════════════════════════
+${gamesNotRun.total > 0 ? `
+⚠️ ${gamesNotRun.total} scheduled games did not complete this period.
+These are EXCLUDED from financial calculations - no revenue or costs attributed.
+
+BREAKDOWN BY REASON:
+${Object.entries(gamesNotRun.byReason || {}).map(([reason, count]) => {
+  const descriptions = {
+    'INITIATING_STALE': 'Set up but never started',
+    'CANCELLED': 'Explicitly cancelled',
+    'SCHEDULED': 'Still scheduled (period ended)',
+    'NOT_FOUND': 'Game record not found',
+    'NOT_PUBLISHED': 'Not published',
+    'UNKNOWN': 'Unknown status'
+  };
+  return `- ${reason}: ${count} - ${descriptions[reason] || reason}`;
+}).join('\n')}
+
+BY VENUE:
+${JSON.stringify(gamesNotRun.byVenue || [], null, 2)}
+
+GAMES NOT RUN LIST:
+${JSON.stringify(gamesNotRun.gamesList?.slice(0, 10) || [], null, 2)}
+` : '✓ All scheduled games ran this period.'}
+
+VENUES WITH ONLY SCHEDULED GAMES (no games completed):
+${scheduledOnlyVenues.length > 0 ? `
+⚠️ ${scheduledOnlyVenues.length} venue(s) had scheduled games but none ran:
+${JSON.stringify(scheduledOnlyVenues.map(v => ({
+  venueName: v.venueName,
+  gamesNotRun: v.gamesNotRun,
+  details: v.gamesNotRunDetails?.slice(0, 3)
+})), null, 2)}
+ACTION REQUIRED: Investigate why games at these venues didn't proceed.
+` : '✓ All venues with scheduled games had at least one game run.'}
 
 ══════════════════════════════════════════════════════════════
 SECTION 5: RECURRING GAME HEALTH
@@ -206,19 +281,41 @@ ${JSON.stringify(opportunities.byType?.expansionOpportunities?.slice(0, 3) || []
 ══════════════════════════════════════════════════════════════
 SECTION 8: VENUE PERFORMANCE
 ══════════════════════════════════════════════════════════════
+Active Venues (with games run): ${activeVenues.length}
+Scheduled-Only Venues (no games ran): ${scheduledOnlyVenues.length}
+
 ${JSON.stringify(venues.map(v => ({
   venueName: v.venueName,
+  // Status
+  hadScheduledGamesOnly: v.hadScheduledGamesOnly || false,
+  // Financial (will be 0 for scheduled-only)
   totalProfit: v.totalProfit,
   totalRevenue: v.totalRevenue,
-  totalGames: v.totalGames,
+  // Volume
+  gamesRun: v.gamesRun || v.totalGames || 0,
+  gamesNotRun: v.gamesNotRun || 0,
+  totalEntries: v.totalEntries,
   avgProfitPerGame: v.avgProfitPerGame,
   profitMargin: v.profitMargin,
+  // Player metrics (NEW)
+  totalUniquePlayers: v.totalUniquePlayers || 0,
+  entriesPerPlayer: v.entriesPerPlayer || 0,
+  // Trending
+  profitTrendPercent: v.profitTrendPercent,
+  entriesTrendPercent: v.entriesTrendPercent,
+  uniquePlayersTrendPercent: v.uniquePlayersTrendPercent,
+  entriesPerPlayerChange: v.entriesPerPlayerChange,
+  // Health
   overallHealth: v.overallHealth,
   trendCategory: v.trendCategory,
-  profitTrendPercent: v.profitTrendPercent,
   totalOverlayCost: v.totalOverlayCost,
+  // Top/bottom games
   topGames: v.topGames?.slice(0, 2),
-  bottomGames: v.bottomGames?.slice(0, 2)
+  bottomGames: v.bottomGames?.slice(0, 2),
+  // Full games list (for detailed view)
+  gamesList: v.gamesList || [],
+  // Games not run details
+  gamesNotRunDetails: v.gamesNotRunDetails?.slice(0, 3) || null
 })), null, 2)}
 
 ══════════════════════════════════════════════════════════════
@@ -306,6 +403,20 @@ REQUIRED JSON OUTPUT
     "recommendation": "Schedule health action"
   },
   
+  "gamesNotRun": {
+    "total": <number>,
+    "breakdown": {
+      "initiatingStale": <number>,
+      "cancelled": <number>,
+      "other": <number>
+    },
+    "byVenue": [
+      { "venueName": "Name", "count": <number>, "reason": "Why games didn't run" }
+    ],
+    "operationalAssessment": "Analysis of why games didn't run - systemic issue or one-off?",
+    "actionRequired": ["Specific actions to prevent this next week"]
+  },
+  
   "recurringGameHealth": {
     "summary": "Overall health of regular game lineup",
     "growing": [{ "gameName": "Name", "trend": "+X%", "action": "What to do" }],
@@ -317,11 +428,19 @@ REQUIRED JSON OUTPUT
     {
       "venueName": "Actual venue name",
       "profit": <number>,
-      "games": <number>,
+      "gamesRun": <number>,
+      "gamesNotRun": <number or 0>,
+      "hadScheduledGamesOnly": <boolean>,
       "avgProfitPerGame": <number>,
-      "health": "EXCELLENT | GOOD | NEEDS_ATTENTION | CRITICAL",
-      "trend": "UPLIFT | STEADY | SOFTENING | AT_RISK",
-      "keyIssue": "Main issue or success factor",
+      "health": "EXCELLENT | GOOD | NEEDS_ATTENTION | CRITICAL | SCHEDULED_ONLY",
+      "trend": "UPLIFT | STEADY | SOFTENING | AT_RISK | NO_DATA",
+      "playerTrend": {
+        "uniquePlayers": <number>,
+        "uniquePlayersTrend": "<+/-X%> or null",
+        "entriesPerPlayer": <number>,
+        "assessment": "Growing | Stable | Needs attention"
+      },
+      "keyIssue": "Main issue or success factor (mention player trends if significant)",
       "oneAction": "Single most important action"
     }
   ],
@@ -382,7 +501,7 @@ REQUIRED JSON OUTPUT
  */
 function getSchema() {
   return {
-    name: 'weekly_ops_report_v2',
+    name: 'weekly_ops_report_v3',
     strict: false,
     schema: {
       type: 'object',
@@ -394,6 +513,7 @@ function getSchema() {
         winningGames: { type: 'array' },
         overlayReport: { type: 'object' },
         scheduleHealth: { type: 'object' },
+        gamesNotRun: { type: 'object' },
         recurringGameHealth: { type: 'object' },
         venueQuickView: { type: 'array' },
         competitorWatch: { type: 'object' },

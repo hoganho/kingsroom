@@ -3,7 +3,7 @@
  * ===================================================
  * Generates deterministic MetricsPacks from GameFinancialSnapshot data.
  * 
- * KEY IMPROVEMENTS (v4.2.0):
+ * KEY IMPROVEMENTS (v4.3.0):
  * 1. Name Resolution - Venues and games are resolved to human-readable names
  * 2. Schedule Compliance - Includes cancelled/missed game analysis
  * 3. Recurring Game Trends - Per-game trending with brand strength
@@ -11,11 +11,14 @@
  * 5. Competitor Analysis - Schedule clashes, market pressure
  * 6. Opportunity Detection - Growth opportunities from data patterns
  * 7. FIXED: Date validation - Ensures periodStart/periodEnd are always valid ISO strings
- * 8. NEW: Games Not Run - Tracks INITIATING/CANCELLED games separately (v4.2.0)
+ * 8. Games Not Run - Tracks INITIATING/CANCELLED games separately
  *    - These are excluded from financial calculations
  *    - But tracked for operational reporting
+ * 9. NEW (v4.3.0): Venues with only scheduled (non-run) games are now included
+ *    - Shows as 0 financials with gamesNotRun count
+ *    - Allows AI to report on venues that had planned activity but no results
  * 
- * @version 4.2.0
+ * @version 4.3.0
  */
 
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
@@ -212,7 +215,7 @@ async function handleGenerateMetricsPack(input) {
     forceRegenerate 
   } = input;
   
-  console.log(`=== Generating MetricsPack (v4.2.0) ===`);
+  console.log(`=== Generating MetricsPack (v4.3.0) ===`);
   console.log(`Entity: ${entityId}, Type: ${reportType}`);
   
   // ===================================================================
@@ -384,6 +387,61 @@ async function handleGenerateMetricsPack(input) {
   // Calculate venue breakdown (snapshots already have names)
   const venues = await calculateVenueBreakdown(entityId, snapshots, venueMetrics, compSnapshots);
   
+  // ===================================================================
+  // ENSURE VENUES WITH ONLY NON-RUN GAMES ARE INCLUDED
+  // ===================================================================
+  // Venues that had scheduled games which didn't run should still appear
+  // in our venue list (with 0 financials) for complete reporting
+  if (gamesNotRunSummary && gamesNotRunSummary.byVenue && gamesNotRunSummary.byVenue.length > 0) {
+    const existingVenueIds = new Set(venues.map(v => v.venueId));
+    
+    for (const notRunVenue of gamesNotRunSummary.byVenue) {
+      if (!existingVenueIds.has(notRunVenue.venueId)) {
+        // This venue had NO games that ran - add it with zero financials
+        venues.push({
+          venueId: notRunVenue.venueId,
+          venueName: notRunVenue.venueName || venueLookup.get(notRunVenue.venueId) || 'Unknown Venue',
+          // Zero financials since no games ran
+          gamesRun: 0,
+          totalRevenue: 0,
+          totalProfit: 0,
+          avgProfitPerGame: 0,
+          totalPlayers: 0,
+          avgPlayersPerGame: 0,
+          guaranteeOverlayCost: 0,
+          // Track the not-run games
+          gamesNotRun: notRunVenue.count,
+          gamesNotRunDetails: notRunVenue.games,
+          // Flag for reporting
+          hadScheduledGamesOnly: true,
+          // Comparison will be null/zero
+          comparison: null
+        });
+        console.log(`Added venue with only scheduled games: ${notRunVenue.venueName} (${notRunVenue.count} games didn't run)`);
+      } else {
+        // Venue exists - augment with not-run game data
+        const existingVenue = venues.find(v => v.venueId === notRunVenue.venueId);
+        if (existingVenue) {
+          existingVenue.gamesNotRun = notRunVenue.count;
+          existingVenue.gamesNotRunDetails = notRunVenue.games;
+        }
+      }
+    }
+  }
+  
+  // Sort venues: active venues first, then venues with only scheduled games
+  venues.sort((a, b) => {
+    // Active venues (with games run) first
+    if (a.gamesRun > 0 && b.gamesRun === 0) return -1;
+    if (b.gamesRun > 0 && a.gamesRun === 0) return 1;
+    // Then by profit
+    return (b.totalProfit || 0) - (a.totalProfit || 0);
+  });
+  
+  const venuesWithGames = venues.filter(v => v.gamesRun > 0).length;
+  const venuesScheduledOnly = venues.filter(v => v.hadScheduledGamesOnly).length;
+  console.log(`Venues: ${venues.length} total (${venuesWithGames} with games run, ${venuesScheduledOnly} scheduled-only)`);
+  
   // Generate alerts (with real names!)
   const allAlerts = generateAlerts(snapshots, venues, thresholds);
   
@@ -484,11 +542,13 @@ async function handleGenerateMetricsPack(input) {
     generatedAt: new Date().toISOString(),
     generatedBy: 'LAMBDA',
     generationDurationMs: Date.now() - startTime,
-    version: 5, // Bumped version for gamesNotRun support
+    version: 6, // Bumped version for venue tracking improvements
     snapshotsIncluded: snapshots.length,
     gamesIncluded: snapshots.length,
     gamesNotRunCount: gamesNotRunSummary?.total || 0,
     venuesIncluded: venues.length,
+    venuesWithGamesRun: venues.filter(v => v.gamesRun > 0).length,
+    venuesScheduledOnly: venues.filter(v => v.hadScheduledGamesOnly).length,
     dataCompleteness: calculateDataCompleteness(snapshots, venues),
     enhancedModulesIncluded: meta.enhancedModules || [],
     warnings: warnings.length > 0 ? warnings : null,
