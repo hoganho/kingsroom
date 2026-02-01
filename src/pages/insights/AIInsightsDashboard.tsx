@@ -1,13 +1,13 @@
 // pages/insights/AIInsightsDashboard.tsx
 // AI Insights Dashboard - Main page for viewing and generating reports
-// VERSION: 2.0.0 - Added async generation with progress display
+// VERSION: 2.1.0 - Added prominent entity display indicator
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 
 // Project-specific imports
 import { useEntity } from '../../contexts/EntityContext';
 import { useAIInsights, parsePackData, parseReportData, ReportStatus, type GenerationStatus } from '../../hooks/useAIInsights';
-import type { PeriodSelectionInput, ResolvedPeriod } from '../../API';
+import type { PeriodSelectionInput } from '../../API';
 import { type PeriodSelectorState, selectorStateToPeriodInput, getPeriodLabel, getDefaultSelectorState, isValidSelection } from '../../types/periodSelection';
 import { PeriodSelector } from '../../components/ui/PeriodSelector';
 
@@ -22,7 +22,7 @@ import { WeeklyMetricsGrid } from '../../components/insights/WeeklyMetricsGrid';
 import { VenueQuickViewPanel } from '../../components/insights/VenueQuickViewPanel';
 
 // Icons
-import { FileText, RefreshCw, ChevronRight, Calendar, BarChart3, Sparkles, Clock, CheckCircle2, AlertCircle, DollarSign, Zap, Database, History, Loader2, XCircle } from 'lucide-react';
+import { FileText, RefreshCw, ChevronRight, ChevronDown, Calendar, BarChart3, Sparkles, Clock, CheckCircle2, AlertCircle, DollarSign, Zap, Database, History, Loader2, XCircle, Building2, MapPin, Gamepad2 } from 'lucide-react';
 
 // ===================================================================
 // MODEL CONFIGURATION
@@ -62,8 +62,18 @@ const REPORT_TYPE_OPTIONS = [
 // HELPERS
 // ===================================================================
 
-const formatDate = (dateStr: string): string => new Date(dateStr).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' });
-const formatDateTime = (dateStr: string): string => new Date(dateStr).toLocaleString('en-AU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+const formatDate = (dateStr: string | null | undefined): string => {
+  if (!dateStr) return 'No date';
+  const date = new Date(dateStr);
+  if (isNaN(date.getTime())) return 'Invalid Date';
+  return date.toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' });
+};
+const formatDateTime = (dateStr: string | null | undefined): string => {
+  if (!dateStr) return 'No date';
+  const date = new Date(dateStr);
+  if (isNaN(date.getTime())) return 'Invalid Date';
+  return date.toLocaleString('en-AU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+};
 const formatCurrency = (value: number): string => new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(value);
 const formatCost = (cost: number): string => cost < 0.01 ? `${(cost * 100).toFixed(2)}¢` : `$${cost.toFixed(4)}`;
 const formatDuration = (ms: number): string => {
@@ -77,6 +87,240 @@ function estimateCost(model: ModelOption): { totalCost: number } {
   const outputCost = (ESTIMATED_OUTPUT_TOKENS / 1_000_000) * model.outputPrice;
   return { totalCost: inputCost + outputCost };
 }
+
+// ===================================================================
+// ENTITY INDICATOR COMPONENT
+// ===================================================================
+
+interface EntityIndicatorProps {
+  entityName: string;
+  entityLogo?: string | null;
+}
+
+const EntityIndicator: React.FC<EntityIndicatorProps> = ({ entityName, entityLogo }) => {
+  return (
+    <div className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-100 rounded-xl">
+      <div className="flex-shrink-0">
+        {entityLogo ? (
+          <img 
+            src={entityLogo} 
+            alt={entityName} 
+            className="w-10 h-10 rounded-lg object-cover ring-2 ring-indigo-200"
+          />
+        ) : (
+          <div className="w-10 h-10 rounded-lg bg-indigo-100 flex items-center justify-center ring-2 ring-indigo-200">
+            <Building2 className="w-5 h-5 text-indigo-600" />
+          </div>
+        )}
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="text-xs font-medium text-indigo-600 uppercase tracking-wide">Generating Reports For</div>
+        <div className="text-lg font-semibold text-gray-900 truncate">{entityName}</div>
+      </div>
+      <div className="flex-shrink-0">
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-700">
+          <Database className="w-3 h-3" />
+          Active
+        </span>
+      </div>
+    </div>
+  );
+};
+
+// ===================================================================
+// PACK DETAILS EXPANDER COMPONENT
+// ===================================================================
+
+interface PackDetailsExpanderProps {
+  packData: PackData | null;
+  metricsPack: MetricsPack;
+}
+
+const PackDetailsExpander: React.FC<PackDetailsExpanderProps> = ({ packData, metricsPack }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [expandedVenues, setExpandedVenues] = useState<Set<string>>(new Set());
+
+  const toggleVenue = (venueName: string) => {
+    setExpandedVenues(prev => {
+      const next = new Set(prev);
+      if (next.has(venueName)) {
+        next.delete(venueName);
+      } else {
+        next.add(venueName);
+      }
+      return next;
+    });
+  };
+
+  // Get venues data - cast to allow flexible property access for different pack structures
+  const packDataAny = packData as Record<string, unknown> | null;
+  const venues = (packDataAny?.venues || []) as Array<{ venueName: string; totalProfit: number; totalGames: number; avgProfitPerGame?: number; overallHealth?: string; trendCategory?: string }>;
+  const games = (packDataAny?.games || []) as Array<{ venueName?: string; venue?: string; gameName?: string; profit?: number; entries?: number }>;
+  // Note: games array comes from rankings.games in packData, not top-level
+
+  // Group games by venue if we have game-level data
+  const gamesByVenue = useMemo(() => {
+    const grouped: Record<string, any[]> = {};
+    games.forEach((game: any) => {
+      const venueName = game.venueName || game.venue || 'Unknown Venue';
+      if (!grouped[venueName]) {
+        grouped[venueName] = [];
+      }
+      grouped[venueName].push(game);
+    });
+    return grouped;
+  }, [games]);
+
+  // Combine venue data with games
+  const venueDetails = useMemo(() => {
+    return venues.map((venue: any) => ({
+      ...venue,
+      games: gamesByVenue[venue.venueName] || [],
+    }));
+  }, [venues, gamesByVenue]);
+
+  // Always show the expander if we have pack metadata (even without detailed venue data)
+  const hasAnyData = venues.length > 0 || metricsPack.venuesIncluded > 0;
+
+  if (!hasAnyData) {
+    return null;
+  }
+
+  return (
+    <div className="border border-gray-200 rounded-lg overflow-hidden">
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors"
+      >
+        <div className="flex items-center gap-2">
+          <Database className="w-4 h-4 text-gray-500" />
+          <span className="font-medium text-gray-700">Data Included in Pack</span>
+          <span className="text-sm text-gray-500">
+            ({metricsPack.venuesIncluded} venues, {metricsPack.gamesIncluded} games)
+          </span>
+        </div>
+        <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+      </button>
+      
+      {isExpanded && (
+        <div className="divide-y divide-gray-100">
+          {/* Show venue details if we have them */}
+          {venueDetails.length > 0 ? (
+            venueDetails.map((venue: any, idx: number) => {
+              const isVenueExpanded = expandedVenues.has(venue.venueName);
+              const venueGames = venue.games || [];
+              const gameCount = venue.totalGames || venueGames.length || 0;
+              
+              return (
+                <div key={venue.venueName || idx} className="bg-white">
+                  <button
+                    onClick={() => toggleVenue(venue.venueName)}
+                    className="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center">
+                        <MapPin className="w-4 h-4 text-indigo-600" />
+                      </div>
+                      <div className="text-left">
+                        <div className="font-medium text-gray-900">{venue.venueName}</div>
+                        <div className="text-sm text-gray-500 flex items-center gap-3">
+                          <span className="flex items-center gap-1">
+                            <Gamepad2 className="w-3 h-3" />
+                            {gameCount} games
+                          </span>
+                          {venue.totalProfit !== undefined && (
+                            <span className={venue.totalProfit >= 0 ? 'text-green-600' : 'text-red-600'}>
+                              {formatCurrency(venue.totalProfit)}
+                            </span>
+                          )}
+                          {venue.overallHealth && (
+                            <span className={`px-1.5 py-0.5 rounded text-xs font-medium ${
+                              venue.overallHealth === 'EXCELLENT' ? 'bg-green-100 text-green-700' :
+                              venue.overallHealth === 'GOOD' ? 'bg-blue-100 text-blue-700' :
+                              venue.overallHealth === 'NEEDS_ATTENTION' ? 'bg-amber-100 text-amber-700' :
+                              'bg-red-100 text-red-700'
+                            }`}>
+                              {venue.overallHealth.replace('_', ' ')}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    {venueGames.length > 0 && (
+                      <ChevronRight className={`w-4 h-4 text-gray-400 transition-transform ${isVenueExpanded ? 'rotate-90' : ''}`} />
+                    )}
+                  </button>
+                  
+                  {/* Games list for this venue */}
+                  {isVenueExpanded && venueGames.length > 0 && (
+                    <div className="bg-gray-50 px-4 py-2 border-t border-gray-100">
+                      <div className="ml-11 space-y-1">
+                        {venueGames.map((game: any, gameIdx: number) => (
+                          <div 
+                            key={game.id || game.gameId || gameIdx} 
+                            className="flex items-center justify-between py-2 px-3 bg-white rounded-lg text-sm"
+                          >
+                            <div className="flex items-center gap-2">
+                              <Gamepad2 className="w-3.5 h-3.5 text-gray-400" />
+                              <span className="text-gray-700">
+                                {game.gameName || game.name || `Game ${gameIdx + 1}`}
+                              </span>
+                              {game.gameDate && (
+                                <span className="text-gray-400 text-xs">
+                                  {formatDate(game.gameDate)}
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-3 text-xs">
+                              {game.entries !== undefined && (
+                                <span className="text-gray-500">{game.entries} entries</span>
+                              )}
+                              {game.profit !== undefined && (
+                                <span className={game.profit >= 0 ? 'text-green-600 font-medium' : 'text-red-600 font-medium'}>
+                                  {formatCurrency(game.profit)}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Show placeholder if no game-level data */}
+                  {isVenueExpanded && venueGames.length === 0 && gameCount > 0 && (
+                    <div className="bg-gray-50 px-4 py-3 border-t border-gray-100">
+                      <div className="ml-11 text-sm text-gray-500 italic">
+                        {gameCount} games included (detailed game list not available in pack data)
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })
+          ) : (
+            /* Fallback when we have counts but no detailed venue data */
+            <div className="bg-white p-4">
+              <div className="text-sm text-gray-600 space-y-2">
+                <div className="flex items-center gap-2">
+                  <MapPin className="w-4 h-4 text-indigo-500" />
+                  <span><strong>{metricsPack.venuesIncluded}</strong> venues included in this pack</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Gamepad2 className="w-4 h-4 text-indigo-500" />
+                  <span><strong>{metricsPack.gamesIncluded}</strong> games included in this pack</span>
+                </div>
+                <p className="text-xs text-gray-400 mt-2 italic">
+                  Detailed venue and game breakdown not available in pack data structure.
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
 
 // ===================================================================
 // GENERATION PROGRESS COMPONENT
@@ -247,8 +491,7 @@ export const AIInsightsDashboard: React.FC = () => {
     generatePack, 
     generateReport, 
     listPacks, 
-    listReports, 
-    previewPeriod, 
+    listReports,
     clearError,
     clearGenerationStatus,
     cancelPolling,
@@ -259,8 +502,6 @@ export const AIInsightsDashboard: React.FC = () => {
   const [reportType, setReportType] = useState<ReportType>(ReportType.WEEKLY_OPS);
   const [selectedModel, setSelectedModel] = useState(DEFAULT_MODEL);
   const [periodState, setPeriodState] = useState<PeriodSelectorState>(getDefaultSelectorState());
-  const [resolvedPeriod, setResolvedPeriod] = useState<ResolvedPeriod | null>(null);
-
   const [metricsPacks, setMetricsPacks] = useState<MetricsPack[]>([]);
   const [directorReports, setDirectorReports] = useState<DirectorReport[]>([]);
   const [loadingPacks, setLoadingPacks] = useState(false);
@@ -298,15 +539,6 @@ export const AIInsightsDashboard: React.FC = () => {
   }, [selectedEntity?.id, reportType, listPacks, listReports, selectedPack]);
 
   useEffect(() => { loadData(); }, [loadData]);
-
-  useEffect(() => {
-    const periodInput = selectorStateToPeriodInput(periodState);
-    if (periodInput) {
-      previewPeriod(periodInput as PeriodSelectionInput).then(setResolvedPeriod);
-    } else {
-      setResolvedPeriod(null);
-    }
-  }, [periodState, previewPeriod]);
 
   // Clear status message after delay
   useEffect(() => {
@@ -397,17 +629,33 @@ export const AIInsightsDashboard: React.FC = () => {
 
   // Render
   if (!selectedEntity) {
-    return <div className="p-8 text-center text-gray-500"><p>Please select an entity to view AI Insights</p></div>;
+    return (
+      <div className="p-8 text-center">
+        <div className="max-w-md mx-auto">
+          <Building2 className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+          <h3 className="text-lg font-medium text-gray-900 mb-2">No Entity Selected</h3>
+          <p className="text-gray-500">Please select an entity from the sidebar dropdown to view AI Insights and generate reports.</p>
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="p-4 lg:p-6 space-y-6">
-      {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">AI Insights</h1>
-          <p className="text-gray-500">{selectedEntity.entityName} • {REPORT_TYPE_OPTIONS.find(o => o.value === reportType)?.label}</p>
+      {/* Header with Entity Indicator */}
+      <div className="space-y-4">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">AI Insights</h1>
+            <p className="text-gray-500">{REPORT_TYPE_OPTIONS.find(o => o.value === reportType)?.label} Report</p>
+          </div>
         </div>
+        
+        {/* Prominent Entity Indicator */}
+        <EntityIndicator 
+          entityName={selectedEntity.entityName} 
+          entityLogo={selectedEntity.entityLogo}
+        />
       </div>
 
       {/* Controls */}
@@ -453,18 +701,46 @@ export const AIInsightsDashboard: React.FC = () => {
         />
       )}
 
-      {/* Generate New View */}
+      {/* Generate View */}
       {viewMode === 'generate' && (
         <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold mb-4 flex items-center gap-2"><Sparkles className="w-5 h-5 text-indigo-500" />Generate New Metrics Pack</h2>
-          <div className="space-y-4">
-            <PeriodSelector value={periodState} onChange={setPeriodState} />
-            {resolvedPeriod && (
-              <div className="bg-gray-50 rounded-lg p-3 text-sm"><span className="font-medium">{resolvedPeriod.periodLabel}:</span> {formatDate(resolvedPeriod.startDate)} - {formatDate(resolvedPeriod.endDate)}</div>
-            )}
-            <button onClick={handleGenerateMetricsPack} disabled={generating || !isValidSelection(periodState)} className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-50">
-              {generating ? <><RefreshCw className="w-4 h-4 animate-spin" />Generating Pack...</> : <><Database className="w-4 h-4" />Generate Metrics Pack</>}
-            </button>
+          <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+            <Sparkles className="w-5 h-5 text-indigo-600" />
+            Generate New Metrics Pack for {selectedEntity.entityName}
+          </h2>
+          
+          <div className="space-y-6">
+            <PeriodSelector
+              value={periodState}
+              onChange={setPeriodState}
+            />
+            
+            <div className="flex items-center gap-4">
+              <button
+                onClick={handleGenerateMetricsPack}
+                disabled={generating || !isValidSelection(periodState)}
+                className="flex items-center gap-2 px-6 py-2.5 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {generating ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <Database className="w-5 h-5" />
+                    Generate Metrics Pack
+                  </>
+                )}
+              </button>
+              
+              <button
+                onClick={() => setViewMode('list')}
+                className="px-4 py-2 text-gray-600 hover:text-gray-800"
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -476,19 +752,32 @@ export const AIInsightsDashboard: React.FC = () => {
           <div className="lg:col-span-1">
             <div className="bg-white rounded-xl border border-gray-200 p-4">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold flex items-center gap-2"><Database className="w-4 h-4 text-gray-400" />Metrics Packs</h3>
-                <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">{metricsPacks.length}</span>
+                <h3 className="font-semibold text-gray-900">Metrics Packs</h3>
+                <span className="text-sm text-gray-500">{metricsPacks.length} packs</span>
               </div>
+              
               {loadingPacks ? (
-                <div className="text-center py-8 text-gray-400"><RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2" />Loading...</div>
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+                </div>
               ) : metricsPacks.length === 0 ? (
-                <div className="text-center py-8 text-gray-400"><Database className="w-8 h-8 mx-auto mb-2 opacity-50" /><p>No metrics packs found</p><button onClick={() => setViewMode('generate')} className="mt-2 text-indigo-600 text-sm hover:underline">Generate your first pack</button></div>
+                <div className="text-center py-8">
+                  <Database className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                  <p className="text-gray-500 text-sm">No metrics packs yet</p>
+                  <button 
+                    onClick={() => setViewMode('generate')} 
+                    className="mt-3 text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+                  >
+                    Generate your first pack
+                  </button>
+                </div>
               ) : (
                 <div className="space-y-2 max-h-[600px] overflow-y-auto">
                   {metricsPacks.map((pack) => {
                     const isSelected = selectedPack?.id === pack.id;
                     const report = getReportForPack(pack);
                     const packDataParsed = parsePackData(pack.packData);
+                    
                     return (
                       <div
                         key={pack.id}
@@ -498,7 +787,9 @@ export const AIInsightsDashboard: React.FC = () => {
                         <div className="flex items-start gap-3">
                           <div className="flex-1 min-w-0">
                             <div className="font-medium text-gray-900 truncate">{pack.periodLabel}</div>
-                            <div className="text-xs text-gray-500 mt-0.5"><Calendar className="inline w-3 h-3 mr-1" />{formatDate(pack.periodStart)} - {formatDate(pack.periodEnd)}</div>
+                            {pack.periodStart && pack.periodEnd && !isNaN(new Date(pack.periodStart).getTime()) && (
+                              <div className="text-xs text-gray-500 mt-0.5"><Calendar className="inline w-3 h-3 mr-1" />{formatDate(pack.periodStart)} - {formatDate(pack.periodEnd)}</div>
+                            )}
                             <div className="flex items-center gap-2 mt-1.5"><span className="text-xs text-gray-600">{pack.gamesIncluded} games • {pack.venuesIncluded} venues</span></div>
                             {packDataParsed?.strategic?.totalRevenue && <div className="text-sm font-medium text-gray-700 mt-1">{formatCurrency(packDataParsed.strategic.totalRevenue)} revenue</div>}
                           </div>
@@ -534,7 +825,11 @@ export const AIInsightsDashboard: React.FC = () => {
                   <div className="flex items-start justify-between mb-4">
                     <div>
                       <h3 className="text-lg font-semibold">{selectedPack.periodLabel}</h3>
-                      <p className="text-sm text-gray-500">{formatDate(selectedPack.periodStart)} - {formatDate(selectedPack.periodEnd)}{selectedPack.comparisonPeriodLabel && <span className="ml-2 text-gray-400">vs {selectedPack.comparisonPeriodLabel}</span>}</p>
+                      {selectedPack.periodStart && selectedPack.periodEnd && !isNaN(new Date(selectedPack.periodStart).getTime()) ? (
+                        <p className="text-sm text-gray-500">{formatDate(selectedPack.periodStart)} - {formatDate(selectedPack.periodEnd)}{selectedPack.comparisonPeriodLabel && <span className="ml-2 text-gray-400">vs {selectedPack.comparisonPeriodLabel}</span>}</p>
+                      ) : selectedPack.comparisonPeriodLabel ? (
+                        <p className="text-sm text-gray-500">vs {selectedPack.comparisonPeriodLabel}</p>
+                      ) : null}
                     </div>
                     <div className="flex items-center gap-2">
                       {selectedReport && selectedReportData && <ReportDownloadButton report={selectedReport} reportData={selectedReportData} metricsPack={selectedPack} />}
@@ -548,6 +843,11 @@ export const AIInsightsDashboard: React.FC = () => {
                     <div className="text-center p-3 bg-gray-50 rounded-lg"><div className="text-2xl font-bold text-gray-900">{selectedPack.venuesIncluded}</div><div className="text-xs text-gray-500">Venues</div></div>
                     <div className="text-center p-3 bg-gray-50 rounded-lg"><div className="text-2xl font-bold text-gray-900">{selectedPack.snapshotsIncluded}</div><div className="text-xs text-gray-500">Snapshots</div></div>
                     <div className="text-center p-3 bg-gray-50 rounded-lg"><div className="text-2xl font-bold text-gray-900">{selectedPack.dataCompleteness ? `${Math.round(selectedPack.dataCompleteness)}%` : '100%'}</div><div className="text-xs text-gray-500">Data Quality</div></div>
+                  </div>
+
+                  {/* Expandable Venues & Games Details */}
+                  <div className="mb-4">
+                    <PackDetailsExpander packData={selectedPackData} metricsPack={selectedPack} />
                   </div>
 
                   {/* Enhanced Modules Available */}

@@ -290,22 +290,22 @@ export const GameCard: React.FC<GameCardProps> = ({ game, variant }) => {
             <div className={cx(
               "flex flex-col rounded-md px-2 py-1 -mx-2 -my-1",
               (game as FinishedGameData).netProfit != null && (game as FinishedGameData).netProfit! < 0 
-                ? "bg-red-50 dark:bg-red-900/20" 
+                ? "bg-orange-100 dark:bg-orange-900/30 border border-orange-300 dark:border-orange-700" 
                 : (game as FinishedGameData).netProfit != null && (game as FinishedGameData).netProfit! > 0
-                  ? "bg-green-50 dark:bg-green-900/20"
+                  ? "bg-blue-100 dark:bg-blue-900/30 border border-blue-300 dark:border-blue-700"
                   : ""
             )}>
               <span className="text-xs text-gray-500 dark:text-gray-400">Profit/Loss</span>
               <span className={cx(
                 "font-semibold",
                 (game as FinishedGameData).netProfit != null && (game as FinishedGameData).netProfit! < 0
-                  ? "text-red-600 dark:text-red-400"
+                  ? "text-orange-700 dark:text-orange-400"
                   : (game as FinishedGameData).netProfit != null && (game as FinishedGameData).netProfit! > 0
-                    ? "text-green-600 dark:text-green-400"
+                    ? "text-blue-700 dark:text-blue-400"
                     : "text-gray-900 dark:text-gray-50"
               )}>
                 {(game as FinishedGameData).netProfit != null 
-                  ? formatCurrency((game as FinishedGameData).netProfit!)
+                  ? `${(game as FinishedGameData).netProfit! >= 0 ? '+' : ''}${formatCurrency((game as FinishedGameData).netProfit!)}`
                   : '-'
                 }
               </span>
@@ -344,7 +344,7 @@ export const GameCard: React.FC<GameCardProps> = ({ game, variant }) => {
             onClick={(e) => e.stopPropagation()}
             className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 hover:underline"
           >
-            View source →
+            Live Link →
           </a>
         )}
         {'lastRefreshedAt' in game && game.lastRefreshedAt && (() => {

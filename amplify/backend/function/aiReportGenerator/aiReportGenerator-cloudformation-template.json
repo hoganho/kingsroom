@@ -467,6 +467,15 @@
                 "*"
               ],
               "Effect": "Allow"
+            },
+            {
+              "Action": [
+                "lambda:InvokeFunction"
+              ],
+              "Resource": [
+                "arn:aws:lambda:ap-southeast-2:*:function:aiReportGenerator-*"
+              ],
+              "Effect": "Allow"
             }
           ]
         },

@@ -3,15 +3,16 @@
  * ===================================================
  * Generates deterministic MetricsPacks from GameFinancialSnapshot data.
  * 
- * KEY IMPROVEMENTS (v4.0.0):
+ * KEY IMPROVEMENTS (v4.1.0):
  * 1. Name Resolution - Venues and games are resolved to human-readable names
  * 2. Schedule Compliance - Includes cancelled/missed game analysis
  * 3. Recurring Game Trends - Per-game trending with brand strength
  * 4. Series Lifecycle - Active/upcoming/completed series with progress
  * 5. Competitor Analysis - Schedule clashes, market pressure
  * 6. Opportunity Detection - Growth opportunities from data patterns
+ * 7. FIXED: Date validation - Ensures periodStart/periodEnd are always valid ISO strings
  * 
- * @version 4.0.0
+ * @version 4.1.0
  */
 
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
@@ -234,12 +235,43 @@ async function handleGenerateMetricsPack(input) {
     resolved = resolvePeriodSelection(defaultPeriod);
   }
   
+  // VALIDATION: Ensure we have valid dates
+  if (!resolved) {
+    throw new Error('Period resolution returned null');
+  }
+  
+  // Validate startDate and endDate are valid Date objects
+  const isValidDate = (d) => d instanceof Date && !isNaN(d.getTime());
+  
+  if (!isValidDate(resolved.startDate)) {
+    console.error('Invalid startDate resolved:', resolved.startDate, 'from input:', JSON.stringify({ periodSelection, periodKey, reportType }));
+    // Fallback to current period
+    const fallback = reportType === 'MONTHLY_BOARD' ? getMonthBounds(new Date()) : getWeekBounds(new Date());
+    resolved.startDate = fallback.start;
+    resolved.endDate = fallback.end;
+    resolved.periodKey = fallback.key;
+    resolved.periodLabel = fallback.label;
+    warnings.push('Period dates were invalid - defaulted to current period');
+  }
+  
+  if (!isValidDate(resolved.endDate)) {
+    console.error('Invalid endDate resolved:', resolved.endDate);
+    // Use startDate + default period length
+    const msPerDay = 24 * 60 * 60 * 1000;
+    const periodLength = reportType === 'MONTHLY_BOARD' ? 30 : 7;
+    resolved.endDate = new Date(resolved.startDate.getTime() + (periodLength - 1) * msPerDay);
+    warnings.push('Period end date was invalid - calculated from start date');
+  }
+  
   const period = {
     start: resolved.startDate,
     end: resolved.endDate,
     key: resolved.periodKey,
     label: resolved.periodLabel
   };
+  
+  // Log resolved period for debugging
+  console.log(`Resolved period: ${period.key} = ${period.start.toISOString()} to ${period.end.toISOString()}`);
   
   const comparisonPeriod = includeComparison && resolved.comparisonStartDate ? {
     start: resolved.comparisonStartDate,
@@ -385,17 +417,34 @@ async function handleGenerateMetricsPack(input) {
   // ===================================================================
   // BUILD AND STORE PACK
   // ===================================================================
+  
+  // Final validation of dates before storing
+  const periodStartISO = period.start instanceof Date && !isNaN(period.start.getTime()) 
+    ? period.start.toISOString() 
+    : new Date().toISOString();
+  const periodEndISO = period.end instanceof Date && !isNaN(period.end.getTime()) 
+    ? period.end.toISOString() 
+    : new Date().toISOString();
+  
+  if (periodStartISO === periodEndISO) {
+    console.warn('WARNING: periodStart equals periodEnd - dates may be invalid');
+  }
+  
   const pack = {
     id: packId,
     entityId,
     reportType,
     periodKey: period.key,
-    periodStart: period.start.toISOString(),
-    periodEnd: period.end.toISOString(),
+    periodStart: periodStartISO,
+    periodEnd: periodEndISO,
     periodLabel: period.label,
     comparisonPeriodKey: comparisonPeriod?.key || null,
-    comparisonPeriodStart: comparisonPeriod?.start?.toISOString() || null,
-    comparisonPeriodEnd: comparisonPeriod?.end?.toISOString() || null,
+    comparisonPeriodStart: comparisonPeriod?.start instanceof Date && !isNaN(comparisonPeriod.start.getTime()) 
+      ? comparisonPeriod.start.toISOString() 
+      : null,
+    comparisonPeriodEnd: comparisonPeriod?.end instanceof Date && !isNaN(comparisonPeriod.end.getTime()) 
+      ? comparisonPeriod.end.toISOString() 
+      : null,
     comparisonPeriodLabel: comparisonPeriod?.label || null,
     
     // Main pack data - now with real names and enhanced analytics!

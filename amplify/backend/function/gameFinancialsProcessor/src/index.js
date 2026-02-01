@@ -25,9 +25,13 @@ Amplify Params - DO NOT EDIT */
  * GAME FINANCIALS PROCESSOR LAMBDA
  * ===================================================================
  * 
- * VERSION: 2.0.0
+ * VERSION: 2.1.0
  * 
  * CHANGELOG:
+ * - v2.1.0: Added financial field change detection to shouldProcessStreamRecord
+ *           - Now checks for changes to guaranteeOverlayCost, prizepoolAddedValue,
+ *             rakeRevenue, gameProfit, etc. even if dataChangedAt is unchanged
+ *           - Fixes issue where snapshots weren't updated when financial fields changed
  * - v2.0.0: Added totalGuaranteeOverlayCost support
  *           - totalGuaranteeOverlayCost now included in totalCost calculation
  *           - costPerPlayer now reflects total cost including overlay
@@ -111,6 +115,8 @@ const determineIsSeriesParent = (game) => {
  * Check if this stream record represents a meaningful change
  * that requires financial processing.
  * 
+ * v2.1.0: Added explicit financial field change detection
+ * 
  * @param {Object} record - DynamoDB stream record
  * @returns {Object} { shouldProcess: boolean, reason: string }
  */
@@ -150,6 +156,36 @@ const shouldProcessStreamRecord = (record) => {
         
         if (oldHash !== newHash) {
             return { shouldProcess: true, reason: 'contentHash changed' };
+        }
+        
+        // v2.1.0: Check if any financial fields changed
+        // This catches cases where financial calculations were updated
+        // but dataChangedAt/contentHash weren't affected
+        const financialFields = [
+            'guaranteeOverlayCost',
+            'prizepoolAddedValue',
+            'rakeRevenue',
+            'gameProfit',
+            'prizepoolPaid',
+            'prizepoolPlayerContributions',
+            'totalBuyInsCollected',
+            'hasGuarantee',
+            'guaranteeAmount',
+            'venueFee'
+        ];
+        
+        const changedFinancialFields = financialFields.filter(field => {
+            const oldVal = oldImage[field];
+            const newVal = newImage[field];
+            // Handle null/undefined/0 comparisons
+            const oldNorm = oldVal ?? 0;
+            const newNorm = newVal ?? 0;
+            return oldNorm !== newNorm;
+        });
+        
+        if (changedFinancialFields.length > 0) {
+            console.log(`[FINANCIALS] Financial fields changed: ${changedFinancialFields.join(', ')}`);
+            return { shouldProcess: true, reason: `Financial fields changed: ${changedFinancialFields.join(', ')}` };
         }
         
         // No meaningful change
@@ -830,7 +866,7 @@ const processGameFinancials = async (game, options = {}) => {
 // ===================================================================
 
 exports.handler = async (event) => {
-    console.log('[FINANCIALS] v2.0.0 - With totalGuaranteeOverlayCost in totalCost');
+    console.log('[FINANCIALS] v2.1.0 - With financial field change detection');
     
     // Check if this is a DynamoDB Stream event
     if (event.Records && Array.isArray(event.Records)) {

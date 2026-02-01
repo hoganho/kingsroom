@@ -1,7 +1,13 @@
 // src/pages/venues/VenueGameDetails.tsx
-// VERSION: 3.12.0 - Navigate to GameDetails page instead of edit modal
+// VERSION: 3.13.1 - Average Guarantee label fix
 //
 // CHANGELOG:
+// - v3.13.1: Changed "Typical Guarantee" to "Average Guarantee"
+//           - Always shows field with "N/A" if value is 0 or missing
+// - v3.13.0: P&L table column improvements
+//           - Moved GTD column to after COSTS
+//           - Buy-In now shows base + rake: "$100 (+$20)" format
+//           - Added UNQ/ENT column showing totalUniquePlayers/totalEntries
 // - v3.12.0: Launch icon now navigates to GameDetails page
 //           - Removed edit modal from this page
 //           - Click launch icon to open /games/details/:gameId
@@ -101,6 +107,7 @@ import {
   calculateTrendInfo, 
   calculateLinearRegression 
 } from '../../components/ui/TrendBadge';
+import { IncomeStatement } from '../../components/financial';
 
 // ---- Time range utilities ----
 
@@ -1090,9 +1097,32 @@ const PLRow: React.FC<PLRowProps> = ({ enrichedInstance, onNavigateToGame }) => 
           )}
         </td>
 
-        {/* Buy-In */}
+        {/* Guarantee - moved after Costs */}
+        <td className="px-1 py-1 text-xs text-right text-gray-700 whitespace-nowrap hidden xl:table-cell">
+          {hasData && game?.hasGuarantee && game?.guaranteeAmount
+            ? formatCurrency(game.guaranteeAmount)
+            : '-'}
+        </td>
+
+        {/* Buy-In - shows base (+rake) format */}
         <td className="px-1 py-1 text-xs text-right text-gray-700 whitespace-nowrap hidden lg:table-cell">
-          {hasData && game?.buyIn ? formatCurrency(game.buyIn) : '-'}
+          {hasData && game?.buyIn ? (
+            game?.rake && game.rake > 0 ? (
+              <span>
+                {formatCurrency(game.buyIn - game.rake)}
+                <span className="text-gray-400 ml-0.5">(+{formatCurrency(game.rake)})</span>
+              </span>
+            ) : (
+              formatCurrency(game.buyIn)
+            )
+          ) : '-'}
+        </td>
+
+        {/* Unique Players / Total Entries */}
+        <td className="px-1 py-1 text-xs text-right text-gray-700 whitespace-nowrap hidden lg:table-cell">
+          {hasData && (game?.totalUniquePlayers != null || game?.totalEntries != null) ? (
+            <span>{game?.totalUniquePlayers ?? 0}/{game?.totalEntries ?? 0}</span>
+          ) : '-'}
         </td>
 
         {/* Prizepool */}
@@ -1101,16 +1131,9 @@ const PLRow: React.FC<PLRowProps> = ({ enrichedInstance, onNavigateToGame }) => 
         </td>
 
         {/* Prizepool Delta */}
-        <td className="px-1 py-1 text-xs text-right text-gray-700 whitespace-nowrap hidden lg:table-cell">
+        <td className="px-1 py-1 text-xs text-right text-gray-700 whitespace-nowrap hidden lg:table-cell pr-2">
           {hasFinancials && financialSnapshot?.prizepoolPaidDelta != null 
             ? formatCurrency(financialSnapshot.prizepoolPaidDelta) 
-            : '-'}
-        </td>
-
-        {/* Guarantee */}
-        <td className="px-1 py-1 text-xs text-right text-gray-700 whitespace-nowrap hidden xl:table-cell pr-2">
-          {hasData && game?.hasGuarantee && game?.guaranteeAmount
-            ? formatCurrency(game.guaranteeAmount)
             : '-'}
         </td>
       </tr>
@@ -1118,7 +1141,7 @@ const PLRow: React.FC<PLRowProps> = ({ enrichedInstance, onNavigateToGame }) => 
       {/* Expanded Details Row - Income Statement Format */}
       {isExpanded && hasData && (
         <tr className="bg-slate-50/80 border-b border-gray-200">
-          <td colSpan={11} className="px-3 py-3">
+          <td colSpan={12} className="px-3 py-3">
             {/* Header: Game Info */}
             <div className="flex items-start justify-between mb-3 pb-2 border-b border-gray-200">
               <div>
@@ -1145,277 +1168,11 @@ const PLRow: React.FC<PLRowProps> = ({ enrichedInstance, onNavigateToGame }) => 
             </div>
 
             {/* Income Statement Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-              
-              {/* Column 1: Revenue */}
-              <div>
-                <div className="font-semibold text-gray-700 uppercase tracking-wide text-[10px] mb-1.5 pb-1 border-b border-gray-200">
-                  Revenue
-                </div>
-                <div className="space-y-1">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Rake Revenue</span>
-                    <span className="text-gray-900">{formatCurrency(financialSnapshot?.rakeRevenue)}</span>
-                  </div>
-                  {(financialSnapshot?.venueFee ?? 0) > 0 && (
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Venue Fee</span>
-                      <span className="text-gray-900">{formatCurrency(financialSnapshot?.venueFee)}</span>
-                    </div>
-                  )}
-                </div>
-                <div className="flex justify-between mt-2 pt-1.5 border-t border-gray-300 font-semibold">
-                  <span className="text-gray-700">Total Revenue</span>
-                  <span className="text-emerald-600">{formatCurrency(financialSnapshot?.totalRevenue)}</span>
-                </div>
-
-                {/* Prizepool Info (non-financial context) */}
-                <div className="mt-3 pt-2 border-t border-dashed border-gray-200">
-                  <div className="font-semibold text-gray-700 uppercase tracking-wide text-[10px] mb-1">
-                    Prizepool
-                  </div>
-                  <div className="space-y-0.5 text-gray-500">
-                    <div className="flex justify-between">
-                      <span>Player Contrib.</span>
-                      <span>{formatCurrency(financialSnapshot?.prizepoolPlayerContributions)}</span>
-                    </div>
-                    {(financialSnapshot?.prizepoolAddedValue ?? 0) > 0 && (
-                      <div className="flex justify-between">
-                        <span>Added Value</span>
-                        <span>{formatCurrency(financialSnapshot?.prizepoolAddedValue)}</span>
-                      </div>
-                    )}
-                    <div className="flex justify-between font-medium text-gray-700">
-                      <span>Total Paid</span>
-                      <span>{formatCurrency(game?.prizepoolPaid)}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Column 2: Costs */}
-              <div>
-                <div className="font-semibold text-gray-700 uppercase tracking-wide text-[10px] mb-1.5 pb-1 border-b border-gray-200">
-                  Costs
-                </div>
-                
-                {/* Staff Costs */}
-                {((financialSnapshot?.totalDealerCost ?? 0) > 0 || 
-                  (financialSnapshot?.totalTournamentDirectorCost ?? 0) > 0 ||
-                  (financialSnapshot?.totalFloorStaffCost ?? 0) > 0 ||
-                  (financialSnapshot?.totalSecurityCost ?? 0) > 0) && (
-                  <div className="mb-2">
-                    <div className="text-[10px] text-gray-500 uppercase mb-0.5">Staff</div>
-                    <div className="space-y-0.5 pl-2 border-l-2 border-gray-200">
-                      {(financialSnapshot?.totalDealerCost ?? 0) > 0 && (
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Dealers</span>
-                          <span className="text-red-600">{formatCurrency(financialSnapshot?.totalDealerCost)}</span>
-                        </div>
-                      )}
-                      {(financialSnapshot?.totalTournamentDirectorCost ?? 0) > 0 && (
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Tournament Director</span>
-                          <span className="text-red-600">{formatCurrency(financialSnapshot?.totalTournamentDirectorCost)}</span>
-                        </div>
-                      )}
-                      {(financialSnapshot?.totalFloorStaffCost ?? 0) > 0 && (
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Floor Staff</span>
-                          <span className="text-red-600">{formatCurrency(financialSnapshot?.totalFloorStaffCost)}</span>
-                        </div>
-                      )}
-                      {(financialSnapshot?.totalSecurityCost ?? 0) > 0 && (
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Security</span>
-                          <span className="text-red-600">{formatCurrency(financialSnapshot?.totalSecurityCost)}</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* Prize/Guarantee Costs */}
-                {((financialSnapshot?.totalGuaranteeOverlayCost ?? 0) > 0 || 
-                  (financialSnapshot?.totalAddedValueCost ?? 0) > 0 ||
-                  (financialSnapshot?.totalPrizeContribution ?? 0) > 0 ||
-                  (financialSnapshot?.totalJackpotContribution ?? 0) > 0 ||
-                  (financialSnapshot?.totalBountyCost ?? 0) > 0) && (
-                  <div className="mb-2">
-                    <div className="text-[10px] text-gray-500 uppercase mb-0.5">Prize & Guarantee</div>
-                    <div className="space-y-0.5 pl-2 border-l-2 border-gray-200">
-                      {(financialSnapshot?.totalGuaranteeOverlayCost ?? 0) > 0 && (
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Guarantee Overlay</span>
-                          <span className="text-red-600">{formatCurrency(financialSnapshot?.totalGuaranteeOverlayCost)}</span>
-                        </div>
-                      )}
-                      {(financialSnapshot?.totalAddedValueCost ?? 0) > 0 && (
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Added Value</span>
-                          <span className="text-red-600">{formatCurrency(financialSnapshot?.totalAddedValueCost)}</span>
-                        </div>
-                      )}
-                      {(financialSnapshot?.totalPrizeContribution ?? 0) > 0 && (
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Prize Contribution</span>
-                          <span className="text-red-600">{formatCurrency(financialSnapshot?.totalPrizeContribution)}</span>
-                        </div>
-                      )}
-                      {(financialSnapshot?.totalJackpotContribution ?? 0) > 0 && (
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Jackpot Contrib.</span>
-                          <span className="text-red-600">{formatCurrency(financialSnapshot?.totalJackpotContribution)}</span>
-                        </div>
-                      )}
-                      {(financialSnapshot?.totalBountyCost ?? 0) > 0 && (
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Bounty</span>
-                          <span className="text-red-600">{formatCurrency(financialSnapshot?.totalBountyCost)}</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* Operating Costs */}
-                {((financialSnapshot?.totalVenueRentalCost ?? 0) > 0 || 
-                  (financialSnapshot?.totalEquipmentRentalCost ?? 0) > 0 ||
-                  (financialSnapshot?.totalFoodBeverageCost ?? 0) > 0 ||
-                  (financialSnapshot?.totalMarketingCost ?? 0) > 0 ||
-                  (financialSnapshot?.totalPromotionCost ?? 0) > 0 ||
-                  (financialSnapshot?.totalOtherCost ?? 0) > 0) && (
-                  <div className="mb-2">
-                    <div className="text-[10px] text-gray-500 uppercase mb-0.5">Operating</div>
-                    <div className="space-y-0.5 pl-2 border-l-2 border-gray-200">
-                      {(financialSnapshot?.totalVenueRentalCost ?? 0) > 0 && (
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Venue Rental</span>
-                          <span className="text-red-600">{formatCurrency(financialSnapshot?.totalVenueRentalCost)}</span>
-                        </div>
-                      )}
-                      {(financialSnapshot?.totalEquipmentRentalCost ?? 0) > 0 && (
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Equipment</span>
-                          <span className="text-red-600">{formatCurrency(financialSnapshot?.totalEquipmentRentalCost)}</span>
-                        </div>
-                      )}
-                      {(financialSnapshot?.totalFoodBeverageCost ?? 0) > 0 && (
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">F&B</span>
-                          <span className="text-red-600">{formatCurrency(financialSnapshot?.totalFoodBeverageCost)}</span>
-                        </div>
-                      )}
-                      {(financialSnapshot?.totalMarketingCost ?? 0) > 0 && (
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Marketing</span>
-                          <span className="text-red-600">{formatCurrency(financialSnapshot?.totalMarketingCost)}</span>
-                        </div>
-                      )}
-                      {(financialSnapshot?.totalPromotionCost ?? 0) > 0 && (
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Promotion</span>
-                          <span className="text-red-600">{formatCurrency(financialSnapshot?.totalPromotionCost)}</span>
-                        </div>
-                      )}
-                      {(financialSnapshot?.totalOtherCost ?? 0) > 0 && (
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Other</span>
-                          <span className="text-red-600">{formatCurrency(financialSnapshot?.totalOtherCost)}</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                <div className="flex justify-between mt-2 pt-1.5 border-t border-gray-300 font-semibold">
-                  <span className="text-gray-700">Total Costs</span>
-                  <span className="text-red-600">{formatCurrency(financialSnapshot?.totalCost)}</span>
-                </div>
-              </div>
-
-              {/* Column 3: Summary / Net Profit */}
-              <div>
-                <div className="font-semibold text-gray-700 uppercase tracking-wide text-[10px] mb-1.5 pb-1 border-b border-gray-200">
-                  Summary
-                </div>
-                
-                <div className="space-y-1.5">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Revenue</span>
-                    <span className="text-emerald-600">{formatCurrency(financialSnapshot?.totalRevenue)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Less: Costs</span>
-                    <span className="text-red-600">({formatCurrency(Math.abs(financialSnapshot?.totalCost ?? 0))})</span>
-                  </div>
-                  <div className="flex justify-between pt-2 mt-1 border-t-2 border-gray-400 font-bold text-sm">
-                    <span className="text-gray-900">Net Profit</span>
-                    <span className={netProfit >= 0 ? 'text-emerald-600' : 'text-red-600'}>
-                      {formatCurrency(netProfit)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-gray-500">
-                    <span>Margin</span>
-                    <span className={profitMargin !== null && profitMargin >= 0 ? 'text-emerald-600' : 'text-red-600'}>
-                      {profitMargin !== null ? `${(profitMargin * 100).toFixed(1)}%` : '-'}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Per Player Metrics */}
-                <div className="mt-3 pt-2 border-t border-dashed border-gray-200">
-                  <div className="font-semibold text-gray-700 uppercase tracking-wide text-[10px] mb-1">
-                    Per Player
-                  </div>
-                  <div className="space-y-0.5 text-gray-500">
-                    <div className="flex justify-between">
-                      <span>Revenue</span>
-                      <span>{formatCurrency(financialSnapshot?.revenuePerPlayer)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Cost</span>
-                      <span>{formatCurrency(financialSnapshot?.costPerPlayer)}</span>
-                    </div>
-                    <div className="flex justify-between font-medium text-gray-700">
-                      <span>Profit</span>
-                      <span className={((financialSnapshot?.profitPerPlayer ?? 0) >= 0) ? 'text-emerald-600' : 'text-red-600'}>
-                        {formatCurrency(financialSnapshot?.profitPerPlayer)}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Guarantee Info */}
-                {game?.hasGuarantee && (
-                  <div className="mt-3 pt-2 border-t border-dashed border-gray-200">
-                    <div className="font-semibold text-gray-700 uppercase tracking-wide text-[10px] mb-1">
-                      Guarantee
-                    </div>
-                    <div className="space-y-0.5 text-gray-500">
-                      <div className="flex justify-between">
-                        <span>Amount</span>
-                        <span>{formatCurrency(game?.guaranteeAmount)}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Coverage</span>
-                        <span className={((financialSnapshot?.guaranteeCoverageRate ?? 0) >= 1) ? 'text-emerald-600' : 'text-amber-600'}>
-                          {financialSnapshot?.guaranteeCoverageRate 
-                            ? `${(financialSnapshot.guaranteeCoverageRate * 100).toFixed(0)}%` 
-                            : '-'}
-                        </span>
-                      </div>
-                      {(financialSnapshot?.totalGuaranteeOverlayCost ?? 0) > 0 && (
-                        <div className="flex justify-between font-medium">
-                          <span>Overlay</span>
-                          <span className="text-red-600">{formatCurrency(financialSnapshot?.totalGuaranteeOverlayCost)}</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
+            <IncomeStatement
+                game={game}
+                financialSnapshot={financialSnapshot}
+                showSupplementary={false}
+            />
 
             {/* Notes */}
             {instance.notes && (
@@ -1774,12 +1531,12 @@ export const VenueGameDetails: React.FC = () => {
                 <Text className="font-medium">{formatCurrency(recurringGame.typicalBuyIn)}</Text>
               </div>
             )}
-            {recurringGame.typicalGuarantee && (
-              <div>
-                <Text className="text-xs text-gray-500">Typical Guarantee</Text>
-                <Text className="font-medium">{formatCurrency(recurringGame.typicalGuarantee)}</Text>
-              </div>
-            )}
+            <div>
+              <Text className="text-xs text-gray-500">Average Guarantee</Text>
+              <Text className="font-medium">
+                {recurringGame.typicalGuarantee ? formatCurrency(recurringGame.typicalGuarantee) : 'N/A'}
+              </Text>
+            </div>
             {recurringGame.gameVariant && (
               <div>
                 <Text className="text-xs text-gray-500">Variant</Text>
@@ -1859,10 +1616,11 @@ export const VenueGameDetails: React.FC = () => {
                 <th className="px-1 py-2 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide">Marg</th>
                 <th className="px-1 py-2 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide hidden sm:table-cell">Rev</th>
                 <th className="px-1 py-2 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide hidden sm:table-cell">Costs</th>
+                <th className="px-1 py-2 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide hidden xl:table-cell">GTD</th>
                 <th className="px-1 py-2 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide hidden lg:table-cell">Buy-In</th>
+                <th className="px-1 py-2 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide hidden lg:table-cell" title="Unique Players / Total Entries">UNQ/ENT</th>
                 <th className="px-1 py-2 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide hidden lg:table-cell">PP</th>
-                <th className="px-1 py-2 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide hidden lg:table-cell" title="Prizepool discrepancy between calculated for players and advertised">PP-Disc</th>
-                <th className="px-1 py-2 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide hidden xl:table-cell pr-2">GTD</th>
+                <th className="px-1 py-2 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide hidden lg:table-cell pr-2" title="Prizepool discrepancy between calculated for players and advertised">PP-Disc</th>
               </tr>
             </thead>
             <tbody className="bg-white">
@@ -1875,7 +1633,7 @@ export const VenueGameDetails: React.FC = () => {
               ))}
               {enrichedInstances.length === 0 && (
                 <tr>
-                  <td className="px-2 py-4 text-center text-xs text-gray-500" colSpan={11}>
+                  <td className="px-2 py-4 text-center text-xs text-gray-500" colSpan={12}>
                     No game instances found for this recurring game.
                   </td>
                 </tr>
@@ -1909,10 +1667,11 @@ export const VenueGameDetails: React.FC = () => {
                   <td className="px-1 py-1.5 text-xs text-right text-red-600 whitespace-nowrap hidden sm:table-cell">
                     {formatCurrency(summaryStats.totalCost)}
                   </td>
+                  <td className="px-1 py-1.5 hidden xl:table-cell"></td>
                   <td className="px-1 py-1.5 hidden lg:table-cell"></td>
                   <td className="px-1 py-1.5 hidden lg:table-cell"></td>
                   <td className="px-1 py-1.5 hidden lg:table-cell"></td>
-                  <td className="px-1 py-1.5 hidden xl:table-cell pr-2"></td>
+                  <td className="px-1 py-1.5 hidden lg:table-cell pr-2"></td>
                 </tr>
               </tfoot>
             )}

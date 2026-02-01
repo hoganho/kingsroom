@@ -4,7 +4,7 @@
   "Parameters": {
     "CloudWatchRule": {
       "Type": "String",
-      "Default": "cron(0 6 * * ? *)",
+      "Default": "cron(15 20 * * ? *)",
       "Description": "Schedule Expression for recurring game instance backfill. Default: 06:00 UTC daily (4pm AEST). Set to NONE to disable."
     },
     "deploymentBucketName": {

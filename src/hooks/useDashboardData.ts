@@ -107,8 +107,10 @@ const listRecentlyFinishedByEntity = /* GraphQL */ `
         isRecurring
         recurringGameName
         sourceUrl
-        gameFinancialSnapshot {
-          netProfit
+        game {
+          gameFinancialSnapshot {
+            netProfit
+          }
         }
       }
       nextToken
@@ -490,12 +492,12 @@ export const useDashboardData = (): UseDashboardDataReturn => {
       results.forEach(result => {
         const typedResult = result as GraphQLResult<RecentlyFinishedByEntityData>;
         if (typedResult.data?.recentlyFinishedByEntity?.items) {
-          // Map gameFinancialSnapshot.netProfit to flat netProfit field
+          // Map nested game.gameFinancialSnapshot.netProfit to flat netProfit field
           const mappedItems = typedResult.data.recentlyFinishedByEntity.items
             .filter(Boolean)
-            .map((item: FinishedGameData & { gameFinancialSnapshot?: { netProfit?: number | null } | null }) => ({
+            .map((item: FinishedGameData & { game?: { gameFinancialSnapshot?: { netProfit?: number | null } | null } | null }) => ({
               ...item,
-              netProfit: item.gameFinancialSnapshot?.netProfit ?? null,
+              netProfit: item.game?.gameFinancialSnapshot?.netProfit ?? null,
             }));
           finished.push(...mappedItems);
         }

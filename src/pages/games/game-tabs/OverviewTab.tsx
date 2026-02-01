@@ -70,6 +70,12 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({ game, structure }) => 
             <DetailRow label="Max Players" value={game.maxPlayers} />
             <DetailRow label="Deal Type" value={game.dealType?.replace(/_/g, ' ')} />
             <DetailRow label="Dealer Dealt" value={game.dealerDealt ? 'Yes' : 'No'} />
+            {game.hasGuarantee && (
+              <DetailRow 
+                label="Guarantee" 
+                value={game.guaranteeAmount ? `$${game.guaranteeAmount.toLocaleString()}` : '-'} 
+              />
+            )}
           </dl>
         </SectionCard>
 

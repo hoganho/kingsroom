@@ -15,7 +15,11 @@ Amplify Params - DO NOT EDIT */
  * ==========================================
  * Transforms MetricsPacks into AI-generated DirectorReports
  * 
- * VERSION: 3.0.0 - Async pattern with polling
+ * VERSION: 3.1.0 - Fixed reportVersion field (was not being set)
+ * 
+ * Changes from v3.0:
+ * - Now properly sets reportVersion field (required Int!)
+ * - Increments version on regeneration
  * 
  * Changes from v2:
  * - Returns immediately with PENDING status
@@ -218,6 +222,12 @@ async function handleGenerateDirectorReport(input, context) {
     }
     
     // Step 4: Create PENDING report record
+    // Determine report version (increment if regenerating, otherwise start at 1)
+    const existingForVersion = await getDirectorReportById(reportId);
+    const reportVersion = existingForVersion?.reportVersion 
+      ? existingForVersion.reportVersion + 1 
+      : 1;
+    
     const pendingReport = {
       id: reportId,
       entityId,
@@ -233,6 +243,7 @@ async function handleGenerateDirectorReport(input, context) {
       requestedAt: new Date().toISOString(),
       requestedModel: model,
       requestedProvider: provider,
+      reportVersion,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
