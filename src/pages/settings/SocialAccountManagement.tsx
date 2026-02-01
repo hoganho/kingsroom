@@ -8,6 +8,7 @@ import { ManualPostUploadTab } from '../../components/social/ManualPostUploadTab
 import { UnprocessedPostsTab } from '../../components/social/UnprocessedPostsTab';
 import { SocialPostsTab } from '../../components/social/SocialPostsTab';
 import { ScrapeDiscrepanciesTab } from '../../components/social/ScrapeDiscrepanciesTab';
+import { SyncProgressModal } from '../../components/social/SyncProgressModal';
 import { DeleteConfirmationModal } from '../../components/entities/DeleteConfirmationModal';
 import { useSocialAccounts, SocialAccount, CreateSocialAccountInput, UpdateSocialAccountInput } from '../../hooks/useSocialAccounts';
 
@@ -49,12 +50,9 @@ import {
   ArrowUpTrayIcon,
   PlayIcon,
 } from '@heroicons/react/24/outline';
-import { Loader2, Database, AlertCircle, Facebook, Link2 } from 'lucide-react';
+import { Loader2, AlertCircle, Facebook, Link2 } from 'lucide-react';
 
-// =====================================================
 // GraphQL Operations
-// =====================================================
-
 const triggerSocialScrape = /* GraphQL */ `
   mutation TriggerSocialScrape($socialAccountId: ID!) {
     triggerSocialScrape(socialAccountId: $socialAccountId) {
@@ -92,9 +90,59 @@ const syncPageInfo = /* GraphQL */ `
   }
 `;
 
-// Subscription for real-time sync progress updates
+// Enhanced subscription for real-time sync progress updates with post details
 const onSyncProgress = /* GraphQL */ `
   subscription OnSyncProgress($socialAccountId: ID!) {
+    onSyncProgress(socialAccountId: $socialAccountId) {
+      socialAccountId
+      status
+      message
+      postsFound
+      newPostsAdded
+      duplicatesSkipped
+      rateLimited
+      pagesCompleted
+      totalPages
+      currentPagePosts
+      currentPost {
+        platformPostId
+        content
+        contentPreview
+        postType
+        postedAt
+        mediaUrls
+        thumbnailUrl
+        likeCount
+        commentCount
+        shareCount
+        isNew
+        isDuplicate
+      }
+      recentPosts {
+        platformPostId
+        content
+        contentPreview
+        postType
+        postedAt
+        mediaUrls
+        thumbnailUrl
+        likeCount
+        commentCount
+        shareCount
+        isNew
+        isDuplicate
+      }
+      estimatedTimeRemaining
+      averagePostsPerPage
+      completedAt
+      attemptId
+    }
+  }
+`;
+
+// Fallback subscription if enhanced fields not yet deployed
+const onSyncProgressBasic = /* GraphQL */ `
+  subscription OnSyncProgressBasic($socialAccountId: ID!) {
     onSyncProgress(socialAccountId: $socialAccountId) {
       socialAccountId
       status
@@ -108,10 +156,7 @@ const onSyncProgress = /* GraphQL */ `
   }
 `;
 
-// =====================================================
 // Types
-// =====================================================
-
 interface Entity {
   id: string;
   entityName: string;
@@ -134,15 +179,40 @@ interface FullSyncResult {
   oldestPostDate?: string;
 }
 
+// Enhanced SyncProgressPost type for individual post details
+interface SyncProgressPost {
+  platformPostId: string;
+  content?: string;
+  contentPreview?: string;
+  postType?: string;
+  postedAt?: string;
+  mediaUrls?: string[];
+  thumbnailUrl?: string;
+  likeCount?: number;
+  commentCount?: number;
+  shareCount?: number;
+  isNew?: boolean;
+  isDuplicate?: boolean;
+}
+
+// Enhanced SyncProgressEvent with post details
 interface SyncProgressEvent {
   socialAccountId: string;
-  status: 'STARTED' | 'IN_PROGRESS' | 'COMPLETED' | 'RATE_LIMITED' | 'FAILED';
+  status: 'STARTED' | 'IN_PROGRESS' | 'COMPLETED' | 'RATE_LIMITED' | 'FAILED' | 'FETCHING_PAGE' | 'PROCESSING_POST';
   message?: string;
   postsFound?: number;
   newPostsAdded?: number;
+  duplicatesSkipped?: number;
   rateLimited?: boolean;
   pagesCompleted?: number;
+  totalPages?: number;
+  currentPagePosts?: number;
+  currentPost?: SyncProgressPost;
+  recentPosts?: SyncProgressPost[];
+  estimatedTimeRemaining?: number;
+  averagePostsPerPage?: number;
   completedAt?: string;
+  attemptId?: string;
 }
 
 type TabType = 'accounts' | 'upload' | 'unprocessed' | 'posts' | 'discrepancies';
@@ -152,170 +222,7 @@ function hasGraphQLData<T>(response: unknown): response is { data: T } {
   return response !== null && typeof response === 'object' && 'data' in response;
 }
 
-// =====================================================
-// Full Sync Warning Modal
-// =====================================================
-
-interface FullSyncWarningModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onConfirm: () => void;
-  account: SocialAccount | null;
-  isLoading: boolean;
-  progressMessage?: string;
-}
-
-const FullSyncWarningModal: React.FC<FullSyncWarningModalProps> = ({
-  isOpen,
-  onClose,
-  onConfirm,
-  account,
-  isLoading,
-  progressMessage
-}) => {
-  if (!isOpen || !account) return null;
-
-  const hasFullHistory = account.hasFullHistory;
-  const hasIncompleteSync = !!(account as any).fullSyncOldestPostDate;
-  const isResume = hasIncompleteSync && !hasFullHistory;
-
-  return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex min-h-screen items-center justify-center p-4">
-        <div 
-          className="fixed inset-0 bg-black/50 transition-opacity"
-          onClick={!isLoading ? onClose : undefined}
-        />
-
-        <div className="relative bg-white rounded-xl shadow-xl max-w-md w-full p-6 z-10">
-          <div className={`mx-auto flex items-center justify-center h-12 w-12 rounded-full ${
-            isLoading ? 'bg-indigo-100' : isResume ? 'bg-green-100' : hasFullHistory ? 'bg-amber-100' : 'bg-blue-100'
-          }`}>
-            {isLoading ? (
-              <Loader2 className="h-6 w-6 text-indigo-600 animate-spin" />
-            ) : isResume ? (
-              <PlayIcon className="h-6 w-6 text-green-600" />
-            ) : hasFullHistory ? (
-              <ExclamationTriangleIcon className="h-6 w-6 text-amber-600" />
-            ) : (
-              <Database className="h-6 w-6 text-blue-600" />
-            )}
-          </div>
-
-          <h3 className="mt-4 text-lg font-semibold text-gray-900 text-center">
-            {isLoading 
-              ? 'Syncing in Progress...'
-              : isResume 
-                ? 'Resume Full Sync' 
-                : hasFullHistory 
-                  ? 'Full History Already Synced' 
-                  : 'Fetch All Historical Posts'}
-          </h3>
-
-          <div className="mt-3 text-sm text-gray-600">
-            {isLoading ? (
-              <div className="text-center">
-                <p className="mb-3 text-indigo-700 font-medium">
-                  {progressMessage || 'Starting sync...'}
-                </p>
-                <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-3">
-                  <p className="text-indigo-800 text-xs">
-                    This may take several minutes. You can close this dialog - the sync will continue in the background and you'll be notified when it completes.
-                  </p>
-                </div>
-              </div>
-            ) : isResume ? (
-              <>
-                <p className="mb-3">
-                  <strong className="text-green-700">{account.accountName}</strong> has a partial sync in progress.
-                </p>
-                <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-3">
-                  <p className="text-green-800">
-                    <strong>Good news:</strong> {account.postCount || 0} posts have already been saved. 
-                    Click "Resume" to continue fetching older posts from where we left off.
-                  </p>
-                </div>
-                <p className="text-gray-500 text-xs">
-                  Last sync stopped at: {new Date((account as any).fullSyncOldestPostDate).toLocaleDateString()}
-                </p>
-              </>
-            ) : hasFullHistory ? (
-              <>
-                <p className="mb-3">
-                  <strong className="text-amber-700">{account.accountName}</strong> has already had a full history sync performed.
-                </p>
-                <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-3">
-                  <p className="text-amber-800">
-                    <strong>Note:</strong> Running a full sync again will re-scan all posts, but duplicates won't be saved. This may take several minutes and use API quota.
-                  </p>
-                </div>
-                <p>
-                  For new posts only, use the regular <strong>"Fetch Posts"</strong> button instead.
-                </p>
-              </>
-            ) : (
-              <>
-                <p className="mb-3">
-                  This will fetch <strong>all historical posts</strong> from <strong className="text-indigo-600">{account.accountName}</strong>.
-                </p>
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-3">
-                  <ul className="list-disc list-inside space-y-1 text-blue-800">
-                    <li>May take several minutes depending on post count</li>
-                    <li>Fetches up to 5,000 posts maximum</li>
-                    <li>Uses Facebook API quota</li>
-                    <li><strong>Progress is saved automatically</strong> - if interrupted, you can resume</li>
-                  </ul>
-                </div>
-                <p>
-                  After the initial sync, regular fetches will only get new posts since the last sync.
-                </p>
-              </>
-            )}
-          </div>
-
-          <div className="mt-6 flex gap-3">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-              {isLoading ? 'Close (Sync Continues)' : 'Cancel'}
-            </button>
-            {!isLoading && (
-              <button
-                type="button"
-                onClick={onConfirm}
-                className={`flex-1 px-4 py-2 text-sm font-medium text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 flex items-center justify-center gap-2 ${
-                  isResume 
-                    ? 'bg-green-600 hover:bg-green-700 focus:ring-green-500'
-                    : hasFullHistory 
-                      ? 'bg-amber-600 hover:bg-amber-700 focus:ring-amber-500' 
-                      : 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500'
-                }`}
-              >
-                {isResume ? (
-                  <>
-                    <PlayIcon className="w-4 h-4" />
-                    Resume Sync
-                  </>
-                ) : hasFullHistory ? (
-                  'Re-sync All Posts'
-                ) : (
-                  'Start Full Sync'
-                )}
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// =====================================================
 // Rate Limit Info Banner
-// =====================================================
-
 interface RateLimitBannerProps {
   accountName: string;
   postsSaved: number;
@@ -360,10 +267,7 @@ const RateLimitBanner: React.FC<RateLimitBannerProps> = ({
   </div>
 );
 
-// =====================================================
 // Main Component
-// =====================================================
-
 export const SocialAccountManagement: React.FC = () => {
   const client = useMemo(() => generateClient(), []);
   
@@ -396,6 +300,7 @@ export const SocialAccountManagement: React.FC = () => {
   const [fullSyncAccount, setFullSyncAccount] = useState<SocialAccount | null>(null);
   const [isFullSyncing, setIsFullSyncing] = useState(false);
   const [syncProgressMessage, setSyncProgressMessage] = useState<string>('');
+  const [syncProgressEvent, setSyncProgressEvent] = useState<SyncProgressEvent | null>(null);
   
   // Logo refresh state
   const [refreshingLogoAccountId, setRefreshingLogoAccountId] = useState<string | null>(null);
@@ -408,6 +313,9 @@ export const SocialAccountManagement: React.FC = () => {
 
   // Subscription ref for cleanup
   const syncSubscriptionRef = useRef<any>(null);
+  
+  // Track if we're using enhanced subscription
+  const usingEnhancedSubscription = useRef<boolean>(true);
 
   // Cleanup subscription on unmount
   useEffect(() => {
@@ -591,20 +499,36 @@ export const SocialAccountManagement: React.FC = () => {
     setFullSyncAccount(account);
     setIsFullSyncModalOpen(true);
     setSyncProgressMessage('');
+    setSyncProgressEvent(null);
   }, []);
 
   // Handle sync progress subscription event
   const handleSyncProgressEvent = useCallback((event: SyncProgressEvent, accountName: string) => {
     console.log('Sync progress event:', event);
     
+    // Store the full event for the enhanced modal
+    setSyncProgressEvent(event);
+    
     switch (event.status) {
       case 'STARTED':
         setSyncProgressMessage(event.message || 'Starting sync...');
         break;
+      
+      case 'FETCHING_PAGE':
+        setSyncProgressMessage(
+          event.message || `Fetching page ${event.pagesCompleted || 0}${event.totalPages ? ` of ~${event.totalPages}` : ''}...`
+        );
+        break;
+      
+      case 'PROCESSING_POST':
+        setSyncProgressMessage(
+          event.message || `Processing posts... (${event.newPostsAdded || 0} new)`
+        );
+        break;
         
       case 'IN_PROGRESS':
         setSyncProgressMessage(
-            event.message || `Fetched ${event.pagesCompleted || 0} pages... (${event.newPostsAdded || 0} new posts saved)`
+          event.message || `Fetched ${event.pagesCompleted || 0} pages... (${event.newPostsAdded || 0} new posts saved)`
         );
         break;
         
@@ -613,6 +537,7 @@ export const SocialAccountManagement: React.FC = () => {
         setIsFullSyncModalOpen(false);
         setFullSyncAccount(null);
         setSyncProgressMessage('');
+        setSyncProgressEvent(null);
         setSuccessMessage(
           `Full sync complete for ${accountName}: ${event.newPostsAdded || 0} new posts saved (scanned ${event.postsFound || 0} total)`
         );
@@ -629,6 +554,7 @@ export const SocialAccountManagement: React.FC = () => {
         setIsFullSyncModalOpen(false);
         setFullSyncAccount(null);
         setSyncProgressMessage('');
+        setSyncProgressEvent(null);
         setRateLimitInfo({
           accountName,
           postsSaved: event.newPostsAdded || 0,
@@ -646,6 +572,7 @@ export const SocialAccountManagement: React.FC = () => {
         setIsFullSyncModalOpen(false);
         setFullSyncAccount(null);
         setSyncProgressMessage('');
+        setSyncProgressEvent(null);
         setError(event.message || 'Sync failed');
         fetchAccounts();
         
@@ -657,6 +584,68 @@ export const SocialAccountManagement: React.FC = () => {
     }
   }, [fetchAccounts]);
 
+  // Setup subscription with fallback
+  const setupSubscription = useCallback((accountId: string, accountName: string) => {
+    // Cleanup any existing subscription
+    if (syncSubscriptionRef.current) {
+      syncSubscriptionRef.current.unsubscribe();
+      syncSubscriptionRef.current = null;
+    }
+
+    // Try enhanced subscription first
+    try {
+      const subscriptionResult = client.graphql({
+        query: onSyncProgress,
+        variables: { socialAccountId: accountId },
+      });
+
+      if ('subscribe' in subscriptionResult) {
+        syncSubscriptionRef.current = subscriptionResult.subscribe({
+          next: ({ data }: any) => {
+            if (data?.onSyncProgress) {
+              usingEnhancedSubscription.current = true;
+              handleSyncProgressEvent(data.onSyncProgress, accountName);
+            }
+          },
+          error: (err: any) => {
+            console.warn('Enhanced subscription error, trying basic:', err);
+            // Try fallback to basic subscription
+            setupBasicSubscription(accountId, accountName);
+          },
+        });
+      }
+    } catch (subError) {
+      console.warn('Could not set up enhanced subscription, trying basic:', subError);
+      setupBasicSubscription(accountId, accountName);
+    }
+  }, [client, handleSyncProgressEvent]);
+
+  // Fallback to basic subscription
+  const setupBasicSubscription = useCallback((accountId: string, accountName: string) => {
+    try {
+      const subscriptionResult = client.graphql({
+        query: onSyncProgressBasic,
+        variables: { socialAccountId: accountId },
+      });
+
+      if ('subscribe' in subscriptionResult) {
+        syncSubscriptionRef.current = subscriptionResult.subscribe({
+          next: ({ data }: any) => {
+            if (data?.onSyncProgress) {
+              usingEnhancedSubscription.current = false;
+              handleSyncProgressEvent(data.onSyncProgress, accountName);
+            }
+          },
+          error: (err: any) => {
+            console.error('Basic subscription error:', err);
+          },
+        });
+      }
+    } catch (subError) {
+      console.warn('Could not set up basic subscription:', subError);
+    }
+  }, [client, handleSyncProgressEvent]);
+
   // Confirm and execute full sync with subscription
   const handleConfirmFullSync = useCallback(async () => {
     if (!fullSyncAccount) return;
@@ -664,35 +653,10 @@ export const SocialAccountManagement: React.FC = () => {
     setIsFullSyncing(true);
     setError(null);
     setSyncProgressMessage('Starting sync...');
-
-    // Cleanup any existing subscription
-    if (syncSubscriptionRef.current) {
-      syncSubscriptionRef.current.unsubscribe();
-      syncSubscriptionRef.current = null;
-    }
+    setSyncProgressEvent(null);
 
     // Set up subscription BEFORE triggering the mutation
-    try {
-      const subscriptionResult = client.graphql({
-        query: onSyncProgress,
-        variables: { socialAccountId: fullSyncAccount.id },
-      });
-
-      if ('subscribe' in subscriptionResult) {
-        syncSubscriptionRef.current = subscriptionResult.subscribe({
-          next: ({ data }: any) => {
-            if (data?.onSyncProgress) {
-              handleSyncProgressEvent(data.onSyncProgress, fullSyncAccount.accountName);
-            }
-          },
-          error: (err: any) => {
-            console.error('Subscription error:', err);
-          },
-        });
-      }
-    } catch (subError) {
-      console.warn('Could not set up subscription, falling back to polling:', subError);
-    }
+    setupSubscription(fullSyncAccount.id, fullSyncAccount.accountName);
 
     // Trigger the sync
     try {
@@ -713,6 +677,7 @@ export const SocialAccountManagement: React.FC = () => {
             setIsFullSyncing(false);
             setIsFullSyncModalOpen(false);
             setFullSyncAccount(null);
+            setSyncProgressEvent(null);
             fetchAccounts();
           }
         } else if (result.success) {
@@ -723,6 +688,7 @@ export const SocialAccountManagement: React.FC = () => {
             setIsFullSyncing(false);
             setIsFullSyncModalOpen(false);
             setFullSyncAccount(null);
+            setSyncProgressEvent(null);
             fetchAccounts();
           }
         } else {
@@ -730,6 +696,7 @@ export const SocialAccountManagement: React.FC = () => {
           setIsFullSyncing(false);
           setIsFullSyncModalOpen(false);
           setFullSyncAccount(null);
+          setSyncProgressEvent(null);
         }
       }
     } catch (err: any) {
@@ -748,6 +715,7 @@ export const SocialAccountManagement: React.FC = () => {
           setIsFullSyncing(false);
           setIsFullSyncModalOpen(false);
           setFullSyncAccount(null);
+          setSyncProgressEvent(null);
           setTimeout(() => fetchAccounts(), 30000);
         }
       } else if (err?.errors?.[0]?.message?.includes('Cannot query field')) {
@@ -755,6 +723,7 @@ export const SocialAccountManagement: React.FC = () => {
         setIsFullSyncing(false);
         setIsFullSyncModalOpen(false);
         setFullSyncAccount(null);
+        setSyncProgressEvent(null);
         
         if (syncSubscriptionRef.current) {
           syncSubscriptionRef.current.unsubscribe();
@@ -766,6 +735,7 @@ export const SocialAccountManagement: React.FC = () => {
         setIsFullSyncing(false);
         setIsFullSyncModalOpen(false);
         setFullSyncAccount(null);
+        setSyncProgressEvent(null);
         
         if (syncSubscriptionRef.current) {
           syncSubscriptionRef.current.unsubscribe();
@@ -773,7 +743,7 @@ export const SocialAccountManagement: React.FC = () => {
         }
       }
     }
-  }, [client, fullSyncAccount, fetchAccounts, handleSyncProgressEvent]);
+  }, [client, fullSyncAccount, fetchAccounts, setupSubscription]);
 
   // Refresh Logo
   const handleRefreshLogo = useCallback(async (account: SocialAccount) => {
@@ -852,6 +822,7 @@ export const SocialAccountManagement: React.FC = () => {
 
   const handleCloseFullSyncModal = useCallback(() => {
     if (isFullSyncing) {
+      // Allow closing while syncing - sync continues in background
       setIsFullSyncModalOpen(false);
       return;
     }
@@ -859,6 +830,7 @@ export const SocialAccountManagement: React.FC = () => {
     setIsFullSyncModalOpen(false);
     setFullSyncAccount(null);
     setSyncProgressMessage('');
+    setSyncProgressEvent(null);
   }, [isFullSyncing]);
 
   // Count accounts with incomplete syncs
@@ -1089,13 +1061,14 @@ export const SocialAccountManagement: React.FC = () => {
         entityName={deletingAccount?.accountName}
       />
 
-      {/* Full Sync Warning Modal */}
-      <FullSyncWarningModal
+      {/* Enhanced Sync Progress Modal */}
+      <SyncProgressModal
         isOpen={isFullSyncModalOpen}
         onClose={handleCloseFullSyncModal}
         onConfirm={handleConfirmFullSync}
         account={fullSyncAccount}
         isLoading={isFullSyncing}
+        progressEvent={syncProgressEvent}
         progressMessage={syncProgressMessage}
       />
     </PageWrapper>

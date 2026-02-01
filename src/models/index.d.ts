@@ -434,6 +434,8 @@ export enum ScheduledPostStatus {
 
 export enum SyncEventStatus {
   STARTED = "STARTED",
+  FETCHING_PAGE = "FETCHING_PAGE",
+  PROCESSING_POST = "PROCESSING_POST",
   IN_PROGRESS = "IN_PROGRESS",
   COMPLETED = "COMPLETED",
   RATE_LIMITED = "RATE_LIMITED",
@@ -5030,15 +5032,57 @@ export declare type SyncPageInfoResult = LazyLoading extends LazyLoadingDisabled
 
 export declare const SyncPageInfoResult: (new (init: ModelInit<SyncPageInfoResult>) => SyncPageInfoResult)
 
+type EagerSyncProgressPost = {
+  readonly platformPostId: string;
+  readonly content?: string | null;
+  readonly contentPreview?: string | null;
+  readonly postType?: string | null;
+  readonly postedAt?: string | null;
+  readonly mediaUrls?: (string | null)[] | null;
+  readonly thumbnailUrl?: string | null;
+  readonly likeCount?: number | null;
+  readonly commentCount?: number | null;
+  readonly shareCount?: number | null;
+  readonly isNew?: boolean | null;
+  readonly isDuplicate?: boolean | null;
+}
+
+type LazySyncProgressPost = {
+  readonly platformPostId: string;
+  readonly content?: string | null;
+  readonly contentPreview?: string | null;
+  readonly postType?: string | null;
+  readonly postedAt?: string | null;
+  readonly mediaUrls?: (string | null)[] | null;
+  readonly thumbnailUrl?: string | null;
+  readonly likeCount?: number | null;
+  readonly commentCount?: number | null;
+  readonly shareCount?: number | null;
+  readonly isNew?: boolean | null;
+  readonly isDuplicate?: boolean | null;
+}
+
+export declare type SyncProgressPost = LazyLoading extends LazyLoadingDisabled ? EagerSyncProgressPost : LazySyncProgressPost
+
+export declare const SyncProgressPost: (new (init: ModelInit<SyncProgressPost>) => SyncProgressPost)
+
 type EagerSocialSyncEvent = {
   readonly socialAccountId: string;
   readonly status: SyncEventStatus | keyof typeof SyncEventStatus;
   readonly message?: string | null;
   readonly postsFound?: number | null;
   readonly newPostsAdded?: number | null;
+  readonly duplicatesSkipped?: number | null;
   readonly rateLimited?: boolean | null;
   readonly pagesCompleted?: number | null;
+  readonly totalPages?: number | null;
+  readonly currentPagePosts?: number | null;
+  readonly currentPost?: SyncProgressPost | null;
+  readonly recentPosts?: (SyncProgressPost | null)[] | null;
+  readonly estimatedTimeRemaining?: number | null;
+  readonly averagePostsPerPage?: number | null;
   readonly completedAt?: string | null;
+  readonly attemptId?: string | null;
 }
 
 type LazySocialSyncEvent = {
@@ -5047,9 +5091,17 @@ type LazySocialSyncEvent = {
   readonly message?: string | null;
   readonly postsFound?: number | null;
   readonly newPostsAdded?: number | null;
+  readonly duplicatesSkipped?: number | null;
   readonly rateLimited?: boolean | null;
   readonly pagesCompleted?: number | null;
+  readonly totalPages?: number | null;
+  readonly currentPagePosts?: number | null;
+  readonly currentPost?: SyncProgressPost | null;
+  readonly recentPosts?: (SyncProgressPost | null)[] | null;
+  readonly estimatedTimeRemaining?: number | null;
+  readonly averagePostsPerPage?: number | null;
   readonly completedAt?: string | null;
+  readonly attemptId?: string | null;
 }
 
 export declare type SocialSyncEvent = LazyLoading extends LazyLoadingDisabled ? EagerSocialSyncEvent : LazySocialSyncEvent

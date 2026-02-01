@@ -88,46 +88,42 @@ type SocialPost @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   sentiment: String
   contentCategory: String
   
-  # === LEGACY SINGLE LINK (KEEP FOR BACKWARD COMPATIBILITY) ===
-  # This is the original single link - now deprecated in favor of gameLinks
-  # Will be set to the primaryLinkedGameId for backward compatibility
+  # Legacy single link - kept for backward compatibility
   linkedGameId: ID @index(name: "bySocialPostGame")
   linkedGame: Game @belongsTo(fields: ["linkedGameId"])
   
-  # === PROCESSING STATUS ===
+  # Processing status
   processingStatus: SocialPostProcessingStatus 
     @default(value: "PENDING")
     @index(name: "byProcessingStatus", sortKeyFields: ["postedAt"])
   processedAt: AWSDateTime
   processingError: String
-  processingVersion: String              # Track which version processed this
+  processingVersion: String
   
-  # === CONTENT CLASSIFICATION ===
-  contentType: SocialPostContentType     # RESULT, PROMOTIONAL, GENERAL, COMMENT
+  # Content classification
+  contentType: SocialPostContentType
   contentTypeConfidence: Float
   
-  # === EXTRACTION RELATIONSHIP ===
+  # Extraction relationship
   extractedGameDataId: ID
   extractedGameData: SocialPostGameData @hasOne(fields: ["extractedGameDataId"])
   
-  # === GAME LINKS (many-to-many via junction table) ===
+  # Game links (many-to-many via junction table)
   gameLinks: [SocialPostGameLink] @hasMany(indexName: "bySocialPostGameLink", fields: ["id"])
   
-  # === CONVENIENCE FIELDS (denormalized from links) ===
-  primaryLinkedGameId: ID                # First/main game referenced (also synced to linkedGameId)
+  # Convenience fields (denormalized from links)
+  primaryLinkedGameId: ID
   linkedGameCount: Int @default(value: "0")
   hasUnverifiedLinks: Boolean @default(value: "false")
   
-  # === YEAR-MONTH PARTITION KEY FOR DATE QUERIES ===
-  # Format: "2025-01" - enables efficient date range queries via byPostMonth GSI
-  # Set automatically when post is created/updated based on postedAt
+  # Year-month partition key for date queries
   postYearMonth: String @index(name: "byPostMonth", sortKeyFields: ["postedAt"])
   
-  # === EFFECTIVE GAME DATE (Computed, denormalized) ===
+  # Effective game date (computed, denormalized)
   effectiveGameDate: AWSDateTime
   effectiveGameDateSource: String
 
-  # === RELATIONSHIPS ===
+  # Relationships
   socialAccountId: ID! @index(name: "bySocialAccount", sortKeyFields: ["postedAt"])
   socialAccount: SocialAccount @belongsTo(fields: ["socialAccountId"])
   entityId: ID @index(name: "bySocialPostEntity", sortKeyFields: ["postedAt"])
@@ -230,16 +226,57 @@ type SyncPageInfoResult {
   logoUrl: String
 }
 
+# Individual post info for real-time sync progress display
+# Lightweight version of SocialPost for streaming to UI
+type SyncProgressPost @aws_iam @aws_cognito_user_pools {
+  platformPostId: String!
+  content: String
+  contentPreview: String
+  postType: String
+  postedAt: AWSDateTime
+  mediaUrls: [String]
+  thumbnailUrl: String
+  likeCount: Int
+  commentCount: Int
+  shareCount: Int
+  isNew: Boolean
+  isDuplicate: Boolean
+}
+
+# Input type for publishing individual post progress
+input SyncProgressPostInput {
+  platformPostId: String!
+  content: String
+  contentPreview: String
+  postType: String
+  postedAt: AWSDateTime
+  mediaUrls: [String]
+  thumbnailUrl: String
+  likeCount: Int
+  commentCount: Int
+  shareCount: Int
+  isNew: Boolean
+  isDuplicate: Boolean
+}
+
 # Event type for real-time sync progress subscription updates
-type SocialSyncEvent {
+type SocialSyncEvent @aws_iam @aws_cognito_user_pools {
   socialAccountId: ID!
   status: SyncEventStatus!
   message: String
   postsFound: Int
   newPostsAdded: Int
+  duplicatesSkipped: Int
   rateLimited: Boolean
   pagesCompleted: Int
+  totalPages: Int
+  currentPagePosts: Int
+  currentPost: SyncProgressPost
+  recentPosts: [SyncProgressPost]
+  estimatedTimeRemaining: Int
+  averagePostsPerPage: Float
   completedAt: AWSDateTime
+  attemptId: ID
 }
 
 # ===================================================================
@@ -287,11 +324,9 @@ input UpdateSocialPostInput {
   id: ID!
   status: SocialPostStatus
   isTournamentRelated: Boolean
-  linkedGameId: ID                       # Keep for backward compatibility
+  linkedGameId: ID
   tags: [String]
   contentCategory: String
-  
-  # === NEW FIELDS ===
   processingStatus: SocialPostProcessingStatus
   contentType: SocialPostContentType
   primaryLinkedGameId: ID

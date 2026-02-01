@@ -257,7 +257,7 @@
         },
         "socialFetcher": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
-          "s3Key": "amplify-builds/socialFetcher-314642756a7630393731-build.zip",
+          "s3Key": "amplify-builds/socialFetcher-61577470314643734577-build.zip",
           "fbAccessToken": "2409157512601402|ZPBbZDM3ctYIb9CbLAtSdH_2KW8",
           "socialPostProcessorFunction": "socialPostProcessor-prod",
           "appsyncEndpoint": "https://ee4nnfa2mzg5pasbzvlo4ogxui.appsync-api.ap-southeast-2.amazonaws.com/graphql",

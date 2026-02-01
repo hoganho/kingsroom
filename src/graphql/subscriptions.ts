@@ -4739,9 +4739,45 @@ export const onSyncProgress = /* GraphQL */ `subscription OnSyncProgress($social
     message
     postsFound
     newPostsAdded
+    duplicatesSkipped
     rateLimited
     pagesCompleted
+    totalPages
+    currentPagePosts
+    currentPost {
+      platformPostId
+      content
+      contentPreview
+      postType
+      postedAt
+      mediaUrls
+      thumbnailUrl
+      likeCount
+      commentCount
+      shareCount
+      isNew
+      isDuplicate
+      __typename
+    }
+    recentPosts {
+      platformPostId
+      content
+      contentPreview
+      postType
+      postedAt
+      mediaUrls
+      thumbnailUrl
+      likeCount
+      commentCount
+      shareCount
+      isNew
+      isDuplicate
+      __typename
+    }
+    estimatedTimeRemaining
+    averagePostsPerPage
     completedAt
+    attemptId
     __typename
   }
 }

@@ -66,6 +66,7 @@ export interface FinishedGameData {
   isRecurring?: boolean | null;
   recurringGameName?: string | null;
   sourceUrl?: string | null;
+  netProfit?: number | null;
 }
 
 export interface UpcomingGameData {

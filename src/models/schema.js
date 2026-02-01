@@ -20191,6 +20191,8 @@ export const schema = {
             "name": "SyncEventStatus",
             "values": [
                 "STARTED",
+                "FETCHING_PAGE",
+                "PROCESSING_POST",
                 "IN_PROGRESS",
                 "COMPLETED",
                 "RATE_LIMITED",
@@ -31181,6 +31183,96 @@ export const schema = {
                 }
             }
         },
+        "SyncProgressPost": {
+            "name": "SyncProgressPost",
+            "fields": {
+                "platformPostId": {
+                    "name": "platformPostId",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "content": {
+                    "name": "content",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "contentPreview": {
+                    "name": "contentPreview",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "postType": {
+                    "name": "postType",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "postedAt": {
+                    "name": "postedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "mediaUrls": {
+                    "name": "mediaUrls",
+                    "isArray": true,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "thumbnailUrl": {
+                    "name": "thumbnailUrl",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "likeCount": {
+                    "name": "likeCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "commentCount": {
+                    "name": "commentCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "shareCount": {
+                    "name": "shareCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "isNew": {
+                    "name": "isNew",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "isDuplicate": {
+                    "name": "isDuplicate",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
         "SocialSyncEvent": {
             "name": "SocialSyncEvent",
             "fields": {
@@ -31221,6 +31313,13 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "duplicatesSkipped": {
+                    "name": "duplicatesSkipped",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "rateLimited": {
                     "name": "rateLimited",
                     "isArray": false,
@@ -31235,10 +31334,64 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "totalPages": {
+                    "name": "totalPages",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "currentPagePosts": {
+                    "name": "currentPagePosts",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "currentPost": {
+                    "name": "currentPost",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "SyncProgressPost"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "recentPosts": {
+                    "name": "recentPosts",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "SyncProgressPost"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "estimatedTimeRemaining": {
+                    "name": "estimatedTimeRemaining",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "averagePostsPerPage": {
+                    "name": "averagePostsPerPage",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "completedAt": {
                     "name": "completedAt",
                     "isArray": false,
                     "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "attemptId": {
+                    "name": "attemptId",
+                    "isArray": false,
+                    "type": "ID",
                     "isRequired": false,
                     "attributes": []
                 }
@@ -33987,5 +34140,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "5dba09982ff99d430c4b21cf600fbef3"
+    "version": "8ea264020bdbc6856ec03f9d491b81bf"
 };

@@ -13,9 +13,11 @@ import {
   Calendar,
   RefreshCw,
   Power,
-  Trash2
+  Trash2,
+  Download,
+  Image as ImageIcon
 } from 'lucide-react';
-import { SocialAccount, CreateSocialAccountInput, UpdateSocialAccountInput } from '../../hooks/useSocialAccounts';
+import { SocialAccount, CreateSocialAccountInput, UpdateSocialAccountInput, SocialPlatform } from '../../hooks/useSocialAccounts';
 
 interface Entity {
   id: string;
@@ -30,8 +32,9 @@ interface Venue {
 interface SocialAccountModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (data: CreateSocialAccountInput | UpdateSocialAccountInput) => Promise<void>;
+  onSave: (data: CreateSocialAccountInput | UpdateSocialAccountInput & { fetchLogo?: boolean }) => Promise<void>;
   onDelete?: (id: string, version?: number) => Promise<void>;
+  onRefreshLogo?: (account: SocialAccount) => Promise<string | null>;
   account?: SocialAccount | null;
   entities: Entity[];
   venues: Venue[];
@@ -77,35 +80,45 @@ const PLATFORM_CONFIG: Record<Platform, {
   },
 };
 
-/**
- * Convert AEST hour (0-23) to UTC hour
- * AEST is UTC+10 (AEDT is UTC+11 during daylight saving)
- * For simplicity, we use UTC+10 (standard time)
- */
 function aestHourToUTC(aestHour: number): number {
-  const offset = 10; // AEST offset (use 11 for AEDT)
+  const offset = 10;
   let utcHour = aestHour - offset;
   if (utcHour < 0) utcHour += 24;
   return utcHour;
 }
 
-/**
- * Convert UTC hour (0-23) to AEST hour
- */
 function utcHourToAEST(utcHour: number): number {
-  const offset = 10; // AEST offset
+  const offset = 10;
   let aestHour = utcHour + offset;
   if (aestHour >= 24) aestHour -= 24;
   return aestHour;
 }
 
-/**
- * Format hour for display (e.g., "6:00 AM")
- */
 function formatHour(hour: number): string {
   const period = hour >= 12 ? 'PM' : 'AM';
   const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
   return `${displayHour}:00 ${period}`;
+}
+
+/**
+ * Check if a URL is a Facebook CDN URL (which expires)
+ */
+function isFacebookCdnUrl(url: string): boolean {
+  if (!url) return false;
+  return (
+    url.includes('fbcdn.net') ||
+    url.includes('fbsbx.com') ||
+    url.includes('facebook.com/photo') ||
+    url.includes('scontent')
+  );
+}
+
+/**
+ * Check if a URL is an S3 URL (permanent)
+ */
+function isS3Url(url: string): boolean {
+  if (!url) return false;
+  return url.includes('.s3.') && url.includes('amazonaws.com');
 }
 
 export const SocialAccountModal: React.FC<SocialAccountModalProps> = ({
@@ -113,6 +126,7 @@ export const SocialAccountModal: React.FC<SocialAccountModalProps> = ({
   onClose,
   onSave,
   onDelete,
+  onRefreshLogo,
   account,
   entities,
   venues,
@@ -130,13 +144,22 @@ export const SocialAccountModal: React.FC<SocialAccountModalProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [urlError, setUrlError] = useState<string | null>(null);
   
-  // New scheduling state
+  // Logo state
+  const [isRefreshingLogo, setIsRefreshingLogo] = useState(false);
+  const [logoRefreshMessage, setLogoRefreshMessage] = useState<string | null>(null);
+  
+  // Scheduling state
   const [scheduleMode, setScheduleMode] = useState<ScheduleMode>('frequency');
-  const [preferredHourAEST, setPreferredHourAEST] = useState(6); // Default 6 AM AEST
+  const [preferredHourAEST, setPreferredHourAEST] = useState(6);
 
   const isEditing = !!account;
 
-  // Generate hour options for the dropdown
+  // Get the current logo URL from account
+  // Note: Lambda stores in profileImageUrl field
+  const currentLogoUrl = (account as any)?.profileImageUrl || null;
+  const logoIsInS3 = currentLogoUrl ? isS3Url(currentLogoUrl) : false;
+  const logoNeedsRefresh = currentLogoUrl && isFacebookCdnUrl(currentLogoUrl);
+
   const hourOptions = useMemo(() => {
     return Array.from({ length: 24 }, (_, i) => ({
       value: i,
@@ -156,7 +179,6 @@ export const SocialAccountModal: React.FC<SocialAccountModalProps> = ({
         setVenueId(account.venueId || '');
         setScrapeFrequency(account.scrapeFrequencyMinutes || 60);
         
-        // Determine schedule mode from account data
         if (!account.isScrapingEnabled) {
           setScheduleMode('disabled');
         } else if (account.preferredScrapeHourUTC !== null && account.preferredScrapeHourUTC !== undefined) {
@@ -166,7 +188,6 @@ export const SocialAccountModal: React.FC<SocialAccountModalProps> = ({
           setScheduleMode('frequency');
         }
       } else {
-        // Reset to defaults for new account
         setPlatform('FACEBOOK');
         setAccountUrl('');
         setAccountName('');
@@ -181,6 +202,7 @@ export const SocialAccountModal: React.FC<SocialAccountModalProps> = ({
       setUrlError(null);
       setShowDeleteConfirm(false);
       setIsDeleting(false);
+      setLogoRefreshMessage(null);
     }
   }, [isOpen, account]);
 
@@ -205,13 +227,11 @@ export const SocialAccountModal: React.FC<SocialAccountModalProps> = ({
         const url = new URL(accountUrl);
         const pathParts = url.pathname.split('/').filter(Boolean);
         if (pathParts.length > 0) {
-          // Skip 'pages', 'company', 'in' prefixes
           const handle = pathParts.find(part => 
             !['pages', 'company', 'in', 'profile.php'].includes(part.toLowerCase())
           );
           if (handle && !accountHandle) {
             setAccountHandle(handle);
-            // Also set name if empty
             if (!accountName) {
               setAccountName(handle.replace(/[_-]/g, ' ').replace(/\b\w/g, c => c.toUpperCase()));
             }
@@ -222,6 +242,28 @@ export const SocialAccountModal: React.FC<SocialAccountModalProps> = ({
       }
     }
   }, [accountUrl, isEditing, accountHandle, accountName]);
+
+  // Handle logo refresh for existing accounts
+  const handleRefreshLogo = async () => {
+    if (!account || !onRefreshLogo) return;
+    
+    setIsRefreshingLogo(true);
+    setLogoRefreshMessage(null);
+    setError(null);
+    
+    try {
+      const newLogoUrl = await onRefreshLogo(account);
+      if (newLogoUrl) {
+        setLogoRefreshMessage('Logo updated successfully!');
+      } else {
+        setLogoRefreshMessage('Could not fetch logo. The page may be private.');
+      }
+    } catch (err) {
+      setError('Failed to refresh logo. Please try again.');
+    } finally {
+      setIsRefreshingLogo(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -240,10 +282,7 @@ export const SocialAccountModal: React.FC<SocialAccountModalProps> = ({
     setIsLoading(true);
 
     try {
-      // Determine scraping settings based on schedule mode
       const isScrapingEnabled = scheduleMode !== 'disabled';
-      
-      // Only include preferredScrapeHourUTC if using daily mode, otherwise null to clear it
       const preferredScrapeHourUTC = scheduleMode === 'daily' 
         ? aestHourToUTC(preferredHourAEST) 
         : null;
@@ -261,8 +300,9 @@ export const SocialAccountModal: React.FC<SocialAccountModalProps> = ({
           _version: account._version,
         } as UpdateSocialAccountInput);
       } else {
+        // For new accounts, fetchLogo: true triggers syncPageInfo after creation
         await onSave({
-          platform,
+          platform: platform as SocialPlatform,
           accountUrl,
           accountName,
           accountHandle: accountHandle || undefined,
@@ -271,7 +311,8 @@ export const SocialAccountModal: React.FC<SocialAccountModalProps> = ({
           scrapeFrequencyMinutes: scrapeFrequency,
           isScrapingEnabled,
           preferredScrapeHourUTC,
-        } as CreateSocialAccountInput);
+          fetchLogo: true, // This triggers logo sync after creation
+        } as any);
       }
       onClose();
     } catch (err) {
@@ -339,7 +380,7 @@ export const SocialAccountModal: React.FC<SocialAccountModalProps> = ({
               </label>
               <div className="grid grid-cols-2 gap-3">
                 {(Object.entries(PLATFORM_CONFIG) as [Platform, typeof PLATFORM_CONFIG[Platform]][])
-                  .slice(0, 2) // Only Facebook and Instagram for now
+                  .slice(0, 2)
                   .map(([key, config]) => {
                     const Icon = config.icon;
                     return (
@@ -350,7 +391,7 @@ export const SocialAccountModal: React.FC<SocialAccountModalProps> = ({
                         className={`flex items-center justify-center gap-2 py-3 px-4 rounded-xl border-2 transition-all ${
                           platform === key
                             ? config.color
-                            : 'border-gray-200 hover:border-gray-300 text-gray-600'
+                            : 'border-gray-200 hover:border-gray-300'
                         }`}
                       >
                         <Icon className="w-5 h-5" />
@@ -362,87 +403,165 @@ export const SocialAccountModal: React.FC<SocialAccountModalProps> = ({
             </div>
           )}
 
-          {/* Platform badge for editing */}
-          {isEditing && (
-            <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-xl">
-              {(() => {
-                const Icon = PLATFORM_CONFIG[platform].icon;
-                return (
-                  <>
-                    <Icon className="w-5 h-5" />
-                    <span className="font-medium text-gray-700">{PLATFORM_CONFIG[platform].name}</span>
-                  </>
-                );
-              })()}
-            </div>
-          )}
-
-          {/* Account URL - Only for new accounts */}
-          {!isEditing && (
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Page URL <span className="text-red-500">*</span>
-              </label>
-              <div className="relative">
-                <Link2 className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type="url"
-                  value={accountUrl}
-                  onChange={(e) => setAccountUrl(e.target.value)}
-                  placeholder={PLATFORM_CONFIG[platform].placeholder}
-                  className={`w-full pl-10 pr-4 py-3 rounded-xl border transition-all focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${
-                    urlError ? 'border-red-300 bg-red-50' : 'border-gray-300'
-                  }`}
-                  required
-                />
-              </div>
-              {urlError && (
-                <p className="mt-1.5 text-sm text-red-600">{urlError}</p>
-              )}
-            </div>
-          )}
-
-          {/* Display Name */}
+          {/* Account URL */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <label htmlFor="accountUrl" className="block text-sm font-semibold text-gray-700 mb-2">
+              {isEditing ? 'Account URL' : 'Page URL'} <span className="text-red-500">*</span>
+            </label>
+            <div className="relative">
+              <Link2 className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                type="url"
+                id="accountUrl"
+                value={accountUrl}
+                onChange={(e) => setAccountUrl(e.target.value)}
+                disabled={isEditing}
+                placeholder={PLATFORM_CONFIG[platform].placeholder}
+                className={`w-full pl-10 pr-4 py-3 rounded-xl border transition-all ${
+                  urlError
+                    ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                    : 'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500'
+                } ${isEditing ? 'bg-gray-50 cursor-not-allowed' : ''}`}
+              />
+            </div>
+            {urlError && (
+              <p className="mt-1 text-sm text-red-600">{urlError}</p>
+            )}
+          </div>
+
+          {/* Account Name */}
+          <div>
+            <label htmlFor="accountName" className="block text-sm font-semibold text-gray-700 mb-2">
               Display Name <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
+              id="accountName"
               value={accountName}
               onChange={(e) => setAccountName(e.target.value)}
-              placeholder="e.g., Kings Room Poker"
-              className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
-              required
+              placeholder="e.g., Crown Melbourne Poker"
+              className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
             />
           </div>
 
-          {/* Handle */}
+          {/* Account Handle */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <label htmlFor="accountHandle" className="block text-sm font-semibold text-gray-700 mb-2">
               Handle / Username
             </label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">@</span>
-              <input
-                type="text"
-                value={accountHandle}
-                onChange={(e) => setAccountHandle(e.target.value)}
-                placeholder="kingsroompoker"
-                className="w-full pl-8 pr-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
-              />
-            </div>
+            <input
+              type="text"
+              id="accountHandle"
+              value={accountHandle}
+              onChange={(e) => setAccountHandle(e.target.value)}
+              placeholder="e.g., @crownpoker"
+              className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+            />
           </div>
+
+          {/* ============================================ */}
+          {/* LOGO SECTION - Only for existing accounts */}
+          {/* ============================================ */}
+          {isEditing && (
+            <div className="border-t pt-5">
+              <label className="block text-sm font-semibold text-gray-700 mb-3">
+                Profile Picture
+              </label>
+              
+              <div className="flex items-start gap-4">
+                {/* Logo Preview */}
+                <div className="flex-shrink-0">
+                  {currentLogoUrl ? (
+                    <div className="relative">
+                      <img
+                        src={currentLogoUrl}
+                        alt="Account logo"
+                        className="w-16 h-16 rounded-xl object-cover border-2 border-gray-200"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = 'none';
+                        }}
+                      />
+                      {logoIsInS3 && (
+                        <div className="absolute -bottom-1 -right-1 p-0.5 bg-green-500 text-white rounded-full" title="Stored in S3">
+                          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                      )}
+                      {logoNeedsRefresh && (
+                        <div className="absolute -bottom-1 -right-1 p-0.5 bg-yellow-500 text-white rounded-full" title="Logo URL may expire">
+                          <AlertCircle className="w-3 h-3" />
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="w-16 h-16 rounded-xl border-2 border-dashed border-gray-300 flex items-center justify-center bg-gray-50">
+                      <ImageIcon className="w-6 h-6 text-gray-400" />
+                    </div>
+                  )}
+                </div>
+
+                {/* Logo Options */}
+                <div className="flex-1 space-y-2">
+                  {onRefreshLogo && (
+                    <button
+                      type="button"
+                      onClick={handleRefreshLogo}
+                      disabled={isRefreshingLogo}
+                      className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-lg hover:bg-indigo-100 transition-colors disabled:opacity-50"
+                    >
+                      {isRefreshingLogo ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Fetching...
+                        </>
+                      ) : (
+                        <>
+                          <Download className="w-4 h-4" />
+                          {currentLogoUrl ? 'Refresh Logo' : 'Fetch Logo'}
+                        </>
+                      )}
+                    </button>
+                  )}
+
+                  {logoRefreshMessage && (
+                    <p className={`text-xs ${logoRefreshMessage.includes('success') ? 'text-green-600' : 'text-yellow-600'}`}>
+                      {logoRefreshMessage}
+                    </p>
+                  )}
+
+                  {logoNeedsRefresh && (
+                    <p className="text-xs text-yellow-700 bg-yellow-50 p-2 rounded-lg">
+                      ⚠️ Current logo URL may expire. Click "Refresh Logo" to store permanently.
+                    </p>
+                  )}
+
+                  {logoIsInS3 && (
+                    <p className="text-xs text-green-600">
+                      ✓ Logo is stored permanently in S3
+                    </p>
+                  )}
+
+                  {!currentLogoUrl && !isRefreshingLogo && (
+                    <p className="text-xs text-gray-500">
+                      Click "Fetch Logo" to download the page's profile picture
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Entity Selection */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Link to Entity
+            <label htmlFor="entityId" className="block text-sm font-semibold text-gray-700 mb-2">
+              Entity
             </label>
             <select
+              id="entityId"
               value={entityId}
               onChange={(e) => setEntityId(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+              className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
             >
               <option value="">No entity link</option>
               {entities.map((entity) => (
@@ -455,13 +574,14 @@ export const SocialAccountModal: React.FC<SocialAccountModalProps> = ({
 
           {/* Venue Selection */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Link to Venue
+            <label htmlFor="venueId" className="block text-sm font-semibold text-gray-700 mb-2">
+              Venue
             </label>
             <select
+              id="venueId"
               value={venueId}
               onChange={(e) => setVenueId(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+              className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
             >
               <option value="">No venue link</option>
               {venues.map((venue) => (
@@ -472,9 +592,7 @@ export const SocialAccountModal: React.FC<SocialAccountModalProps> = ({
             </select>
           </div>
 
-          {/* ============================================ */}
-          {/* SCRAPING SCHEDULE SECTION */}
-          {/* ============================================ */}
+          {/* Scraping Schedule Section */}
           <div className="border-t pt-5">
             <label className="block text-sm font-semibold text-gray-700 mb-3">
               Scraping Schedule
@@ -587,7 +705,6 @@ export const SocialAccountModal: React.FC<SocialAccountModalProps> = ({
               </label>
             </div>
 
-            {/* Schedule explanation */}
             <p className="mt-3 text-xs text-gray-500">
               {scheduleMode === 'disabled' && 'You can still trigger manual scrapes from the account details.'}
               {scheduleMode === 'frequency' && `Posts will be fetched automatically every ${scrapeFrequency >= 60 ? `${scrapeFrequency / 60} hour${scrapeFrequency > 60 ? 's' : ''}` : `${scrapeFrequency} minutes`}.`}
@@ -597,7 +714,6 @@ export const SocialAccountModal: React.FC<SocialAccountModalProps> = ({
 
           {/* Actions */}
           <div className="flex gap-3 pt-2">
-            {/* Delete button - only shown when editing */}
             {isEditing && onDelete && (
               <button
                 type="button"

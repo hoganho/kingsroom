@@ -267,16 +267,11 @@ export const GameCard: React.FC<GameCardProps> = ({ game, variant }) => {
 
         {variant === 'finished' && (
           <>
+            {/* Row 1: Buy-in and Total Entries */}
             <div className="flex flex-col">
-              <span className="text-xs text-gray-500 dark:text-gray-400">Prizepool Paid</span>
-              <span className="font-semibold text-emerald-600 dark:text-emerald-400">
-                {valOrDash((game as FinishedGameData).prizepoolPaid, formatCurrency)}
-              </span>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-xs text-gray-500 dark:text-gray-400">Prizepool Calc</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400">Buy-in</span>
               <span className="font-semibold text-gray-900 dark:text-gray-50">
-                {valOrDash((game as FinishedGameData).prizepoolCalculated, formatCurrency)}
+                {valOrDash(game.buyIn, formatCurrency)}
               </span>
             </div>
             <div className="flex flex-col">
@@ -285,10 +280,34 @@ export const GameCard: React.FC<GameCardProps> = ({ game, variant }) => {
                 {valOrDash((game as FinishedGameData).totalEntries)}
               </span>
             </div>
+            {/* Row 2: Prizepool Paid and Profit/Loss */}
             <div className="flex flex-col">
-              <span className="text-xs text-gray-500 dark:text-gray-400">Buy-in</span>
-              <span className="font-semibold text-gray-900 dark:text-gray-50">
-                {valOrDash(game.buyIn, formatCurrency)}
+              <span className="text-xs text-gray-500 dark:text-gray-400">Prizepool Paid</span>
+              <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+                {valOrDash((game as FinishedGameData).prizepoolPaid, formatCurrency)}
+              </span>
+            </div>
+            <div className={cx(
+              "flex flex-col rounded-md px-2 py-1 -mx-2 -my-1",
+              (game as FinishedGameData).netProfit != null && (game as FinishedGameData).netProfit! < 0 
+                ? "bg-red-50 dark:bg-red-900/20" 
+                : (game as FinishedGameData).netProfit != null && (game as FinishedGameData).netProfit! > 0
+                  ? "bg-green-50 dark:bg-green-900/20"
+                  : ""
+            )}>
+              <span className="text-xs text-gray-500 dark:text-gray-400">Profit/Loss</span>
+              <span className={cx(
+                "font-semibold",
+                (game as FinishedGameData).netProfit != null && (game as FinishedGameData).netProfit! < 0
+                  ? "text-red-600 dark:text-red-400"
+                  : (game as FinishedGameData).netProfit != null && (game as FinishedGameData).netProfit! > 0
+                    ? "text-green-600 dark:text-green-400"
+                    : "text-gray-900 dark:text-gray-50"
+              )}>
+                {(game as FinishedGameData).netProfit != null 
+                  ? formatCurrency((game as FinishedGameData).netProfit!)
+                  : '-'
+                }
               </span>
             </div>
           </>

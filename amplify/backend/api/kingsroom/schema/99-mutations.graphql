@@ -487,17 +487,26 @@ type Mutation {
 
   # Note: SocialSyncEvent type is defined in 85-social.graphql
   # Note: SyncEventStatus enum is defined in 00-enums.graphql
-  publishSyncProgress(
-    socialAccountId: ID!
-    status: SyncEventStatus!
-    message: String
-    postsFound: Int
-    newPostsAdded: Int
-    rateLimited: Boolean
-    pagesCompleted: Int
-  ): SocialSyncEvent
-    @aws_iam
-    @aws_cognito_user_pools
+    publishSyncProgress(
+        socialAccountId: ID!
+        status: SyncEventStatus!
+        message: String
+        postsFound: Int
+        newPostsAdded: Int
+        duplicatesSkipped: Int
+        rateLimited: Boolean
+        pagesCompleted: Int
+        totalPages: Int
+        currentPagePosts: Int
+        currentPost: SyncProgressPostInput
+        recentPosts: [SyncProgressPostInput]
+        estimatedTimeRemaining: Int
+        averagePostsPerPage: Float
+        completedAt: AWSDateTime
+        attemptId: ID
+    ): SocialSyncEvent
+        @aws_iam
+        @aws_cognito_user_pools
 }
 
 type Subscription {

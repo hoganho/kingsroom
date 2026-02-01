@@ -33,10 +33,25 @@ function hasGraphQLData<T>(response: unknown): response is { data: T } {
   return response !== null && typeof response === 'object' && 'data' in response;
 }
 
+// ============================================
+// GraphQL mutation to sync page info (fetches logo from FB and stores in S3)
+// This calls the existing socialFetcher Lambda's syncPageInfo handler
+// ============================================
+const syncPageInfoMutation = /* GraphQL */ `
+  mutation SyncPageInfo($socialAccountId: ID!, $forceRefresh: Boolean) {
+    syncPageInfo(socialAccountId: $socialAccountId, forceRefresh: $forceRefresh) {
+      success
+      message
+      logoUrl
+      followerCount
+      pageName
+    }
+  }
+`;
+
 export const useSocialAccounts = (options: UseSocialAccountsOptions = {}) => {
   const { filterByEntity = true } = options;
   
-  // Use useMemo for client - same pattern as useScraperManagement
   const client = useMemo(() => generateClient(), []);
   const { currentEntity } = useEntity();
   
@@ -44,12 +59,9 @@ export const useSocialAccounts = (options: UseSocialAccountsOptions = {}) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  // Track if initial fetch has been done to prevent flickering
   const hasFetchedRef = useRef(false);
   const currentEntityIdRef = useRef<string | undefined>(undefined);
 
-  // Compute the effective entityId based on filterByEntity option
-  // This ensures consistent behavior across initial fetch and post-mutation refreshes
   const effectiveEntityId = filterByEntity ? currentEntity?.id : undefined;
 
   // Extract platform account ID from URL
@@ -73,9 +85,47 @@ export const useSocialAccounts = (options: UseSocialAccountsOptions = {}) => {
     }
   }, []);
 
+  // ============================================
+  // Sync page info (logo, follower count, etc.) via socialFetcher Lambda
+  // This downloads the logo from Facebook and stores it in S3
+  // ============================================
+  const syncPageInfo = useCallback(async (
+    socialAccountId: string,
+    forceRefresh = false
+  ): Promise<{ success: boolean; logoUrl: string | null; message: string }> => {
+    try {
+      console.log('[useSocialAccounts] Syncing page info for:', socialAccountId);
+      
+      const response = await client.graphql({
+        query: syncPageInfoMutation,
+        variables: { socialAccountId, forceRefresh },
+      });
+
+      if (hasGraphQLData<{ syncPageInfo: { success: boolean; logoUrl: string | null; message: string } }>(response)) {
+        const result = response.data.syncPageInfo;
+        console.log('[useSocialAccounts] Page info synced:', result);
+        
+        if (result.success) {
+          // Refresh accounts to get updated profileImageUrl
+          await fetchAccounts(effectiveEntityId, true);
+        }
+        
+        return {
+          success: result.success,
+          logoUrl: result.logoUrl,
+          message: result.message,
+        };
+      }
+      
+      return { success: false, logoUrl: null, message: 'Invalid response' };
+    } catch (err) {
+      console.error('[useSocialAccounts] Error syncing page info:', err);
+      return { success: false, logoUrl: null, message: String(err) };
+    }
+  }, [client, effectiveEntityId]);
+
   // Fetch all accounts
   const fetchAccounts = useCallback(async (entityId?: string, forceRefresh = false) => {
-    // Prevent duplicate fetches for the same entity
     if (!forceRefresh && hasFetchedRef.current && currentEntityIdRef.current === entityId) {
       return;
     }
@@ -121,6 +171,9 @@ export const useSocialAccounts = (options: UseSocialAccountsOptions = {}) => {
     entityId?: string | null;
     venueId?: string | null;
     scrapeFrequencyMinutes?: number | null;
+    isScrapingEnabled?: boolean;
+    preferredScrapeHourUTC?: number | null;
+    fetchLogo?: boolean; // If true, will call syncPageInfo after creation
   }): Promise<SocialAccount | null> => {
     try {
       const platformAccountId = input.platformAccountId || 
@@ -135,9 +188,10 @@ export const useSocialAccounts = (options: UseSocialAccountsOptions = {}) => {
         entityId: input.entityId,
         venueId: input.venueId,
         status: SocialAccountStatus.PENDING_VERIFICATION,
-        isScrapingEnabled: true,
+        isScrapingEnabled: input.isScrapingEnabled ?? true,
         consecutiveFailures: 0,
         scrapeFrequencyMinutes: input.scrapeFrequencyMinutes || 60,
+        preferredScrapeHourUTC: input.preferredScrapeHourUTC,
       };
 
       const response = await client.graphql({
@@ -146,16 +200,37 @@ export const useSocialAccounts = (options: UseSocialAccountsOptions = {}) => {
       });
 
       if (hasGraphQLData<{ createSocialAccount: SocialAccount }>(response) && response.data?.createSocialAccount) {
-        // Force refresh after create - use effectiveEntityId to respect filterByEntity option
+        const newAccount = response.data.createSocialAccount;
+        
+        // ============================================
+        // NEW: Auto-sync page info to fetch and store the logo in S3
+        // This runs async in the background - doesn't block account creation
+        // ============================================
+        if (input.fetchLogo !== false && input.platform === 'FACEBOOK') {
+          console.log('[useSocialAccounts] Triggering page info sync for new account...');
+          
+          // Don't await - let it run in background
+          syncPageInfo(newAccount.id, true).then((result) => {
+            if (result.success) {
+              console.log('[useSocialAccounts] Logo synced successfully:', result.logoUrl);
+            } else {
+              console.warn('[useSocialAccounts] Logo sync failed:', result.message);
+            }
+          }).catch((err) => {
+            console.warn('[useSocialAccounts] Logo sync error:', err);
+          });
+        }
+        
+        // Force refresh after create
         await fetchAccounts(effectiveEntityId, true);
-        return response.data.createSocialAccount;
+        return newAccount;
       }
       return null;
     } catch (err) {
       console.error('Error creating social account:', err);
       throw new Error('Failed to create social account. Please check the URL and try again.');
     }
-  }, [client, fetchAccounts, effectiveEntityId, extractPlatformAccountId]);
+  }, [client, fetchAccounts, effectiveEntityId, extractPlatformAccountId, syncPageInfo]);
 
   // Update account
   const updateAccountFn = useCallback(async (input: UpdateSocialAccountInput): Promise<SocialAccount | null> => {
@@ -165,25 +240,17 @@ export const useSocialAccounts = (options: UseSocialAccountsOptions = {}) => {
         variables: { input },
       });
 
-      // Handle partial responses - GraphQL can return both data AND errors
-      // This happens when nested relations have null values for non-nullable fields
-      // (e.g., entity.games[0].gameCost._version)
       if (hasGraphQLData<{ updateSocialAccount: SocialAccount }>(response) && response.data?.updateSocialAccount) {
-        // Log warnings if there are errors, but don't fail
         if ('errors' in response && Array.isArray((response as any).errors) && (response as any).errors.length > 0) {
-          console.warn(`[useSocialAccounts] Update succeeded with ${(response as any).errors.length} field warnings (nested relations with missing data)`);
+          console.warn(`[useSocialAccounts] Update succeeded with ${(response as any).errors.length} field warnings`);
         }
-        // Force refresh after update - use effectiveEntityId to respect filterByEntity option
         await fetchAccounts(effectiveEntityId, true);
         return response.data.updateSocialAccount;
       }
       return null;
     } catch (err: any) {
-      // Amplify may throw an error even when the mutation succeeded but had field-level errors
-      // Check if the error contains data - if so, the mutation actually worked
       if (err?.data?.updateSocialAccount) {
-        console.warn(`[useSocialAccounts] Update succeeded despite errors (${err?.errors?.length || 0} field warnings)`);
-        // Force refresh after update - use effectiveEntityId to respect filterByEntity option
+        console.warn(`[useSocialAccounts] Update succeeded despite errors`);
         await fetchAccounts(effectiveEntityId, true);
         return err.data.updateSocialAccount;
       }
@@ -206,7 +273,6 @@ export const useSocialAccounts = (options: UseSocialAccountsOptions = {}) => {
         },
       });
       
-      // Force refresh after delete - use effectiveEntityId to respect filterByEntity option
       await fetchAccounts(effectiveEntityId, true);
       return true;
     } catch (err) {
@@ -235,9 +301,17 @@ export const useSocialAccounts = (options: UseSocialAccountsOptions = {}) => {
     } as UpdateSocialAccountInput);
   }, [updateAccountFn]);
 
-  // Initial fetch - only runs when entity actually changes
+  // ============================================
+  // Refresh logo for an existing account
+  // Calls syncPageInfo with forceRefresh=true
+  // ============================================
+  const refreshLogo = useCallback(async (account: SocialAccount): Promise<string | null> => {
+    const result = await syncPageInfo(account.id, true);
+    return result.logoUrl;
+  }, [syncPageInfo]);
+
+  // Initial fetch
   useEffect(() => {
-    // Only fetch if entity changed or we haven't fetched yet
     if (!hasFetchedRef.current || currentEntityIdRef.current !== effectiveEntityId) {
       fetchAccounts(effectiveEntityId);
     }
@@ -254,6 +328,8 @@ export const useSocialAccounts = (options: UseSocialAccountsOptions = {}) => {
     toggleScrapingEnabled,
     updateStatus,
     extractPlatformAccountId,
+    syncPageInfo,
+    refreshLogo,
   };
 };
 

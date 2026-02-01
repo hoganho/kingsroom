@@ -454,6 +454,8 @@ enum ScheduledPostStatus {
 # Status for real-time sync progress subscription events
 enum SyncEventStatus {
   STARTED
+  FETCHING_PAGE
+  PROCESSING_POST
   IN_PROGRESS
   COMPLETED
   RATE_LIMITED
