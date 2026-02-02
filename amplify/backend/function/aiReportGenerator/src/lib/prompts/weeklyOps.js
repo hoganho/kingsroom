@@ -2,7 +2,7 @@
  * Weekly Operations Report Prompt Template
  * Generates tactical insights for venue managers
  * 
- * VERSION: 2.1.0 - Updated for MetricsPack v6 (Games Not Run tracking)
+ * VERSION: 2.2.0 - Updated for MetricsPack v7 (Player Activity Trends)
  * 
  * Now uses:
  * - scheduleCompliance (cancellation analysis)
@@ -10,6 +10,7 @@
  * - opportunities (schedule gaps, expansion)
  * - competitorAnalysis (clashes, market pressure)
  * - gamesNotRun (scheduled games that didn't complete - INITIATING, etc.)
+ * - playerActivityTrends (WoW targeting classification changes, retention signals)
  */
 
 /**
@@ -38,8 +39,9 @@ ANALYSIS PRIORITIES:
 5. GAMES NOT RUN - Games that were scheduled but didn't complete
 6. RECURRING GAME HEALTH - Which regular games are growing vs declining
 7. PLAYER TRENDS - Are unique players growing/declining? Is engagement changing?
-8. COMPETITOR ACTIVITY - Schedule clashes and market pressure
-9. QUICK WINS - Opportunities that can be actioned THIS WEEK
+8. PLAYER ACTIVITY TRENDS (NEW) - Week-on-week targeting classification shifts
+9. COMPETITOR ACTIVITY - Schedule clashes and market pressure
+10. QUICK WINS - Opportunities that can be actioned THIS WEEK
 
 PLAYER & ENTRY TRENDING (Key for Ops):
 When analyzing venues, look at player metrics to spot issues early:
@@ -53,6 +55,27 @@ Operational insights from player trends:
 - If unique players growing but entries/player falling = attracting casuals, need engagement programs  
 - Both declining = urgent action needed - check marketing, promotions, competitor activity
 - Both growing = healthy venue, consider expansion
+
+PLAYER ACTIVITY TRENDS INTERPRETATION (NEW - Week-on-Week):
+This section shows how player targeting classifications are shifting week-over-week:
+- Active_EL (Active/Engaged/Loyal): Your best players - any decline needs immediate attention
+- Retain_Inactive31_60d: Players who stopped 1-2 months ago - prime reactivation targets
+- Retain_Inactive61_90d: Slipping further - harder to recover
+- Churned_91_120d+: Progressively harder to win back
+
+KEY SIGNALS:
+- Active_EL declining: Players are becoming inactive - check for venue/game issues, competitor activity
+- Active_EL → Retain transitions increasing: Early churn signal - need retention actions NOW
+- Retain buckets growing: Players "pooling" before churn - time-sensitive reactivation needed
+- Churned buckets growing: Losing players permanently - check if systemic issue
+
+ACCOUNT CATEGORY CHANGES (for context):
+- VIP changes: Your most valuable players - any loss is significant
+- REGULAR changes: Core recurring players - stability matters
+- COMMITTED declining: Engagement dropping
+- TRIALIST declining: Acquisition pipeline weakening
+
+Use these trends to explain operational observations - if entries are down, is it because Active players are churning or just a slow week?
 
 GAME STATUS INTERPRETATION:
 When discussing games that didn't run, be specific about what happened:
@@ -108,6 +131,7 @@ function buildUserPrompt(metricsPack, options = {}) {
   const competitorAnalysis = data.competitorAnalysis || {};
   const opportunities = data.opportunities || {};
   const gamesNotRun = data.gamesNotRun || {};
+  const playerActivityTrends = data.playerActivityTrends || {};
   
   // Separate venues into active vs scheduled-only
   const activeVenues = venues.filter(v => !v.hadScheduledGamesOnly);
@@ -212,6 +236,57 @@ ${JSON.stringify(scheduledOnlyVenues.map(v => ({
 })), null, 2)}
 ACTION REQUIRED: Investigate why games at these venues didn't proceed.
 ` : '✓ All venues with scheduled games had at least one game run.'}
+
+══════════════════════════════════════════════════════════════
+SECTION 4C: PLAYER ACTIVITY TRENDS (Week-on-Week) ★ NEW
+══════════════════════════════════════════════════════════════
+${playerActivityTrends.weekly?.available ? `
+Period: ${playerActivityTrends.weekly.currentPeriod || 'Current Week'} vs ${playerActivityTrends.weekly.previousPeriod || 'Prior Week'}
+
+TARGETING CLASSIFICATION CHANGES (Week-on-Week):
+${JSON.stringify(playerActivityTrends.weekly.targetingClassification || {}, null, 2)}
+
+KEY HIGHLIGHTS:
+${(playerActivityTrends.weekly.targetingClassification?.highlights || []).map(h => 
+  `- ${h.classification}: ${h.message}`
+).join('\n') || 'No significant changes this week.'}
+
+ACCOUNT CATEGORY SNAPSHOT:
+${JSON.stringify(playerActivityTrends.weekly.accountCategory || {}, null, 2)}
+
+OPERATIONAL IMPLICATIONS:
+${(() => {
+  const tc = playerActivityTrends.weekly.targetingClassification?.delta || {};
+  const implications = [];
+  
+  // Check Active_EL trend
+  if (tc['Active_EL']?.percentChange < -5) {
+    implications.push(`⚠️ URGENT: Active players down ${Math.abs(tc['Active_EL'].percentChange).toFixed(1)}% - investigate venue/game issues or competitor activity`);
+  } else if (tc['Active_EL']?.percentChange > 5) {
+    implications.push(`✓ POSITIVE: Active players up ${tc['Active_EL'].percentChange.toFixed(1)}% - retention efforts working`);
+  }
+  
+  // Check Retain buckets
+  const retainGrowth = (tc['Retain_Inactive31_60d']?.change || 0) + (tc['Retain_Inactive61_90d']?.change || 0);
+  if (retainGrowth > 20) {
+    implications.push(`⚠️ WARNING: ${retainGrowth} players moved to retention buckets - early churn signal`);
+  }
+  
+  // Check Churned buckets
+  const churnedGrowth = (tc['Churned_91_120d']?.change || 0) + (tc['Churned_121_180d']?.change || 0);
+  if (churnedGrowth > 10) {
+    implications.push(`⚠️ ATTENTION: ${churnedGrowth} players moved to churned status - check for systemic issues`);
+  }
+  
+  return implications.length > 0 ? implications.join('\n') : 'Player activity trends stable this week.';
+})()}
+` : `
+Player activity trend data not yet available.
+Note: This requires at least 2 weeks of snapshot data to calculate trends.
+Once available, this section will show week-on-week changes in:
+- Targeting classifications (Active → Retain → Churned flows)
+- Account category movements (VIP, REGULAR, etc.)
+`}
 
 ══════════════════════════════════════════════════════════════
 SECTION 5: RECURRING GAME HEALTH
@@ -417,6 +492,31 @@ REQUIRED JSON OUTPUT
     "actionRequired": ["Specific actions to prevent this next week"]
   },
   
+  "playerActivityTrends": {
+    "available": <boolean>,
+    "summary": "One-sentence summary of player activity health",
+    "targetingClassificationChanges": {
+      "activePlayersChange": <number or null>,
+      "activePlayersPercent": <number or null>,
+      "retentionBucketGrowth": <number or null>,
+      "churnBucketGrowth": <number or null>,
+      "trend": "HEALTHY | STABLE | CONCERNING | CRITICAL"
+    },
+    "accountCategoryChanges": {
+      "vipChange": <number or null>,
+      "regularChange": <number or null>,
+      "trend": "GROWING | STABLE | DECLINING"
+    },
+    "highlights": [
+      {
+        "type": "POSITIVE | WARNING | CRITICAL",
+        "message": "Specific insight from the data",
+        "action": "What to do about it"
+      }
+    ],
+    "correlations": "How player activity trends explain this week's financial performance"
+  },
+  
   "recurringGameHealth": {
     "summary": "Overall health of regular game lineup",
     "growing": [{ "gameName": "Name", "trend": "+X%", "action": "What to do" }],
@@ -490,6 +590,7 @@ REQUIRED JSON OUTPUT
     "gamesAtRisk": [{ "game": "Name", "risk": "What could go wrong", "mitigation": "How to prevent" }],
     "opportunities": [{ "game": "Name", "opportunity": "Why it could do better", "action": "How to capitalize" }],
     "competitorEvents": ["Competitor events to monitor"],
+    "playerActivityWatch": "What to monitor in player activity trends",
     "focusAreas": ["Top 2-3 things to monitor"]
   }
 }`;
@@ -501,7 +602,7 @@ REQUIRED JSON OUTPUT
  */
 function getSchema() {
   return {
-    name: 'weekly_ops_report_v3',
+    name: 'weekly_ops_report_v4',
     strict: false,
     schema: {
       type: 'object',
@@ -514,6 +615,7 @@ function getSchema() {
         overlayReport: { type: 'object' },
         scheduleHealth: { type: 'object' },
         gamesNotRun: { type: 'object' },
+        playerActivityTrends: { type: 'object' },
         recurringGameHealth: { type: 'object' },
         venueQuickView: { type: 'array' },
         competitorWatch: { type: 'object' },

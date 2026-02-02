@@ -132,6 +132,13 @@ export type AmplifyDependentResourcesAttributes = {
       "Region": "string",
       "ScheduledRuleArn": "string"
     },
+    "refreshTargetingClassifications": {
+      "Arn": "string",
+      "LambdaExecutionRole": "string",
+      "LambdaExecutionRoleArn": "string",
+      "Name": "string",
+      "Region": "string"
+    },
     "s3ManagementFunction": {
       "Arn": "string",
       "LambdaExecutionRole": "string",

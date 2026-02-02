@@ -104,11 +104,11 @@ export enum PlayerAccountStatus {
 }
 
 export enum PlayerAccountCategory {
-  NEW = "NEW",
-  RECREATIONAL = "RECREATIONAL",
+  TRIALIST = "TRIALIST",
+  CASUAL = "CASUAL",
+  COMMITTED = "COMMITTED",
   REGULAR = "REGULAR",
-  VIP = "VIP",
-  LAPSED = "LAPSED"
+  VIP = "VIP"
 }
 
 export enum SeriesStatus {
@@ -293,6 +293,12 @@ export enum SnapshotType {
   AUTO = "AUTO",
   MANUAL = "MANUAL",
   RECONCILED = "RECONCILED"
+}
+
+export enum SnapshotPeriodType {
+  DAILY = "DAILY",
+  WEEKLY = "WEEKLY",
+  MONTHLY = "MONTHLY"
 }
 
 export enum EntryType {
@@ -8740,6 +8746,82 @@ export declare type VenuePlayerMetrics = LazyLoading extends LazyLoadingDisabled
 
 export declare const VenuePlayerMetrics: (new (init: ModelInit<VenuePlayerMetrics>) => VenuePlayerMetrics) & {
   copyOf(source: VenuePlayerMetrics, mutator: (draft: MutableModel<VenuePlayerMetrics>) => MutableModel<VenuePlayerMetrics> | void): VenuePlayerMetrics;
+}
+
+type EagerPlayerActivitySnapshot = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<PlayerActivitySnapshot, 'id'>;
+  };
+  readonly id: string;
+  readonly snapshotType: SnapshotPeriodType | keyof typeof SnapshotPeriodType;
+  readonly snapshotDate: string;
+  readonly dateKey?: string | null;
+  readonly weekKey?: string | null;
+  readonly monthKey?: string | null;
+  readonly mode?: string | null;
+  readonly totalPlayers?: number | null;
+  readonly totalPlayerVenues?: number | null;
+  readonly playerTargetingDistribution?: string | null;
+  readonly playerVenueTargetingDistribution?: string | null;
+  readonly playerTargetingTransitions?: string | null;
+  readonly playerVenueTargetingTransitions?: string | null;
+  readonly playerTargetingUpdated?: number | null;
+  readonly playerVenueTargetingUpdated?: number | null;
+  readonly venueTargetingBreakdown?: string | null;
+  readonly accountCategoryDistribution?: string | null;
+  readonly accountCategoryTransitions?: string | null;
+  readonly accountCategoryUpdated?: number | null;
+  readonly totalVIPs?: number | null;
+  readonly vipStatsByEntity?: string | null;
+  readonly firstDailySnapshot?: string | null;
+  readonly lastDailySnapshot?: string | null;
+  readonly dailySnapshotCount?: number | null;
+  readonly totalErrors?: number | null;
+  readonly executionTimeMs?: number | null;
+  readonly generatedBy?: string | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+type LazyPlayerActivitySnapshot = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<PlayerActivitySnapshot, 'id'>;
+  };
+  readonly id: string;
+  readonly snapshotType: SnapshotPeriodType | keyof typeof SnapshotPeriodType;
+  readonly snapshotDate: string;
+  readonly dateKey?: string | null;
+  readonly weekKey?: string | null;
+  readonly monthKey?: string | null;
+  readonly mode?: string | null;
+  readonly totalPlayers?: number | null;
+  readonly totalPlayerVenues?: number | null;
+  readonly playerTargetingDistribution?: string | null;
+  readonly playerVenueTargetingDistribution?: string | null;
+  readonly playerTargetingTransitions?: string | null;
+  readonly playerVenueTargetingTransitions?: string | null;
+  readonly playerTargetingUpdated?: number | null;
+  readonly playerVenueTargetingUpdated?: number | null;
+  readonly venueTargetingBreakdown?: string | null;
+  readonly accountCategoryDistribution?: string | null;
+  readonly accountCategoryTransitions?: string | null;
+  readonly accountCategoryUpdated?: number | null;
+  readonly totalVIPs?: number | null;
+  readonly vipStatsByEntity?: string | null;
+  readonly firstDailySnapshot?: string | null;
+  readonly lastDailySnapshot?: string | null;
+  readonly dailySnapshotCount?: number | null;
+  readonly totalErrors?: number | null;
+  readonly executionTimeMs?: number | null;
+  readonly generatedBy?: string | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+export declare type PlayerActivitySnapshot = LazyLoading extends LazyLoadingDisabled ? EagerPlayerActivitySnapshot : LazyPlayerActivitySnapshot
+
+export declare const PlayerActivitySnapshot: (new (init: ModelInit<PlayerActivitySnapshot>) => PlayerActivitySnapshot) & {
+  copyOf(source: PlayerActivitySnapshot, mutator: (draft: MutableModel<PlayerActivitySnapshot>) => MutableModel<PlayerActivitySnapshot> | void): PlayerActivitySnapshot;
 }
 
 type EagerEntityMetrics = {

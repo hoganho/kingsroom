@@ -32,6 +32,7 @@ const { calculateRankings } = require('./lib/rankingsCalculator');
 const { calculatePlayerInsights } = require('./lib/playerInsightsCalculator');
 const { generateSocialPulseDigest } = require('./lib/socialPulseDigest');
 const { buildOpportunityData } = require('./lib/opportunityDetector');
+const { calculatePlayerActivityTrends } = require('./lib/playerActivityTrendsCalculator');
 const { 
   getWeekBounds, 
   getMonthBounds, 
@@ -526,6 +527,7 @@ async function handleGenerateMetricsPack(input) {
       alertSummary,
       rankings,
       playerInsights,
+      playerActivityTrends,
       // Enhanced data modules
       scheduleCompliance: scheduleCompliance || null,
       recurringGameTrends: recurringGameTrends || null,

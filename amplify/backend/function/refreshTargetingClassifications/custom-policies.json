@@ -1,0 +1,74 @@
+[
+  {
+    "Action": [
+      "ses:SendEmail",
+      "ses:SendRawEmail"
+    ],
+    "Resource": [
+      "arn:aws:ses:ap-southeast-2:*:identity/*"
+    ]
+  },
+  {
+    "Action": [
+      "dynamodb:Scan",
+      "dynamodb:GetItem",
+      "dynamodb:UpdateItem"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:ap-southeast-2:*:table/Player-*",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/Player-*/index/*"
+    ]
+  },
+  {
+    "Action": [
+      "dynamodb:Scan",
+      "dynamodb:GetItem",
+      "dynamodb:UpdateItem"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerVenue-*",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerVenue-*/index/*"
+    ]
+  },
+  {
+    "Action": [
+      "dynamodb:GetItem",
+      "dynamodb:Query"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerSummary-*",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerSummary-*/index/*"
+    ]
+  },
+  {
+    "Action": [
+      "dynamodb:Query"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerResult-*",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerResult-*/index/*"
+    ]
+  },
+  {
+    "Action": [
+      "dynamodb:Scan"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerTransaction-*",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerTransaction-*/index/*"
+    ]
+  },
+  {
+    "Action": [
+      "dynamodb:GetItem",
+      "dynamodb:PutItem",
+      "dynamodb:UpdateItem",
+      "dynamodb:Query",
+      "dynamodb:Scan"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerActivitySnapshot-*",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerActivitySnapshot-*/index/*"
+    ]
+  }
+]

@@ -2,7 +2,7 @@
  * Monthly Board Report Prompt Template
  * Generates strategic insights for executives and board members
  * 
- * VERSION: 2.1.0 - Updated for MetricsPack v6 (Games Not Run tracking)
+ * VERSION: 2.2.0 - Updated for MetricsPack v7 (Player Activity Trends)
  * 
  * Now uses:
  * - scheduleCompliance (operational execution)
@@ -11,6 +11,7 @@
  * - competitorAnalysis (market position, threats)
  * - seriesLifecycle (tournament series performance)
  * - gamesNotRun (scheduled games that didn't complete - INITIATING, CANCELLED, etc.)
+ * - playerActivityTrends (MoM targeting/account category changes, VIP trends, lifecycle health)
  */
 
 /**
@@ -40,7 +41,8 @@ STRATEGIC ANALYSIS PRIORITIES:
 6. GROWTH OPPORTUNITIES - Data-driven expansion recommendations
 7. SERIES PERFORMANCE - Tournament series ROI and learnings
 8. PLAYER BASE - Retention, acquisition, lifetime value trends
-9. GAMES NOT RUN - Scheduled games that didn't complete affect operational efficiency
+9. PLAYER LIFECYCLE TRENDS (NEW) - Month-on-month targeting/account category shifts
+10. GAMES NOT RUN - Scheduled games that didn't complete affect operational efficiency
 
 PLAYER & ENTRY TRENDING ANALYSIS:
 When analyzing venue performance, comment on player trends:
@@ -52,6 +54,32 @@ Example insights:
 - "+15% unique players with +8% entries/player = healthy growth + strong retention"
 - "-10% unique players but +20% entries/player = fewer players but more engaged core"
 - "-5% entries/player = engagement declining, may need promotional refresh"
+
+PLAYER ACTIVITY TRENDS INTERPRETATION (NEW - Month-on-Month):
+This section shows how player targeting classifications and account categories shift month-over-month.
+
+TARGETING CLASSIFICATION ANALYSIS:
+- Active_EL: Active/Engaged/Loyal players - the healthy core
+- Retain_Inactive31_60d/61_90d: Players in the "danger zone" - need reactivation
+- Churned buckets: Players lost for longer periods - increasingly hard to recover
+
+STRATEGIC SIGNALS:
+- Active_EL declining MoM: Systemic engagement problem - investigate product, competition, or market issues
+- Retain buckets growing: "Churn pipeline" filling up - immediate reactivation campaign needed
+- Churned buckets stable/declining: Either successful reactivation or slower pipeline (check Active_EL)
+
+ACCOUNT CATEGORY ANALYSIS:
+- VIP: Top 5% by buy-ins - highest value, must protect
+- REGULAR: Core recurring players - stability backbone
+- COMMITTED: Engaged but not top tier - growth potential
+- CASUAL: Occasional players - marketing targets
+- TRIALIST: New players - acquisition pipeline health
+
+STRATEGIC SIGNALS:
+- VIP declining: Immediate board-level concern - investigate causes
+- REGULAR growing: Healthy player development pipeline
+- TRIALIST declining: Acquisition weakening - marketing review needed
+- CASUAL → COMMITTED flow: Player development working
 
 GAME STATUS INTERPRETATION:
 When reporting on games that didn't run, use appropriate business language:
@@ -115,6 +143,7 @@ function buildUserPrompt(metricsPack, options = {}) {
   const opportunities = data.opportunities || {};
   const seriesLifecycle = data.seriesLifecycle || {};
   const gamesNotRun = data.gamesNotRun || {};
+  const playerActivityTrends = data.playerActivityTrends || {};
   
   // Pre-calculate key ratios
   const overlayImpact = s.netProfit < 0 && s.overlayCost > 0 
@@ -248,6 +277,99 @@ ${JSON.stringify(scheduledOnlyVenues.map(v => ({
   details: v.gamesNotRunDetails
 })), null, 2)}
 ` : '✓ All venues with scheduled games had at least one game run.'}
+
+════════════════════════════════════════════════════════════════════════════════
+SECTION 4C: PLAYER LIFECYCLE TRENDS (Month-on-Month) ★ NEW
+════════════════════════════════════════════════════════════════════════════════
+${playerActivityTrends.monthly?.available ? `
+Period: ${playerActivityTrends.monthly.currentPeriod || 'Current Month'} vs ${playerActivityTrends.monthly.previousPeriod || 'Prior Month'}
+
+TARGETING CLASSIFICATION DISTRIBUTION (Current Month):
+${JSON.stringify(playerActivityTrends.monthly.targetingClassification?.distribution || {}, null, 2)}
+
+TARGETING CLASSIFICATION CHANGES (Month-on-Month):
+${JSON.stringify(playerActivityTrends.monthly.targetingClassification?.delta || {}, null, 2)}
+
+TARGETING HIGHLIGHTS:
+${(playerActivityTrends.monthly.targetingClassification?.highlights || []).map(h => 
+  `- ${h.classification}: ${h.message}`
+).join('\n') || 'No significant targeting classification changes this month.'}
+
+ACCOUNT CATEGORY DISTRIBUTION (Current Month):
+${JSON.stringify(playerActivityTrends.monthly.accountCategory?.distribution || {}, null, 2)}
+
+ACCOUNT CATEGORY CHANGES (Month-on-Month):
+${JSON.stringify(playerActivityTrends.monthly.accountCategory?.delta || {}, null, 2)}
+
+ACCOUNT CATEGORY HIGHLIGHTS:
+${(playerActivityTrends.monthly.accountCategory?.highlights || []).map(h => 
+  `- ${h.category}: ${h.message}`
+).join('\n') || 'No significant account category changes this month.'}
+
+STRATEGIC PLAYER LIFECYCLE ASSESSMENT:
+${(() => {
+  const tc = playerActivityTrends.monthly.targetingClassification?.delta || {};
+  const ac = playerActivityTrends.monthly.accountCategory?.delta || {};
+  const assessment = [];
+  
+  // Active player health
+  if (tc['Active_EL']?.percentChange !== undefined) {
+    if (tc['Active_EL'].percentChange < -10) {
+      assessment.push(`🔴 CRITICAL: Active player base declined ${Math.abs(tc['Active_EL'].percentChange).toFixed(1)}% MoM - immediate investigation required`);
+    } else if (tc['Active_EL'].percentChange < -5) {
+      assessment.push(`🟠 WARNING: Active player base declined ${Math.abs(tc['Active_EL'].percentChange).toFixed(1)}% MoM - monitor closely`);
+    } else if (tc['Active_EL'].percentChange > 5) {
+      assessment.push(`🟢 POSITIVE: Active player base grew ${tc['Active_EL'].percentChange.toFixed(1)}% MoM`);
+    } else {
+      assessment.push(`⚪ STABLE: Active player base change within normal range (${tc['Active_EL'].percentChange >= 0 ? '+' : ''}${tc['Active_EL'].percentChange.toFixed(1)}%)`);
+    }
+  }
+  
+  // VIP health
+  if (ac['VIP']?.change !== undefined) {
+    if (ac['VIP'].change < -5) {
+      assessment.push(`🔴 CRITICAL: Lost ${Math.abs(ac['VIP'].change)} VIP players this month - high-value player attrition`);
+    } else if (ac['VIP'].change > 5) {
+      assessment.push(`🟢 POSITIVE: Gained ${ac['VIP'].change} VIP players - player development pipeline working`);
+    }
+  }
+  
+  // Retention bucket health
+  const retainGrowth = (tc['Retain_Inactive31_60d']?.change || 0) + (tc['Retain_Inactive61_90d']?.change || 0);
+  if (retainGrowth > 50) {
+    assessment.push(`🟠 WARNING: ${retainGrowth} players accumulated in retention buckets - churn pipeline building`);
+  } else if (retainGrowth < -20) {
+    assessment.push(`🟢 POSITIVE: Retention bucket shrinkage suggests reactivation success`);
+  }
+  
+  // Acquisition health
+  if (ac['TRIALIST']?.change !== undefined) {
+    if (ac['TRIALIST'].change < -20) {
+      assessment.push(`🟠 WARNING: TRIALIST count down ${Math.abs(ac['TRIALIST'].change)} - acquisition pipeline weakening`);
+    } else if (ac['TRIALIST'].change > 20) {
+      assessment.push(`🟢 POSITIVE: ${ac['TRIALIST'].change} new TRIALISTs - acquisition efforts working`);
+    }
+  }
+  
+  return assessment.length > 0 ? assessment.join('\n') : 'Player lifecycle metrics within normal parameters.';
+})()}
+` : `
+Player lifecycle trend data not yet available.
+Note: This requires at least 2 months of snapshot data to calculate trends.
+Once available, this section will show month-on-month changes in:
+- Targeting classifications (Active → Retain → Churned flows)
+- Account categories (VIP, REGULAR, COMMITTED, CASUAL, TRIALIST movements)
+- Strategic implications for player development and retention
+`}
+
+${playerActivityTrends.weekly?.available ? `
+WEEKLY TREND CONTEXT (supporting data):
+Current Week (${playerActivityTrends.weekly.currentPeriod || 'Latest'}):
+- Active Players: ${playerActivityTrends.weekly.targetingClassification?.distribution?.['Active_EL'] || 'N/A'}
+- Week-on-Week Change: ${playerActivityTrends.weekly.targetingClassification?.delta?.['Active_EL']?.percentChange !== undefined 
+  ? `${playerActivityTrends.weekly.targetingClassification.delta['Active_EL'].percentChange >= 0 ? '+' : ''}${playerActivityTrends.weekly.targetingClassification.delta['Active_EL'].percentChange.toFixed(1)}%`
+  : 'N/A'}
+` : ''}
 
 ════════════════════════════════════════════════════════════════════════════════
 SECTION 5: RECURRING GAME PORTFOLIO HEALTH
@@ -384,7 +506,7 @@ ${JSON.stringify(venues.map(v => ({
   totalEntries: v.totalEntries,
   avgEntriesPerGame: v.avgEntriesPerGame,
   
-  // Player metrics (NEW)
+  // Player metrics
   totalUniquePlayers: v.totalUniquePlayers || 0,
   avgPlayersPerGame: v.avgPlayersPerGame || 0,
   entriesPerPlayer: v.entriesPerPlayer || 0,
@@ -394,109 +516,83 @@ ${JSON.stringify(venues.map(v => ({
   revenueTrendPercent: v.revenueTrendPercent,
   trendCategory: v.trendCategory,
   
-  // Trending - Volume/Players (NEW)
+  // Trending - Volume/Players
   entriesTrendPercent: v.entriesTrendPercent,
   uniquePlayersTrendPercent: v.uniquePlayersTrendPercent,
   gamesTrendPercent: v.gamesTrendPercent,
   entriesPerPlayerChange: v.entriesPerPlayerChange,
   
-  // Prior period comparison
-  priorPeriodProfit: v.priorPeriodProfit,
-  priorPeriodEntries: v.priorPeriodEntries,
-  priorPeriodUniquePlayers: v.priorPeriodUniquePlayers,
-  priorPeriodGames: v.priorPeriodGames,
-  
   // Health indicators
   overallHealth: v.overallHealth,
-  profitability: v.profitability,
-  
-  // Guarantee info
   totalOverlayCost: v.totalOverlayCost,
-  avgCoverageRate: v.avgCoverageRate,
   
-  // Breakdowns
-  gameTypeBreakdown: v.gameTypeBreakdown,
-  dayBreakdown: v.dayBreakdown,
+  // Key games
+  topGames: v.topGames?.slice(0, 3),
+  bottomGames: v.bottomGames?.slice(0, 3),
   
-  // Games summary
-  topGames: v.topGames,
-  bottomGames: v.bottomGames,
-  
-  // Full games list (all games with details)
-  gamesList: v.gamesList || [],
-  
-  // Games not run details (if any)
+  // Games not run details
   gamesNotRunDetails: v.gamesNotRunDetails || null
 })), null, 2)}
 
 ════════════════════════════════════════════════════════════════════════════════
-SECTION 10: ALERTS & RANKINGS
+SECTION 10: ALERTS & RISK REGISTER
 ════════════════════════════════════════════════════════════════════════════════
-ALERT SUMMARY: ${alertSummary.total || 0} total
-- HIGH: ${alertSummary.bySeverity?.HIGH || 0}
-- MEDIUM: ${alertSummary.bySeverity?.MEDIUM || 0}
-- LOW: ${alertSummary.bySeverity?.LOW || 0}
+Alert Summary: ${alertSummary.total || 0} total (HIGH: ${alertSummary.bySeverity?.HIGH || 0}, MEDIUM: ${alertSummary.bySeverity?.MEDIUM || 0}, LOW: ${alertSummary.bySeverity?.LOW || 0})
 
-By Type: ${JSON.stringify(alertSummary.byType || {}, null, 2)}
-
-ALL ALERTS:
+ALERTS:
 ${JSON.stringify(alerts, null, 2)}
 
-RANKINGS:
-${JSON.stringify(rankings, null, 2)}
+════════════════════════════════════════════════════════════════════════════════
+SECTION 11: RANKINGS & BENCHMARKS
+════════════════════════════════════════════════════════════════════════════════
+Top Games by Profit: ${JSON.stringify(rankings.games?.topByProfit?.slice(0, 10) || [], null, 2)}
+Top Venues by Profit: ${JSON.stringify(rankings.venues?.topByProfit?.slice(0, 5) || [], null, 2)}
+Day of Week Performance: ${JSON.stringify(rankings.dayOfWeek || [], null, 2)}
+Game Type Performance: ${JSON.stringify(rankings.gameTypes || [], null, 2)}
+Buy-in Tier Performance: ${JSON.stringify(rankings.buyInTiers || [], null, 2)}
 
 ════════════════════════════════════════════════════════════════════════════════
 REQUIRED JSON OUTPUT
 ════════════════════════════════════════════════════════════════════════════════
 {
   "executiveSummary": {
-    "headline": "One sentence: profit/loss with trend direction and primary driver",
-    "overallHealth": "CRITICAL | NEEDS_ATTENTION | STABLE | GOOD | EXCELLENT",
-    "healthRationale": "Data-backed justification for rating",
-    "profitStatement": "Clear P&L statement: '$X profit/loss, Y% margin, Z% vs prior period'",
-    "keyHighlights": ["3-5 most material findings with numbers"],
-    "keyRisks": ["Top 2-3 risks with quantified exposure"],
-    "trajectory": "IMPROVING | STABLE | DECLINING"
-  },
-  
-  "financialPerformance": {
-    "revenue": {
-      "actual": <number>,
-      "priorPeriod": <number>,
-      "change": <number>,
-      "changePercent": <number>,
-      "drivers": ["What drove revenue up/down"]
-    },
-    "costs": {
-      "total": <number>,
-      "breakdown": {
-        "staff": <number>,
-        "venue": <number>,
-        "marketing": <number>,
-        "overlay": <number>,
-        "other": <number>
-      },
-      "biggestDriver": "Which cost category had most impact",
-      "costPerEntry": <number>
-    },
-    "profit": {
-      "actual": <number>,
-      "priorPeriod": <number>,
+    "headline": "One sentence: profit/loss, key driver, and trajectory",
+    "businessHealth": "EXCELLENT | GOOD | SATISFACTORY | CONCERNING | CRITICAL",
+    "healthRationale": "Why this rating - reference specific metrics",
+    "profitSummary": {
+      "value": <number>,
       "change": <number>,
       "changePercent": <number>,
       "margin": <number>,
-      "marginChange": <number>,
-      "analysis": "What drove profit performance"
+      "marginChange": <number>
+    },
+    "keyWins": ["Top 2-3 positive outcomes with numbers"],
+    "keyRisks": ["Top 2-3 risks with quantified exposure"],
+    "vsLastPeriod": "Improved/Declined/Stable with key metrics",
+    "trajectory": "IMPROVING | STABLE | DECLINING",
+    "boardAttentionItems": ["Items requiring board discussion"]
+  },
+  
+  "financialPerformance": {
+    "revenue": { "value": <number>, "change": <number>, "changePercent": <number>, "breakdown": {...}, "drivers": ["What drove revenue"] },
+    "costs": { "value": <number>, "change": <number>, "changePercent": <number>, "breakdown": {...}, "concerns": ["Cost concerns"] },
+    "profit": { "value": <number>, "change": <number>, "changePercent": <number>, "drivers": ["What drove profit"] },
+    "margin": { "value": <number>, "change": <number>, "assessment": "Margin health and trend" },
+    "unitEconomics": {
+      "revenuePerEntry": <number>,
+      "costPerEntry": <number>,
+      "profitPerEntry": <number>,
+      "profitPerGame": <number>,
+      "assessment": "Unit economics health"
     }
   },
   
   "guaranteeAnalysis": {
-    "summary": "Overall assessment of guarantee strategy",
-    "totalExposure": <number>,
-    "totalOverlayCost": <number>,
     "overlayRate": <number>,
-    "avgCoverageRate": <number>,
+    "totalOverlayCost": <number>,
     "overlayAsPercentOfLoss": <number or null>,
+    "avgCoverageRate": <number>,
+    "assessment": "Guarantee strategy effectiveness",
     "problemGuarantees": [
       { "gameName": "Name", "venueName": "Venue", "overlay": <number>, "coverageRate": <number>, "recommendation": "Action" }
     ],
@@ -564,8 +660,43 @@ REQUIRED JSON OUTPUT
     "venuesWithNoGamesRun": [
       { "venueName": "Name", "gamesScheduled": <number>, "reason": "Why games didn't run", "recommendation": "Action" }
     ],
-    "systemic Issues": ["Recurring problems causing games not to run"],
+    "systemicIssues": ["Recurring problems causing games not to run"],
     "recommendation": "Operational improvement action"
+  },
+  
+  "playerLifecycleTrends": {
+    "available": <boolean>,
+    "summary": "Board-level summary of player lifecycle health",
+    "targetingClassification": {
+      "activePlayersCount": <number or null>,
+      "activePlayersChange": <number or null>,
+      "activePlayersPercent": <number or null>,
+      "retentionBucketTotal": <number or null>,
+      "retentionBucketChange": <number or null>,
+      "churnedTotal": <number or null>,
+      "churnedChange": <number or null>,
+      "healthAssessment": "HEALTHY | STABLE | CONCERNING | CRITICAL",
+      "rationale": "Why this assessment"
+    },
+    "accountCategory": {
+      "vipCount": <number or null>,
+      "vipChange": <number or null>,
+      "regularCount": <number or null>,
+      "regularChange": <number or null>,
+      "trialistCount": <number or null>,
+      "trialistChange": <number or null>,
+      "healthAssessment": "GROWING | STABLE | DECLINING",
+      "rationale": "Why this assessment"
+    },
+    "strategicImplications": [
+      {
+        "finding": "Key finding from the data",
+        "impact": "Business impact",
+        "recommendation": "Strategic action"
+      }
+    ],
+    "boardAttentionRequired": <boolean>,
+    "boardAttentionReason": "Why board needs to discuss this (if applicable)"
   },
   
   "competitivePosition": {
@@ -642,11 +773,13 @@ REQUIRED JSON OUTPUT
     "confidence": "HIGH | MEDIUM | LOW",
     "nextPeriodFocus": "Primary strategic focus",
     "keyRisksToMonitor": ["Risks requiring attention"],
+    "playerLifecycleWatch": "What to monitor in player trends",
     "targetMetrics": {
       "revenue": "Target or direction",
       "profit": "Target or direction",
       "margin": "Target or direction",
-      "compliance": "Target or direction"
+      "compliance": "Target or direction",
+      "activePlayersRetention": "Target or direction"
     },
     "catalysts": ["Events that could change trajectory"]
   }
@@ -659,7 +792,7 @@ REQUIRED JSON OUTPUT
  */
 function getSchema() {
   return {
-    name: 'monthly_board_report_v3',
+    name: 'monthly_board_report_v4',
     strict: false,
     schema: {
       type: 'object',
@@ -672,6 +805,7 @@ function getSchema() {
         operationalExecution: { type: 'object' },
         portfolioHealth: { type: 'object' },
         venuePerformance: { type: 'array' },
+        playerLifecycleTrends: { type: 'object' },
         competitivePosition: { type: 'object' },
         seriesPerformance: { type: 'object' },
         growthOpportunities: { type: 'object' },

@@ -116,14 +116,20 @@ export const formatStatus = (status: PlayerAccountStatus): StatusDisplay => {
 
 export const formatCategory = (category: PlayerAccountCategory): CategoryDisplay => {
   const categoryMap: Record<PlayerAccountCategory, CategoryDisplay> = {
-    [PlayerAccountCategory.NEW]: {
-      label: 'New',
+    [PlayerAccountCategory.TRIALIST]: {
+      label: 'Trialist',
       color: 'green',
       bgColor: 'bg-green-100',
       textColor: 'text-green-800',
     },
-    [PlayerAccountCategory.RECREATIONAL]: {
+    [PlayerAccountCategory.CASUAL]: {
       label: 'Recreational',
+      color: 'blue',
+      bgColor: 'bg-blue-100',
+      textColor: 'text-blue-800',
+    },
+    [PlayerAccountCategory.COMMITTED]: {
+      label: 'Committed',
       color: 'blue',
       bgColor: 'bg-blue-100',
       textColor: 'text-blue-800',
@@ -139,12 +145,6 @@ export const formatCategory = (category: PlayerAccountCategory): CategoryDisplay
       color: 'purple',
       bgColor: 'bg-purple-100',
       textColor: 'text-purple-800',
-    },
-    [PlayerAccountCategory.LAPSED]: {
-      label: 'Lapsed',
-      color: 'gray',
-      bgColor: 'bg-gray-100',
-      textColor: 'text-gray-800',
     },
   };
 

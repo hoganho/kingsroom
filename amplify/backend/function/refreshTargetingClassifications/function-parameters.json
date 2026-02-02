@@ -1,0 +1,49 @@
+{
+  "permissions": {
+    "api": {
+      "kingsroom": [
+        "Query",
+        "Mutation"
+      ]
+    },
+    "storage": {
+      "Entity:@model(appsync)": [
+        "read"
+      ],
+      "Venue:@model(appsync)": [
+        "read"
+      ],
+      "Player:@model(appsync)": [
+        "read",
+        "update"
+      ],
+      "PlayerSummary:@model(appsync)": [
+        "read",
+        "update"
+      ],
+      "PlayerEntry:@model(appsync)": [
+        "read"
+      ],
+      "PlayerResult:@model(appsync)": [
+        "read"
+      ],
+      "PlayerVenue:@model(appsync)": [
+        "read",
+        "update"
+      ],
+      "PlayerTransaction:@model(appsync)": [
+        "read"
+      ],
+      "PlayerCredits:@model(appsync)": [
+        "read"
+      ],
+      "PlayerPoints:@model(appsync)": [
+        "read"
+      ],
+      "PlayerTicket:@model(appsync)": [
+        "read"
+      ]
+    }
+  },
+  "lambdaLayers": []
+}

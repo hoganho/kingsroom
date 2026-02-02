@@ -9676,6 +9676,279 @@ export const schema = {
                 }
             ]
         },
+        "PlayerActivitySnapshot": {
+            "name": "PlayerActivitySnapshot",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "snapshotType": {
+                    "name": "snapshotType",
+                    "isArray": false,
+                    "type": {
+                        "enum": "SnapshotPeriodType"
+                    },
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "snapshotDate": {
+                    "name": "snapshotDate",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "dateKey": {
+                    "name": "dateKey",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "weekKey": {
+                    "name": "weekKey",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "monthKey": {
+                    "name": "monthKey",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "mode": {
+                    "name": "mode",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalPlayers": {
+                    "name": "totalPlayers",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalPlayerVenues": {
+                    "name": "totalPlayerVenues",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "playerTargetingDistribution": {
+                    "name": "playerTargetingDistribution",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "playerVenueTargetingDistribution": {
+                    "name": "playerVenueTargetingDistribution",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "playerTargetingTransitions": {
+                    "name": "playerTargetingTransitions",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "playerVenueTargetingTransitions": {
+                    "name": "playerVenueTargetingTransitions",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "playerTargetingUpdated": {
+                    "name": "playerTargetingUpdated",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "playerVenueTargetingUpdated": {
+                    "name": "playerVenueTargetingUpdated",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "venueTargetingBreakdown": {
+                    "name": "venueTargetingBreakdown",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "accountCategoryDistribution": {
+                    "name": "accountCategoryDistribution",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "accountCategoryTransitions": {
+                    "name": "accountCategoryTransitions",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "accountCategoryUpdated": {
+                    "name": "accountCategoryUpdated",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalVIPs": {
+                    "name": "totalVIPs",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "vipStatsByEntity": {
+                    "name": "vipStatsByEntity",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "firstDailySnapshot": {
+                    "name": "firstDailySnapshot",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "lastDailySnapshot": {
+                    "name": "lastDailySnapshot",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "dailySnapshotCount": {
+                    "name": "dailySnapshotCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalErrors": {
+                    "name": "totalErrors",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "executionTimeMs": {
+                    "name": "executionTimeMs",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "generatedBy": {
+                    "name": "generatedBy",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "createdAt": {
+                    "name": "createdAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "updatedAt": {
+                    "name": "updatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                }
+            },
+            "syncable": true,
+            "pluralName": "PlayerActivitySnapshots",
+            "attributes": [
+                {
+                    "type": "model",
+                    "properties": {
+                        "subscriptions": null
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "bySnapshotType",
+                        "fields": [
+                            "snapshotType",
+                            "snapshotDate"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byDateKey",
+                        "fields": [
+                            "dateKey"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byWeekKey",
+                        "fields": [
+                            "weekKey"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byMonthKey",
+                        "fields": [
+                            "monthKey"
+                        ]
+                    }
+                },
+                {
+                    "type": "auth",
+                    "properties": {
+                        "rules": [
+                            {
+                                "allow": "private",
+                                "operations": [
+                                    "create",
+                                    "update",
+                                    "delete",
+                                    "read"
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
         "EntityMetrics": {
             "name": "EntityMetrics",
             "fields": {
@@ -19791,11 +20064,11 @@ export const schema = {
         "PlayerAccountCategory": {
             "name": "PlayerAccountCategory",
             "values": [
-                "NEW",
-                "RECREATIONAL",
+                "TRIALIST",
+                "CASUAL",
+                "COMMITTED",
                 "REGULAR",
-                "VIP",
-                "LAPSED"
+                "VIP"
             ]
         },
         "SeriesStatus": {
@@ -20020,6 +20293,14 @@ export const schema = {
                 "AUTO",
                 "MANUAL",
                 "RECONCILED"
+            ]
+        },
+        "SnapshotPeriodType": {
+            "name": "SnapshotPeriodType",
+            "values": [
+                "DAILY",
+                "WEEKLY",
+                "MONTHLY"
             ]
         },
         "EntryType": {
@@ -34140,5 +34421,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "8ea264020bdbc6856ec03f9d491b81bf"
+    "version": "fa198ccae0625da5384fd5619a313b9e"
 };

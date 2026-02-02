@@ -106,12 +106,12 @@ enum PlayerAccountStatus {
   PENDING_VERIFICATION
 }
 
-enum PlayerAccountCategory { 
-  NEW
-  RECREATIONAL
-  REGULAR
-  VIP
-  LAPSED
+enum PlayerAccountCategory {
+  TRIALIST    # Early-stage explorer
+  CASUAL      # Plays occasionally  
+  COMMITTED   # Regular intent, not weekly
+  REGULAR     # Weekly participation sustained
+  VIP         # Top 5% by value (overrides REGULAR)
 }
 
 enum SeriesStatus { 
@@ -304,6 +304,12 @@ enum SnapshotType {
   AUTO
   MANUAL
   RECONCILED
+}
+
+enum SnapshotPeriodType {
+  DAILY      # Daily snapshot (DAILY_2025-02-01)
+  WEEKLY     # Weekly aggregate (WEEKLY_2025-W05)  
+  MONTHLY    # Monthly aggregate (MONTHLY_2025-02)
 }
 
 enum EntryType { 
