@@ -380,6 +380,7 @@ type GameFinancialSnapshot
   isReconciled: Boolean @default(value: "false")
   reconciledAt: AWSDateTime
   reconciledBy: String
+  excludeFromAccounting: Boolean @default(value: "false")
 
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!

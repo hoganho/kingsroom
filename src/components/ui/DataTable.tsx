@@ -12,9 +12,11 @@ export interface DataTableProps<T> {
   columns: ColumnDef<T, any>[]
   className?: string
   onRowClick?: (row: T) => void
+  /** Optional callback to provide custom class names per row based on row data */
+  rowClassName?: (row: T) => string
 }
 
-export function DataTable<T>({ data, columns, className, onRowClick }: DataTableProps<T>) {
+export function DataTable<T>({ data, columns, className, onRowClick, rowClassName }: DataTableProps<T>) {
   const table = useReactTable<T>({
     data,
     columns,
@@ -57,7 +59,8 @@ export function DataTable<T>({ data, columns, className, onRowClick }: DataTable
               onClick={() => onRowClick?.(row.original)}
               className={cx(
                 "hover:bg-gray-50 dark:hover:bg-gray-900/50",
-                onRowClick && "cursor-pointer"
+                onRowClick && "cursor-pointer",
+                rowClassName?.(row.original)
               )}
             >
               {row.getVisibleCells().map((cell) => {

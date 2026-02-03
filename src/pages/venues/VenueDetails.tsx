@@ -1,8 +1,17 @@
 // src/pages/venues/VenueDetails.tsx
-// VERSION: 3.6.0 - Refactored to use shared ProfitTrendChart component
+// VERSION: 3.8.0 - excludeFromAccounting support for corrupted game data
 //
 // CHANGELOG:
-// - v3.6.0: Refactored to use shared ProfitTrendChart from components/charts
+// - v3.8.0: Added excludeFromAccounting handling for corrupted game data
+//           - Games with excludeFromAccounting=true shown in tables with strikethrough + opacity
+//           - Red "Excluded" badge displayed on excluded rows (Status column / game name)
+//           - Excluded games removed from all calculations: chart, stats, totals
+//           - buildOverallTrendData / buildScheduleGroupStats skip excluded snapshots
+//           - Ad-hoc stats separate includedGames count from totalGames
+//           - AdHocPLBarChart renders excluded games as gray dashed placeholders
+//           - DataTable rowClassName prop added for per-row conditional styling
+//           - Footer/summary sections show excluded count when applicable
+// - v3.7.0: Updated Game History P&L table and Profit Trend chart
 //           - Removed local ProfitTrendChart component (~70 lines)
 //           - ProfitTrendChartSection now converts data to ProfitDataPoint format
 //           - All other functionality unchanged
@@ -61,6 +70,9 @@ import {
   ResponsiveContainer,
   LineChart,
   Line,
+  ComposedChart,
+  Area,
+  ReferenceLine,
 } from 'recharts';
 import { format, parseISO, startOfMonth } from 'date-fns';
 
@@ -75,12 +87,10 @@ import { DataTable } from '../../components/ui/DataTable';
 import type { ColumnDef } from '@tanstack/react-table';
 // Import chart components and trend utilities (all from ProfitTrendChart)
 import { 
-  ProfitTrendChart, 
-  ProfitDataPoint,
   TrendBadge, 
-  TrendChartLegend, 
   TrendInfo, 
-  calculateTrendInfo, 
+  calculateTrendInfo,
+  calculateLinearRegression,
 } from '../../components/charts';
 
 // ============================================
@@ -153,6 +163,10 @@ interface GameFinancialSnapshotWithGame {
   totalCost?: number | null;
   netProfit?: number | null;
   profitMargin?: number | null;
+  guaranteedPrizePool?: number | null;
+  prizepoolDiscrepancy?: number | null;
+  profitPerPlayer?: number | null;
+  excludeFromAccounting?: boolean | null;
   gameType?: string | null;
   tournamentType?: string | null;
   isSeries?: boolean | null;
@@ -247,6 +261,10 @@ interface GameRowData {
   cost: number;
   profitMargin: number | null;
   tournamentId: string | null;
+  gtd: number;
+  prizepoolDiscrepancy: number;
+  profitPerPlayer: number | null;
+  excludeFromAccounting: boolean;
 }
 
 // ============================================
@@ -359,6 +377,10 @@ const listGameFinancialSnapshotsWithGame = /* GraphQL */ `
         totalCost
         netProfit
         profitMargin
+        guaranteedPrizePool
+        prizepoolDiscrepancy
+        profitPerPlayer
+        excludeFromAccounting
         gameType
         tournamentType
         isSeries
@@ -550,6 +572,8 @@ function buildScheduleGroupStats(
     // CHANGED: Use recurringGameId as the grouping key
     const recurringGameId = snap.game?.recurringGameId;
     if (!recurringGameId) continue; // Skip games without a recurring game assignment
+    // Skip excluded games from all calculations (corrupted data)
+    if (snap.excludeFromAccounting === true) continue;
 
     if (!statsByRecurringGame.has(recurringGameId)) {
       statsByRecurringGame.set(recurringGameId, {
@@ -650,17 +674,23 @@ function buildScheduleGroupStats(
 
 function buildOverallTrendData(
   snapshots: GameFinancialSnapshotWithGame[]
-): { date: string; profit: number; prizepool: number; entries: number; games: number }[] {
-  const byMonth = new Map<string, { profit: number; prizepool: number; entries: number; games: number }>();
+): { date: string; profit: number; prizepool: number; entries: number; games: number; avgProfitPerPlayer: number | null }[] {
+  const byMonth = new Map<string, { profit: number; prizepool: number; entries: number; games: number; profitPerPlayerSum: number; profitPerPlayerCount: number }>();
 
   for (const snap of snapshots) {
     if (!snap.gameStartDateTime) continue;
+    // Skip excluded games from all calculations (corrupted data)
+    if (snap.excludeFromAccounting === true) continue;
     const monthKey = getMonthKey(snap.gameStartDateTime);
-    const existing = byMonth.get(monthKey) ?? { profit: 0, prizepool: 0, entries: 0, games: 0 };
+    const existing = byMonth.get(monthKey) ?? { profit: 0, prizepool: 0, entries: 0, games: 0, profitPerPlayerSum: 0, profitPerPlayerCount: 0 };
     existing.profit += snap.netProfit ?? 0;
     existing.prizepool += snap.prizepoolTotal ?? 0;
     existing.entries += snap.totalEntries ?? 0;
     existing.games += 1;
+    if (snap.profitPerPlayer != null) {
+      existing.profitPerPlayerSum += snap.profitPerPlayer;
+      existing.profitPerPlayerCount += 1;
+    }
     byMonth.set(monthKey, existing);
   }
 
@@ -668,7 +698,13 @@ function buildOverallTrendData(
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([date, values]) => ({
       date,
-      ...values,
+      profit: values.profit,
+      prizepool: values.prizepool,
+      entries: values.entries,
+      games: values.games,
+      avgProfitPerPlayer: values.profitPerPlayerCount > 0
+        ? values.profitPerPlayerSum / values.profitPerPlayerCount
+        : null,
     }));
 }
 
@@ -699,6 +735,10 @@ function buildGameRowData(snapshots: GameFinancialSnapshotWithGame[]): GameRowDa
       cost: snap.totalCost ?? 0,
       profitMargin: snap.profitMargin ?? null,
       tournamentId: snap.game?.tournamentId ?? null,
+      gtd: snap.guaranteedPrizePool ?? 0,
+      prizepoolDiscrepancy: snap.prizepoolDiscrepancy ?? 0,
+      profitPerPlayer: snap.profitPerPlayer ?? null,
+      excludeFromAccounting: snap.excludeFromAccounting === true,
     }));
 }
 
@@ -884,7 +924,7 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({ schedule, onClick }) => {
 // ---- Profit Trend Chart Section with Badge (UPDATED: uses shared ProfitTrendChart) ----
 
 interface ProfitTrendChartSectionProps {
-  data: { date: string; profit: number }[];
+  data: { date: string; profit: number; avgProfitPerPlayer: number | null }[];
   selectedGameTypes: Set<GameTypeKey>;
   onGameTypeToggle: (type: GameTypeKey) => void;
   availableGameTypes: Set<GameTypeKey>;
@@ -898,22 +938,64 @@ const ProfitTrendChartSection: React.FC<ProfitTrendChartSectionProps> = ({
 }) => {
   const [trendInfo, setTrendInfo] = useState<TrendInfo | null>(null);
 
-  // Convert trend data to ProfitDataPoint format for shared chart
-  const chartData: ProfitDataPoint[] = useMemo(() => {
-    return data.map((item, index) => ({
-      id: `month-${index}`,
-      date: (() => {
-        try {
-          return format(parseISO(item.date + '-01'), 'MMM yy');
-        } catch {
-          return item.date;
-        }
-      })(),
-      fullDate: item.date + '-01',
-      profit: item.profit,
-      isMissing: false,
-    }));
+  // Build composite chart data with trendline + profitPerPlayer
+  const compositeChartData = useMemo(() => {
+    // Calculate trendline via linear regression
+    const profitPoints = data.map((item, index) => ({ x: index, y: item.profit }));
+    const { slope, intercept } = calculateLinearRegression(profitPoints);
+
+    return data.map((item, index) => {
+      let displayDate = item.date;
+      try {
+        displayDate = format(parseISO(item.date + '-01'), 'MMM yy');
+      } catch { /* keep original */ }
+
+      return {
+        date: displayDate,
+        fullDate: item.date + '-01',
+        profit: item.profit,
+        trendline: slope * index + intercept,
+        avgProfitPerPlayer: item.avgProfitPerPlayer,
+      };
+    });
   }, [data]);
+
+  // Calculate trend info for badge
+  useEffect(() => {
+    const profitPoints = data.map((item, index) => ({ x: index, y: item.profit }));
+    setTrendInfo(calculateTrendInfo(profitPoints));
+  }, [data]);
+
+  const hasProfitPerPlayer = compositeChartData.some(d => d.avgProfitPerPlayer != null);
+
+  // Custom tooltip for dual-axis chart
+  const DualAxisTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      const profitVal = payload.find((p: any) => p.dataKey === 'profit')?.value;
+      const pppVal = payload.find((p: any) => p.dataKey === 'avgProfitPerPlayer')?.value;
+      const dataPoint = payload[0]?.payload;
+      return (
+        <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-3 text-sm">
+          <p className="font-medium text-gray-700 mb-1">
+            {dataPoint?.fullDate 
+              ? format(parseISO(dataPoint.fullDate), 'MMM yyyy') 
+              : label}
+          </p>
+          {profitVal != null && (
+            <p className={profitVal >= 0 ? 'text-blue-600' : 'text-red-600'}>
+              Profit: {formatCurrency(profitVal)}
+            </p>
+          )}
+          {pppVal != null && (
+            <p className={pppVal >= 0 ? 'text-emerald-600' : 'text-red-600'}>
+              Avg $/Player: {formatCurrency(pppVal)}
+            </p>
+          )}
+        </div>
+      );
+    }
+    return null;
+  };
 
   return (
     <div>
@@ -930,16 +1012,95 @@ const ProfitTrendChartSection: React.FC<ProfitTrendChartSectionProps> = ({
             availableTypes={availableGameTypes}
           />
         </div>
-        <TrendChartLegend />
+        <div className="flex items-center gap-4 text-xs text-gray-500">
+          <div className="flex items-center gap-1.5">
+            <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: '#6366f1', opacity: 0.3 }} />
+            <span>Profit/Loss</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <div className="w-4 h-0.5" style={{ borderStyle: 'dashed', borderWidth: '1px', borderColor: '#10b981' }} />
+            <span>Trend</span>
+          </div>
+          {hasProfitPerPlayer && (
+            <div className="flex items-center gap-1.5">
+              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#f59e0b' }} />
+              <span>$/Player</span>
+            </div>
+          )}
+        </div>
       </div>
       <Card>
-        {chartData.length > 0 ? (
-          <ProfitTrendChart 
-            data={chartData} 
-            onTrendCalculated={setTrendInfo}
-            height={200}
-            gradientId="venueDetailsProfitGradient"
-          />
+        {compositeChartData.length > 0 ? (
+          <ResponsiveContainer width="100%" height={200}>
+            <ComposedChart data={compositeChartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+              <defs>
+                <linearGradient id="venueDetailsProfitGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+              <XAxis 
+                dataKey="date" 
+                tick={{ fontSize: 11 }} 
+                stroke="#9ca3af"
+                interval="preserveStartEnd"
+              />
+              <YAxis 
+                yAxisId="left"
+                tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`}
+                tick={{ fontSize: 11 }} 
+                stroke="#9ca3af"
+              />
+              {hasProfitPerPlayer && (
+                <YAxis
+                  yAxisId="right"
+                  orientation="right"
+                  tickFormatter={(v) => `$${v.toFixed(0)}`}
+                  tick={{ fontSize: 11 }}
+                  stroke="#f59e0b"
+                />
+              )}
+              <Tooltip content={<DualAxisTooltip />} />
+              <ReferenceLine yAxisId="left" y={0} stroke="#9ca3af" strokeDasharray="3 3" />
+              
+              {/* Profit Area */}
+              <Area
+                yAxisId="left"
+                type="monotone"
+                dataKey="profit"
+                stroke="#6366f1"
+                strokeWidth={2}
+                fill="url(#venueDetailsProfitGradient)"
+                connectNulls={false}
+              />
+              
+              {/* Trendline */}
+              <Line
+                yAxisId="left"
+                type="linear"
+                dataKey="trendline"
+                stroke="#10b981"
+                strokeWidth={2}
+                strokeDasharray="5 5"
+                dot={false}
+                activeDot={false}
+              />
+
+              {/* Profit Per Player on secondary axis */}
+              {hasProfitPerPlayer && (
+                <Line
+                  yAxisId="right"
+                  type="monotone"
+                  dataKey="avgProfitPerPlayer"
+                  stroke="#f59e0b"
+                  strokeWidth={2}
+                  dot={{ r: 3, fill: '#f59e0b' }}
+                  connectNulls
+                />
+              )}
+            </ComposedChart>
+          </ResponsiveContainer>
         ) : (
           <div className="flex items-center justify-center h-48 text-gray-400">
             No trend data available
@@ -964,9 +1125,10 @@ const AdHocPLBarChart: React.FC<AdHocPLBarChartProps> = ({ games }) => {
     return [...games].sort((a, b) => a.date.localeCompare(b.date));
   }, [games]);
 
-  // Calculate scale
-  const maxProfit = Math.max(...sortedGames.map(d => d.profit), 0);
-  const minProfit = Math.min(...sortedGames.map(d => d.profit), 0);
+  // Calculate scale from INCLUDED games only (excluded = corrupted data)
+  const includedGames = sortedGames.filter(g => !g.excludeFromAccounting);
+  const maxProfit = Math.max(...includedGames.map(d => d.profit), 0);
+  const minProfit = Math.min(...includedGames.map(d => d.profit), 0);
   const range = Math.max(Math.abs(maxProfit), Math.abs(minProfit)) || 1000;
   
   const chartHeight = 120;
@@ -1004,15 +1166,32 @@ const AdHocPLBarChart: React.FC<AdHocPLBarChartProps> = ({ games }) => {
             {/* Bars */}
             <div className="flex items-end h-full" style={{ paddingBottom: zeroLine }}>
               {sortedGames.map((d) => {
-                const barHeight = Math.abs(d.profit) / range * (chartHeight / 2 - 4);
-                const isPositive = d.profit >= 0;
-                
                 let displayDate = '';
                 try {
                   displayDate = format(parseISO(d.date), 'dd MMM');
                 } catch {
                   displayDate = '';
                 }
+
+                // Excluded games render as a gray placeholder bar
+                if (d.excludeFromAccounting) {
+                  return (
+                    <div 
+                      key={d.id}
+                      className="flex flex-col items-center justify-end group relative"
+                      style={{ width: barWidth + 2 }}
+                    >
+                      <div
+                        className="rounded-t bg-gray-300 border border-dashed border-gray-400"
+                        style={{ width: barWidth, height: 4 }}
+                        title={`${displayDate}: Excluded (corrupted data)`}
+                      />
+                    </div>
+                  );
+                }
+
+                const barHeight = Math.abs(d.profit) / range * (chartHeight / 2 - 4);
+                const isPositive = d.profit >= 0;
                 
                 return (
                   <div 
@@ -1042,6 +1221,16 @@ const AdHocPLBarChart: React.FC<AdHocPLBarChartProps> = ({ games }) => {
               style={{ top: zeroLine }}
             >
               {sortedGames.map((d) => {
+                // Excluded games already rendered as placeholder above
+                if (d.excludeFromAccounting) {
+                  return (
+                    <div 
+                      key={`neg-${d.id}`}
+                      style={{ width: barWidth + 2, height: 0 }}
+                    />
+                  );
+                }
+
                 const barHeight = Math.abs(d.profit) / range * (chartHeight / 2 - 4);
                 const isNegative = d.profit < 0;
                 
@@ -1089,6 +1278,12 @@ const AdHocPLBarChart: React.FC<AdHocPLBarChartProps> = ({ games }) => {
             <div className="w-3 h-3 bg-red-500 rounded" />
             <span>Loss</span>
           </div>
+          {sortedGames.some(g => g.excludeFromAccounting) && (
+            <div className="flex items-center gap-1">
+              <div className="w-3 h-3 bg-gray-300 rounded border border-dashed border-gray-400" />
+              <span>Excluded</span>
+            </div>
+          )}
           <span className="ml-auto">← Oldest to Newest →</span>
         </div>
       </div>
@@ -1127,13 +1322,15 @@ const AdHocPLRow: React.FC<AdHocPLRowProps> = ({ game, onNavigate }) => {
 
   const profitColorClass = game.profit >= 0 ? 'text-blue-600' : 'text-red-600';
   const marginColorClass = game.profitMargin !== null && game.profitMargin >= 0 ? 'text-blue-600' : 'text-red-600';
+  const excludedClass = game.excludeFromAccounting ? 'line-through opacity-50' : '';
 
   return (
     <>
       {/* Main Row */}
       <tr
-        className="border-b border-gray-100 transition-colors hover:bg-gray-50 cursor-pointer"
+        className={`border-b border-gray-100 transition-colors hover:bg-gray-50 cursor-pointer ${excludedClass}`}
         onClick={handleRowClick}
+        title={game.excludeFromAccounting ? 'Excluded from all totals — corrupted data' : undefined}
       >
         {/* Expand Toggle */}
         <td className="px-3 py-3 w-10">
@@ -1153,9 +1350,16 @@ const AdHocPLRow: React.FC<AdHocPLRowProps> = ({ game, onNavigate }) => {
 
         {/* Game Name */}
         <td className="px-3 py-3 whitespace-nowrap">
-          <span className="font-medium text-gray-900 text-sm">
-            {game.name.length > 30 ? game.name.substring(0, 30) + '...' : game.name}
-          </span>
+          <div className="flex items-center gap-1">
+            <span className="font-medium text-gray-900 text-sm">
+              {game.name.length > 30 ? game.name.substring(0, 30) + '...' : game.name}
+            </span>
+            {game.excludeFromAccounting && (
+              <span className="px-1.5 py-0.5 text-[10px] font-medium rounded bg-red-100 text-red-600 no-underline" style={{ textDecoration: 'none' }}>
+                Excluded
+              </span>
+            )}
+          </div>
         </td>
 
         {/* Tournament ID */}
@@ -1568,17 +1772,21 @@ export const VenueDetails: React.FC = () => {
   // Ad-hoc stats
   const adHocStats = useMemo(() => {
     const adHocGames = buildGameRowData(adHocSnapshots);
-    const totalProfit = adHocGames.reduce((sum, g) => sum + g.profit, 0);
-    const totalPrizepool = adHocGames.reduce((sum, g) => sum + g.prizepool, 0);
-    const totalEntries = adHocGames.reduce((sum, g) => sum + g.entries, 0);
+    // Exclude corrupted games from all totals/calculations
+    const includedGames = adHocGames.filter(g => !g.excludeFromAccounting);
+    const totalProfit = includedGames.reduce((sum, g) => sum + g.profit, 0);
+    const totalPrizepool = includedGames.reduce((sum, g) => sum + g.prizepool, 0);
+    const totalEntries = includedGames.reduce((sum, g) => sum + g.entries, 0);
+    const includedCount = includedGames.length;
     return {
-      totalGames: adHocGames.length,
+      totalGames: adHocGames.length, // total including excluded (for display count)
+      includedGames: includedCount,   // count excluding corrupted games (for calculations)
       totalProfit,
       totalPrizepool,
       totalEntries,
-      avgProfit: adHocGames.length > 0 ? totalProfit / adHocGames.length : 0,
-      avgEntries: adHocGames.length > 0 ? totalEntries / adHocGames.length : 0,
-      games: adHocGames,
+      avgProfit: includedCount > 0 ? totalProfit / includedCount : 0,
+      avgEntries: includedCount > 0 ? totalEntries / includedCount : 0,
+      games: adHocGames, // all games for display (including excluded, shown with strikethrough)
     };
   }, [adHocSnapshots]);
 
@@ -1596,7 +1804,7 @@ export const VenueDetails: React.FC = () => {
     }
     
     const totalEntries = tableGlobalStats.totalEntries + adHocStats.totalEntries;
-    const totalGames = tableGlobalStats.totalGames + adHocStats.totalGames;
+    const totalGames = tableGlobalStats.totalGames + adHocStats.includedGames;
     const totalProfit = tableGlobalStats.totalProfit + adHocStats.totalProfit;
     const totalPrizepool = tableGlobalStats.totalPrizepool + adHocStats.totalPrizepool;
     
@@ -1649,7 +1857,7 @@ export const VenueDetails: React.FC = () => {
         ),
       },
       {
-        header: 'Type',
+        header: 'Status',
         accessorKey: 'classification',
         cell: ({ row }) => {
           const classification = row.original.classification;
@@ -1666,9 +1874,37 @@ export const VenueDetails: React.FC = () => {
             UNKNOWN: 'Unknown',
           };
           return (
-            <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${styles[classification]}`}>
-              {labels[classification]}
-            </span>
+            <div className="flex items-center gap-1">
+              <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${styles[classification]}`}>
+                {labels[classification]}
+              </span>
+              {row.original.excludeFromAccounting && (
+                <span className="px-1.5 py-0.5 text-[10px] font-medium rounded bg-red-100 text-red-600" title="Excluded from all totals — corrupted data">
+                  Excluded
+                </span>
+              )}
+            </div>
+          );
+        },
+      },
+      {
+        header: 'GTD',
+        accessorKey: 'gtd',
+        cell: ({ row }) => {
+          const { gtd, prizepool, prizepoolDiscrepancy } = row.original;
+          const gtdDisplay = gtd > 0 ? formatCompactCurrency(gtd) : '-';
+          const ppDisplay = formatCompactCurrency(prizepool);
+          const discDisplay = prizepoolDiscrepancy !== 0
+            ? formatCompactCurrency(prizepoolDiscrepancy)
+            : '$0';
+          if (gtd <= 0 && prizepool <= 0) return <span className="text-gray-400">-</span>;
+          return (
+            <div className="text-sm leading-tight">
+              <span className="font-medium">{gtdDisplay}</span>
+              <span className="text-gray-400 text-xs ml-1">
+                ({ppDisplay} | {discDisplay})
+              </span>
+            </div>
           );
         },
       },
@@ -1700,19 +1936,28 @@ export const VenueDetails: React.FC = () => {
         },
       },
       {
-        header: 'Registrations',
-        accessorKey: 'registrations',
-        cell: ({ row }) => row.original.registrations.toLocaleString(),
+        header: 'UNQ/ENT',
+        id: 'unqEnt',
+        cell: ({ row }) => (
+          <span className="text-sm">
+            {row.original.registrations.toLocaleString()}
+            <span className="text-gray-400 mx-0.5">/</span>
+            {row.original.entries.toLocaleString()}
+          </span>
+        ),
       },
       {
-        header: 'Entries',
-        accessorKey: 'entries',
-        cell: ({ row }) => row.original.entries.toLocaleString(),
-      },
-      {
-        header: 'Prizepool',
-        accessorKey: 'prizepool',
-        cell: ({ row }) => formatCurrency(row.original.prizepool),
+        header: '$/Player',
+        accessorKey: 'profitPerPlayer',
+        cell: ({ row }) => {
+          const val = row.original.profitPerPlayer;
+          if (val == null) return <span className="text-gray-400">-</span>;
+          return (
+            <span className={`font-medium text-sm ${val >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
+              {formatCurrency(val)}
+            </span>
+          );
+        },
       },
       {
         header: 'Profit',
@@ -1929,7 +2174,10 @@ export const VenueDetails: React.FC = () => {
                     <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                       <div>
                         <Text className="text-xs text-gray-500">Total Games</Text>
-                        <Metric className="text-lg">{adHocStats.totalGames}</Metric>
+                        <Metric className="text-lg">{adHocStats.includedGames}</Metric>
+                        {adHocStats.totalGames > adHocStats.includedGames && (
+                          <Text className="text-xs text-gray-400">{adHocStats.totalGames - adHocStats.includedGames} excluded</Text>
+                        )}
                       </div>
                       <div>
                         <Text className="text-xs text-gray-500">Total Entries</Text>
@@ -1999,7 +2247,12 @@ export const VenueDetails: React.FC = () => {
                           <tr className="font-semibold">
                             <td className="px-3 py-3"></td>
                             <td className="px-3 py-3 text-sm text-gray-700" colSpan={2}>
-                              TOTALS ({adHocStats.totalGames} games)
+                              TOTALS ({adHocStats.includedGames} game{adHocStats.includedGames !== 1 ? 's' : ''}
+                              {adHocStats.totalGames > adHocStats.includedGames && (
+                                <span className="font-normal text-gray-400 ml-1">
+                                  · {adHocStats.totalGames - adHocStats.includedGames} excluded
+                                </span>
+                              )})
                             </td>
                             <td className="px-3 py-3"></td>
                             <td className="px-3 py-3"></td>
@@ -2084,6 +2337,7 @@ export const VenueDetails: React.FC = () => {
               data={gameRows} 
               columns={columns} 
               onRowClick={handleGameRowClick}
+              rowClassName={(row) => row.excludeFromAccounting ? 'line-through opacity-50' : ''}
             />
           </div>
         )}
