@@ -3,7 +3,7 @@
 //
 // CHANGELOG:
 // - v3.8.0: Added excludeFromAccounting handling for corrupted game data
-//           - Games with excludeFromAccounting=true shown in tables with strikethrough + opacity
+//           - Games with excludeFromAccounting=true shown with strikethrough + opacity
 //           - Red "Excluded" badge displayed on excluded rows (Status column / game name)
 //           - Excluded games removed from all calculations: chart, stats, totals
 //           - buildOverallTrendData / buildScheduleGroupStats skip excluded snapshots
@@ -11,6 +11,7 @@
 //           - AdHocPLBarChart renders excluded games as gray dashed placeholders
 //           - DataTable rowClassName prop added for per-row conditional styling
 //           - Footer/summary sections show excluded count when applicable
+//           - GTD column: guaranteeAmount (GTD), game.prizepoolPaid (PP), prizepoolPaidDelta (delta)
 // - v3.7.0: Updated Game History P&L table and Profit Trend chart
 //           - Removed local ProfitTrendChart component (~70 lines)
 //           - ProfitTrendChartSection now converts data to ProfitDataPoint format
@@ -163,8 +164,8 @@ interface GameFinancialSnapshotWithGame {
   totalCost?: number | null;
   netProfit?: number | null;
   profitMargin?: number | null;
-  guaranteedPrizePool?: number | null;
-  prizepoolDiscrepancy?: number | null;
+  guaranteeAmount?: number | null;
+  prizepoolPaidDelta?: number | null;
   profitPerPlayer?: number | null;
   excludeFromAccounting?: boolean | null;
   gameType?: string | null;
@@ -183,6 +184,7 @@ interface GameFinancialSnapshotWithGame {
     tournamentType?: string | null;
     gameVariant?: string | null;
     tournamentId?: string | null;
+    prizepoolPaid?: number | null;
     // NEW: recurringGameId for proper grouping
     recurringGameId?: string | null;
     recurringGame?: {
@@ -262,7 +264,8 @@ interface GameRowData {
   profitMargin: number | null;
   tournamentId: string | null;
   gtd: number;
-  prizepoolDiscrepancy: number;
+  prizepoolPaid: number;
+  prizepoolPaidDelta: number;
   profitPerPlayer: number | null;
   excludeFromAccounting: boolean;
 }
@@ -377,8 +380,8 @@ const listGameFinancialSnapshotsWithGame = /* GraphQL */ `
         totalCost
         netProfit
         profitMargin
-        guaranteedPrizePool
-        prizepoolDiscrepancy
+        guaranteeAmount
+        prizepoolPaidDelta
         profitPerPlayer
         excludeFromAccounting
         gameType
@@ -397,6 +400,7 @@ const listGameFinancialSnapshotsWithGame = /* GraphQL */ `
           tournamentType
           gameVariant
           tournamentId
+          prizepoolPaid
           recurringGameId
           recurringGame {
             id
@@ -735,8 +739,9 @@ function buildGameRowData(snapshots: GameFinancialSnapshotWithGame[]): GameRowDa
       cost: snap.totalCost ?? 0,
       profitMargin: snap.profitMargin ?? null,
       tournamentId: snap.game?.tournamentId ?? null,
-      gtd: snap.guaranteedPrizePool ?? 0,
-      prizepoolDiscrepancy: snap.prizepoolDiscrepancy ?? 0,
+      gtd: snap.guaranteeAmount ?? 0,
+      prizepoolPaid: snap.game?.prizepoolPaid ?? 0,
+      prizepoolPaidDelta: snap.prizepoolPaidDelta ?? 0,
       profitPerPlayer: snap.profitPerPlayer ?? null,
       excludeFromAccounting: snap.excludeFromAccounting === true,
     }));
@@ -1891,18 +1896,18 @@ export const VenueDetails: React.FC = () => {
         header: 'GTD',
         accessorKey: 'gtd',
         cell: ({ row }) => {
-          const { gtd, prizepool, prizepoolDiscrepancy } = row.original;
+          const { gtd, prizepoolPaid, prizepoolPaidDelta } = row.original;
           const gtdDisplay = gtd > 0 ? formatCompactCurrency(gtd) : '-';
-          const ppDisplay = formatCompactCurrency(prizepool);
-          const discDisplay = prizepoolDiscrepancy !== 0
-            ? formatCompactCurrency(prizepoolDiscrepancy)
+          const ppDisplay = prizepoolPaid > 0 ? formatCompactCurrency(prizepoolPaid) : '$0';
+          const deltaDisplay = prizepoolPaidDelta !== 0
+            ? formatCompactCurrency(prizepoolPaidDelta)
             : '$0';
-          if (gtd <= 0 && prizepool <= 0) return <span className="text-gray-400">-</span>;
+          if (gtd <= 0 && prizepoolPaid <= 0) return <span className="text-gray-400">-</span>;
           return (
             <div className="text-sm leading-tight">
               <span className="font-medium">{gtdDisplay}</span>
               <span className="text-gray-400 text-xs ml-1">
-                ({ppDisplay} | {discDisplay})
+                ({ppDisplay} | <span className={prizepoolPaidDelta !== 0 ? (prizepoolPaidDelta > 0 ? 'text-blue-500' : 'text-red-500') : ''}>{deltaDisplay}</span>)
               </span>
             </div>
           );
