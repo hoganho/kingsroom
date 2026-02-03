@@ -156,7 +156,8 @@
           "deploymentBucketName": "amplify-kingsroom-dev-13051-deployment",
           "s3Key": "amplify-builds/aiReportGenerator-5137317144525a676948-build.zip"
         },
-        "refreshPlayerMetrics": {}
+        "refreshPlayerMetrics": {},
+        "refreshTargetingClassifications": {}
       },
       "api": {
         "kingsroom": {}

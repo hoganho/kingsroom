@@ -226,16 +226,48 @@ const AuthGate = ({ children }: { children: React.ReactNode }) => {
 // PROTECTED LAYOUT COMPONENT
 // ============================================
 const ProtectedLayout = () => {
+  const location = useLocation();
+  const { user, loading } = useAuth();
+  const { canAccess, hasAnyAccess, firstAccessiblePage } = useUserPermissions();
+
+  // Wait for auth to resolve (same as AuthGate)
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-950">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto" />
+          <p className="mt-4 text-sm text-gray-500 dark:text-gray-400">Authenticating...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null;
+  }
+
+  // No access to anything → show restricted screen
+  if (!hasAnyAccess) {
+    return <NoAccessScreen />;
+  }
+
+  // Check if user can access the current route
+  if (!canAccess(location.pathname)) {
+    // Redirect to first page they DO have access to
+    if (firstAccessiblePage) {
+      return <Navigate to={firstAccessiblePage.path} replace />;
+    }
+    return <NoAccessScreen />;
+  }
+
   return (
-    <AuthGate>
-      <EntityProvider>
-        <GameProvider>
-          <MainLayout>
-            <Outlet />
-          </MainLayout>
-        </GameProvider>
-      </EntityProvider>
-    </AuthGate>
+    <EntityProvider>
+      <GameProvider>
+        <MainLayout>
+          <Outlet />
+        </MainLayout>
+      </GameProvider>
+    </EntityProvider>
   );
 };
 
