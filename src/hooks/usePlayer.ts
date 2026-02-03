@@ -1,5 +1,6 @@
 // src/hooks/usePlayer.ts
 // Custom hooks for player data fetching and management
+// VERSION: 2.1.0 - Updated usePlayerProfile to fetch full PlayerVenue data with targetingClassification
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { generateClient } from 'aws-amplify/api';
@@ -30,7 +31,6 @@ import {
   LIST_TOP_PLAYERS,
   GET_PLAYER_RESULTS,
   GET_PLAYER_ENTRIES,
-  GET_PLAYER_VENUES,
   GET_PLAYER_TRANSACTIONS,
   GET_PLAYER_CREDITS,
   GET_PLAYER_POINTS,
@@ -95,11 +95,62 @@ interface UsePlayersDashboardResult {
   refetch: () => Promise<void>;
 }
 
+interface UsePlayerVenuesResult {
+  venues: PlayerVenue[];
+  loading: boolean;
+  error: string | null;
+  refetch: () => Promise<void>;
+}
+
 // ============================================================================
 // Get GraphQL Client
 // ============================================================================
 
 const getClient = () => generateClient();
+
+// ============================================================================
+// GraphQL Query for Full PlayerVenue Data (used by usePlayerProfile)
+// This query fetches playerVenues with ALL fields including targetingClassification
+// ============================================================================
+
+const GET_PLAYER_VENUES_FULL = /* GraphQL */ `
+  query GetPlayerVenuesFullCustom(
+    $playerId: ID!
+    $limit: Int
+    $nextToken: String
+  ) {
+    listPlayerVenues(
+      filter: { playerId: { eq: $playerId } }
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        playerId
+        venueId
+        entityId
+        totalGamesPlayed
+        averageBuyIn
+        totalBuyIns
+        totalWinnings
+        netProfit
+        firstPlayedDate
+        lastPlayedDate
+        targetingClassification
+        venue {
+          id
+          name
+          entityId
+          entity {
+            id
+            entityName
+          }
+        }
+      }
+      nextToken
+    }
+  }
+`;
 
 // ============================================================================
 // usePlayer - Fetch single player basic info
@@ -149,6 +200,7 @@ export const usePlayer = (playerId: string | undefined): UsePlayerResult => {
 
 // ============================================================================
 // usePlayerProfile - Fetch complete player profile with all relationships
+// UPDATED: Now fetches full PlayerVenue data with targetingClassification
 // ============================================================================
 
 export const usePlayerProfile = (playerId: string | undefined): UsePlayerProfileResult => {
@@ -198,11 +250,12 @@ export const usePlayerProfile = (playerId: string | undefined): UsePlayerProfile
           playerEntriesByPlayerIdAndGameStartDateTime: { items: PlayerEntry[] };
         }>>,
         
+        // UPDATED: Use GET_PLAYER_VENUES_FULL to get all venue fields including targetingClassification
         client.graphql({
-          query: GET_PLAYER_VENUES,
-          variables: { playerId, limit: 20 },
+          query: GET_PLAYER_VENUES_FULL,
+          variables: { playerId, limit: 100 },
         }) as Promise<GraphQLResult<{
-          listPlayerVenues: { items: PlayerVenue[] };
+          listPlayerVenues: { items: PlayerVenue[]; nextToken: string | null };
         }>>,
         
         client.graphql({
@@ -240,6 +293,28 @@ export const usePlayerProfile = (playerId: string | undefined): UsePlayerProfile
         return;
       }
 
+      // Get initial venues from the response
+      let venues: PlayerVenue[] = venuesResponse.data?.listPlayerVenues?.items?.filter(
+        (v): v is PlayerVenue => v !== null
+      ) || [];
+      
+      // Fetch additional venues if there are more (pagination)
+      let nextToken = venuesResponse.data?.listPlayerVenues?.nextToken;
+      while (nextToken) {
+        const moreVenuesResponse = await client.graphql({
+          query: GET_PLAYER_VENUES_FULL,
+          variables: { playerId, limit: 100, nextToken },
+        }) as GraphQLResult<{
+          listPlayerVenues: { items: PlayerVenue[]; nextToken: string | null };
+        }>;
+        
+        const moreVenues = moreVenuesResponse.data?.listPlayerVenues?.items?.filter(
+          (v): v is PlayerVenue => v !== null
+        ) || [];
+        venues = [...venues, ...moreVenues];
+        nextToken = moreVenuesResponse.data?.listPlayerVenues?.nextToken;
+      }
+
       setData({
         player,
         summary: player.playerSummary || null,
@@ -249,7 +324,7 @@ export const usePlayerProfile = (playerId: string | undefined): UsePlayerProfile
         recentEntries:
           entriesResponse.data?.playerEntriesByPlayerIdAndGameStartDateTime?.items?.filter(Boolean) ||
           [],
-        venues: venuesResponse.data?.listPlayerVenues?.items?.filter(Boolean) || [],
+        venues, // Now contains full venue data with targetingClassification
         transactions:
           transactionsResponse.data?.playerTransactionsByPlayerIdAndTransactionDate?.items?.filter(
             Boolean
@@ -276,6 +351,61 @@ export const usePlayerProfile = (playerId: string | undefined): UsePlayerProfile
   }, [fetchProfile]);
 
   return { data, loading, error, refetch: fetchProfile };
+};
+
+// ============================================================================
+// usePlayerVenues - Standalone hook for fetching player venues (NEW)
+// ============================================================================
+
+export const usePlayerVenues = (playerId: string | undefined): UsePlayerVenuesResult => {
+  const [venues, setVenues] = useState<PlayerVenue[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchVenues = useCallback(async () => {
+    if (!playerId) {
+      setVenues([]);
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const client = getClient();
+      let allVenues: PlayerVenue[] = [];
+      let nextToken: string | null = null;
+
+      do {
+        const response = await client.graphql({
+          query: GET_PLAYER_VENUES_FULL,
+          variables: { playerId, limit: 100, nextToken },
+        }) as GraphQLResult<{
+          listPlayerVenues: { items: PlayerVenue[]; nextToken: string | null };
+        }>;
+
+        const fetchedVenues = response.data?.listPlayerVenues?.items?.filter(
+          (v): v is PlayerVenue => v !== null
+        ) || [];
+        allVenues = [...allVenues, ...fetchedVenues];
+        nextToken = response.data?.listPlayerVenues?.nextToken || null;
+      } while (nextToken);
+
+      setVenues(allVenues);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to fetch venues';
+      console.error('Error fetching player venues:', err);
+      setError(message);
+    } finally {
+      setLoading(false);
+    }
+  }, [playerId]);
+
+  useEffect(() => {
+    fetchVenues();
+  }, [fetchVenues]);
+
+  return { venues, loading, error, refetch: fetchVenues };
 };
 
 // ============================================================================

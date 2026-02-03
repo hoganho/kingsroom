@@ -8335,18 +8335,25 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
-                "newPlayerCount": {
-                    "name": "newPlayerCount",
+                "trialistPlayerCount": {
+                    "name": "trialistPlayerCount",
                     "isArray": false,
                     "type": "Int",
-                    "isRequired": true,
+                    "isRequired": false,
                     "attributes": []
                 },
-                "recreationalPlayerCount": {
-                    "name": "recreationalPlayerCount",
+                "casualPlayerCount": {
+                    "name": "casualPlayerCount",
                     "isArray": false,
                     "type": "Int",
-                    "isRequired": true,
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "committedPlayerCount": {
+                    "name": "committedPlayerCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
                     "attributes": []
                 },
                 "regularPlayerCount": {
@@ -8358,6 +8365,20 @@ export const schema = {
                 },
                 "vipPlayerCount": {
                     "name": "vipPlayerCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "newPlayerCount": {
+                    "name": "newPlayerCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "recreationalPlayerCount": {
+                    "name": "recreationalPlayerCount",
                     "isArray": false,
                     "type": "Int",
                     "isRequired": true,
@@ -8615,6 +8636,13 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "topPlayersByBuyIns": {
+                    "name": "topPlayersByBuyIns",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "calculatedAt": {
                     "name": "calculatedAt",
                     "isArray": false,
@@ -8810,18 +8838,25 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
-                "newPlayerCount": {
-                    "name": "newPlayerCount",
+                "trialistPlayerCount": {
+                    "name": "trialistPlayerCount",
                     "isArray": false,
                     "type": "Int",
-                    "isRequired": true,
+                    "isRequired": false,
                     "attributes": []
                 },
-                "recreationalPlayerCount": {
-                    "name": "recreationalPlayerCount",
+                "casualPlayerCount": {
+                    "name": "casualPlayerCount",
                     "isArray": false,
                     "type": "Int",
-                    "isRequired": true,
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "committedPlayerCount": {
+                    "name": "committedPlayerCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
                     "attributes": []
                 },
                 "regularPlayerCount": {
@@ -8833,6 +8868,20 @@ export const schema = {
                 },
                 "vipPlayerCount": {
                     "name": "vipPlayerCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "newPlayerCount": {
+                    "name": "newPlayerCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "recreationalPlayerCount": {
+                    "name": "recreationalPlayerCount",
                     "isArray": false,
                     "type": "Int",
                     "isRequired": true,
@@ -9083,6 +9132,13 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "topPlayersByBuyIns": {
+                    "name": "topPlayersByBuyIns",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "playerGrowthTrend": {
                     "name": "playerGrowthTrend",
                     "isArray": false,
@@ -9317,18 +9373,25 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
-                "newPlayerCount": {
-                    "name": "newPlayerCount",
+                "trialistPlayerCount": {
+                    "name": "trialistPlayerCount",
                     "isArray": false,
                     "type": "Int",
-                    "isRequired": true,
+                    "isRequired": false,
                     "attributes": []
                 },
-                "recreationalPlayerCount": {
-                    "name": "recreationalPlayerCount",
+                "casualPlayerCount": {
+                    "name": "casualPlayerCount",
                     "isArray": false,
                     "type": "Int",
-                    "isRequired": true,
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "committedPlayerCount": {
+                    "name": "committedPlayerCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
                     "attributes": []
                 },
                 "regularPlayerCount": {
@@ -9340,6 +9403,20 @@ export const schema = {
                 },
                 "vipPlayerCount": {
                     "name": "vipPlayerCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "newPlayerCount": {
+                    "name": "newPlayerCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "recreationalPlayerCount": {
+                    "name": "recreationalPlayerCount",
                     "isArray": false,
                     "type": "Int",
                     "isRequired": true,
@@ -34421,5 +34498,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "fa198ccae0625da5384fd5619a313b9e"
+    "version": "1a8827a5af17127f67a00f3cf298ca9b"
 };

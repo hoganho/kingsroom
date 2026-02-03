@@ -26,7 +26,8 @@ Amplify Params - DO NOT EDIT */
  * Lambda: refreshPlayerMetrics
  * Region: ap-southeast-2
  * 
- * VERSION: 1.2.0 - Fixed AWSJSON double-encoding, added SES notifications
+ * VERSION: 1.3.0 - Fixed avgGamesPerPlayer calculation (use PlayerVenue data instead of Player.summary)
+ *                - Added topPlayersByBuyIns to EntityPlayerMetrics for entity-level Top Spenders
  * 
  * CHANGELOG:
  * - v1.2.0: Fixed double-stringify on AWSJSON fields (now stores raw objects)
@@ -55,10 +56,12 @@ const {
   PutCommand,
   BatchGetCommand
 } = require("@aws-sdk/lib-dynamodb");
+const { LambdaClient, InvokeCommand } = require("@aws-sdk/client-lambda");
 const { sendNotification } = require('./ses-notification');
 
 const client = new DynamoDBClient({ region: "ap-southeast-2" });
 const docClient = DynamoDBDocumentClient.from(client);
+const lambdaClient = new LambdaClient({ region: "ap-southeast-2" });
 
 // ============================================
 // CONFIGURATION & CONSTANTS
@@ -73,13 +76,18 @@ const PLAYER_STATUS = {
   PENDING_VERIFICATION: 'PENDING_VERIFICATION'
 };
 
-// Category enum values
+// Category enum values (v2: matches updated GraphQL schema)
 const PLAYER_CATEGORY = {
-  NEW: 'NEW',
-  RECREATIONAL: 'RECREATIONAL',
-  REGULAR: 'REGULAR',
-  VIP: 'VIP',
-  LAPSED: 'LAPSED'
+  // New enum values
+  TRIALIST: 'TRIALIST',       // Early-stage explorer (was NEW)
+  CASUAL: 'CASUAL',           // Plays occasionally (was RECREATIONAL)
+  COMMITTED: 'COMMITTED',     // Regular intent, not weekly (new)
+  REGULAR: 'REGULAR',         // Weekly participation sustained
+  VIP: 'VIP',                 // Top 5% by value
+  // Legacy values (for backward compatibility during transition)
+  NEW: 'NEW',                 // @deprecated - maps to TRIALIST
+  RECREATIONAL: 'RECREATIONAL', // @deprecated - maps to CASUAL
+  LAPSED: 'LAPSED'            // @deprecated - removed from enum
 };
 
 // Targeting classification enum values
@@ -143,7 +151,7 @@ const VENUE_PLAYER_METRICS_TABLE = getTableName('VenuePlayerMetrics');
 // ============================================
 
 exports.handler = async (event) => {
-  console.log('[PLAYER-METRICS] Starting player metrics refresh v1.2.0', JSON.stringify(event, null, 2));
+  console.log('[PLAYER-METRICS] Starting player metrics refresh v1.3.1', JSON.stringify(event, null, 2));
   
   const startTime = Date.now();
   
@@ -155,6 +163,59 @@ exports.handler = async (event) => {
   
   const isGraphQLTrigger = !!event.arguments?.input;
   const isDirectInvoke = !!event.input && !isEventBridgeTrigger;
+  const isAsyncBackground = event._asyncBackground === true;
+  
+  // ============================================================
+  // ASYNC SELF-INVOCATION for GraphQL triggers
+  // AppSync @function resolver has a 30s timeout that can't be
+  // changed via Amplify config. To avoid timeouts, we detect
+  // GraphQL invocations and re-invoke ourselves asynchronously
+  // (InvocationType: 'Event'), then return immediately.
+  // The background invocation sets _asyncBackground: true so
+  // it won't loop.
+  // ============================================================
+  if (isGraphQLTrigger && !isAsyncBackground) {
+    console.log('[PLAYER-METRICS] GraphQL trigger detected — launching async background invocation');
+    
+    const functionName = process.env.AWS_LAMBDA_FUNCTION_NAME;
+    const backgroundPayload = {
+      ...event.arguments.input,
+      _asyncBackground: true,
+      _triggeredBy: 'GRAPHQL_ASYNC',
+    };
+    
+    try {
+      await lambdaClient.send(new InvokeCommand({
+        FunctionName: functionName,
+        InvocationType: 'Event',  // Fire-and-forget (async)
+        Payload: JSON.stringify({ input: backgroundPayload }),
+      }));
+      
+      console.log('[PLAYER-METRICS] Background invocation launched successfully');
+      
+      return {
+        success: true,
+        message: `Refresh started asynchronously. The Lambda is running in the background (function: ${functionName}). Check CloudWatch logs for progress.`,
+        triggeredBy: 'GRAPHQL_ASYNC',
+        executionTimeMs: Date.now() - startTime,
+        refreshedAt: new Date().toISOString(),
+        globalMetricsUpdated: 0,
+        entityMetricsUpdated: 0,
+        venueMetricsUpdated: 0,
+        totalPlayersScanned: 0,
+        errors: [],
+      };
+    } catch (invokeErr) {
+      console.error('[PLAYER-METRICS] Failed to launch async invocation:', invokeErr);
+      return {
+        success: false,
+        message: `Failed to launch async invocation: ${invokeErr.message}. Check that the Lambda has lambda:InvokeFunction permission on itself.`,
+        triggeredBy: 'GRAPHQL_ASYNC',
+        executionTimeMs: Date.now() - startTime,
+        errors: [invokeErr.message],
+      };
+    }
+  }
   
   // Handle getPlayerMetricsDashboard query
   if (event.field === 'getPlayerMetricsDashboard' || event.fieldName === 'getPlayerMetricsDashboard') {
@@ -891,7 +952,6 @@ function calculateGlobalMetrics(players, playerVenues, entities, venues, timeRan
   let totalNetBalance = 0;
   let totalWinnings = 0;
   let totalBuyIns = 0;
-  let totalGames = 0;
   let totalCredits = 0;
   let totalPoints = 0;
   
@@ -900,10 +960,15 @@ function calculateGlobalMetrics(players, playerVenues, entities, venues, timeRan
       totalNetBalance += player.summary.netBalance || 0;
       totalWinnings += player.summary.totalWinnings || 0;
       totalBuyIns += player.summary.totalBuyIns || 0;
-      totalGames += player.summary.gamesPlayedAllTime || 0;
     }
     totalCredits += player.creditBalance || 0;
     totalPoints += player.pointsBalance || 0;
+  }
+  
+  // Calculate total games from PlayerVenue records (more accurate than player.summary)
+  let totalGames = 0;
+  for (const gamesCount of playerGamesMap.values()) {
+    totalGames += gamesCount;
   }
   
   const avgGamesPerPlayer = totalPlayers > 0 ? totalGames / totalPlayers : 0;
@@ -953,6 +1018,18 @@ function calculateGlobalMetrics(players, playerVenues, entities, venues, timeRan
       gamesPlayed: p.summary?.gamesPlayedAllTime || 0
     }));
   
+  // Top players by total buy-ins (Top Spenders)
+  const topPlayersByBuyIns = players
+    .filter(p => p.summary?.totalBuyIns != null && p.summary.totalBuyIns > 0)
+    .sort((a, b) => (b.summary?.totalBuyIns || 0) - (a.summary?.totalBuyIns || 0))
+    .slice(0, 10)
+    .map(p => ({
+      playerId: p.id,
+      name: `${p.firstName} ${p.lastName}`,
+      totalBuyIns: p.summary?.totalBuyIns || 0,
+      gamesPlayed: p.summary?.gamesPlayedAllTime || 0
+    }));
+  
   return {
     id: `global_${timeRange}`,
     timeRange,
@@ -965,10 +1042,15 @@ function calculateGlobalMetrics(players, playerVenues, entities, venues, timeRan
     suspendedPlayerCount: statusCounts[PLAYER_STATUS.SUSPENDED] || 0,
     pendingVerificationPlayerCount: statusCounts[PLAYER_STATUS.PENDING_VERIFICATION] || 0,
     
-    newPlayerCount: categoryCounts[PLAYER_CATEGORY.NEW] || 0,
-    recreationalPlayerCount: categoryCounts[PLAYER_CATEGORY.RECREATIONAL] || 0,
+    // New category counts (v2 enum)
+    trialistPlayerCount: (categoryCounts[PLAYER_CATEGORY.TRIALIST] || 0) + (categoryCounts[PLAYER_CATEGORY.NEW] || 0),
+    casualPlayerCount: (categoryCounts[PLAYER_CATEGORY.CASUAL] || 0) + (categoryCounts[PLAYER_CATEGORY.RECREATIONAL] || 0),
+    committedPlayerCount: categoryCounts[PLAYER_CATEGORY.COMMITTED] || 0,
     regularPlayerCount: categoryCounts[PLAYER_CATEGORY.REGULAR] || 0,
     vipPlayerCount: categoryCounts[PLAYER_CATEGORY.VIP] || 0,
+    // Legacy category counts (deprecated - for backward compatibility)
+    newPlayerCount: (categoryCounts[PLAYER_CATEGORY.NEW] || 0) + (categoryCounts[PLAYER_CATEGORY.TRIALIST] || 0),
+    recreationalPlayerCount: (categoryCounts[PLAYER_CATEGORY.RECREATIONAL] || 0) + (categoryCounts[PLAYER_CATEGORY.CASUAL] || 0),
     lapsedPlayerCount: categoryCounts[PLAYER_CATEGORY.LAPSED] || 0,
     
     notPlayedCount: targetingCounts[TARGETING.NOT_PLAYED] || 0,
@@ -1013,6 +1095,7 @@ function calculateGlobalMetrics(players, playerVenues, entities, venues, timeRan
     topVenuesByRegistrations,
     topPlayersByNetBalance,
     topPlayersByVenueCount,
+    topPlayersByBuyIns,
     
     calculatedAt: nowIso,
     calculatedBy: 'SCHEDULED_LAMBDA',
@@ -1164,7 +1247,6 @@ function calculateEntityMetrics(entity, players, playerVenues, venues, playersRe
   let totalNetBalance = 0;
   let totalWinnings = 0;
   let totalBuyIns = 0;
-  let totalGames = 0;
   let totalCredits = 0;
   let totalPoints = 0;
   
@@ -1173,10 +1255,15 @@ function calculateEntityMetrics(entity, players, playerVenues, venues, playersRe
       totalNetBalance += player.summary.netBalance || 0;
       totalWinnings += player.summary.totalWinnings || 0;
       totalBuyIns += player.summary.totalBuyIns || 0;
-      totalGames += player.summary.gamesPlayedAllTime || 0;
     }
     totalCredits += player.creditBalance || 0;
     totalPoints += player.pointsBalance || 0;
+  }
+  
+  // Calculate total games from PlayerVenue records (more accurate than player.summary)
+  let totalGames = 0;
+  for (const gamesCount of entityPlayerGamesMap.values()) {
+    totalGames += gamesCount;
   }
   
   const avgGamesPerPlayer = totalPlayers > 0 ? totalGames / totalPlayers : 0;
@@ -1222,6 +1309,18 @@ function calculateEntityMetrics(entity, players, playerVenues, venues, playersRe
       netBalance: p.summary?.netBalance || 0
     }));
   
+  // Top Spenders - players with highest total buy-ins in this entity
+  const topPlayersByBuyIns = players
+    .filter(p => p.summary?.totalBuyIns != null && p.summary.totalBuyIns > 0)
+    .sort((a, b) => (b.summary?.totalBuyIns || 0) - (a.summary?.totalBuyIns || 0))
+    .slice(0, 10)
+    .map(p => ({
+      playerId: p.id,
+      name: `${p.firstName} ${p.lastName}`,
+      totalBuyIns: p.summary?.totalBuyIns || 0,
+      gamesPlayed: p.summary?.gamesPlayedAllTime || 0
+    }));
+  
   return {
     id: `${entity.id}_${timeRange}`,
     entityId: entity.id,
@@ -1235,10 +1334,15 @@ function calculateEntityMetrics(entity, players, playerVenues, venues, playersRe
     suspendedPlayerCount: statusCounts[PLAYER_STATUS.SUSPENDED] || 0,
     pendingVerificationPlayerCount: statusCounts[PLAYER_STATUS.PENDING_VERIFICATION] || 0,
     
-    newPlayerCount: categoryCounts[PLAYER_CATEGORY.NEW] || 0,
-    recreationalPlayerCount: categoryCounts[PLAYER_CATEGORY.RECREATIONAL] || 0,
+    // New category counts (v2 enum)
+    trialistPlayerCount: (categoryCounts[PLAYER_CATEGORY.TRIALIST] || 0) + (categoryCounts[PLAYER_CATEGORY.NEW] || 0),
+    casualPlayerCount: (categoryCounts[PLAYER_CATEGORY.CASUAL] || 0) + (categoryCounts[PLAYER_CATEGORY.RECREATIONAL] || 0),
+    committedPlayerCount: categoryCounts[PLAYER_CATEGORY.COMMITTED] || 0,
     regularPlayerCount: categoryCounts[PLAYER_CATEGORY.REGULAR] || 0,
     vipPlayerCount: categoryCounts[PLAYER_CATEGORY.VIP] || 0,
+    // Legacy category counts (deprecated)
+    newPlayerCount: (categoryCounts[PLAYER_CATEGORY.NEW] || 0) + (categoryCounts[PLAYER_CATEGORY.TRIALIST] || 0),
+    recreationalPlayerCount: (categoryCounts[PLAYER_CATEGORY.RECREATIONAL] || 0) + (categoryCounts[PLAYER_CATEGORY.CASUAL] || 0),
     lapsedPlayerCount: categoryCounts[PLAYER_CATEGORY.LAPSED] || 0,
     
     notPlayedCount: targetingCounts[TARGETING.NOT_PLAYED] || 0,
@@ -1284,6 +1388,7 @@ function calculateEntityMetrics(entity, players, playerVenues, venues, playersRe
     topPlayersByNetBalance,
     topPlayersByGamesPlayed,
     topPlayersByVenueCount,
+    topPlayersByBuyIns,
     
     calculatedAt: nowIso,
     calculatedBy: 'SCHEDULED_LAMBDA',
@@ -1445,10 +1550,15 @@ function calculateVenueMetrics(venue, players, playerVenues, playersRegisteredHe
     suspendedPlayerCount: statusCounts[PLAYER_STATUS.SUSPENDED] || 0,
     pendingVerificationPlayerCount: statusCounts[PLAYER_STATUS.PENDING_VERIFICATION] || 0,
     
-    newPlayerCount: categoryCounts[PLAYER_CATEGORY.NEW] || 0,
-    recreationalPlayerCount: categoryCounts[PLAYER_CATEGORY.RECREATIONAL] || 0,
+    // New category counts (v2 enum)
+    trialistPlayerCount: (categoryCounts[PLAYER_CATEGORY.TRIALIST] || 0) + (categoryCounts[PLAYER_CATEGORY.NEW] || 0),
+    casualPlayerCount: (categoryCounts[PLAYER_CATEGORY.CASUAL] || 0) + (categoryCounts[PLAYER_CATEGORY.RECREATIONAL] || 0),
+    committedPlayerCount: categoryCounts[PLAYER_CATEGORY.COMMITTED] || 0,
     regularPlayerCount: categoryCounts[PLAYER_CATEGORY.REGULAR] || 0,
     vipPlayerCount: categoryCounts[PLAYER_CATEGORY.VIP] || 0,
+    // Legacy category counts (deprecated)
+    newPlayerCount: (categoryCounts[PLAYER_CATEGORY.NEW] || 0) + (categoryCounts[PLAYER_CATEGORY.TRIALIST] || 0),
+    recreationalPlayerCount: (categoryCounts[PLAYER_CATEGORY.RECREATIONAL] || 0) + (categoryCounts[PLAYER_CATEGORY.CASUAL] || 0),
     lapsedPlayerCount: categoryCounts[PLAYER_CATEGORY.LAPSED] || 0,
     
     activeELCount: targetingCounts[TARGETING.ACTIVE_EL] || targetingCounts['Active_EL'] || 0,

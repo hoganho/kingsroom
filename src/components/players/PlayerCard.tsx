@@ -19,6 +19,7 @@ import {
   formatCategory,
   formatDate,
   getPrimaryVenue,
+  getRegistrationVenueName,
   getNetBalanceColor,
 } from '../../utils/playerHelpers';
 
@@ -35,6 +36,17 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({
   const status = formatStatus(player.status);
   const category = formatCategory(player.category);
   const summary = player.playerSummary;
+
+  // Get venue name - prioritize primary venue (most played), fall back to registration venue
+  const getVenueDisplay = (): string => {
+    // First try to get primary venue from playerVenues
+    const primaryVenue = getPrimaryVenue(player);
+    if (primaryVenue && primaryVenue !== 'No venue') {
+      return primaryVenue;
+    }
+    // Fall back to registration venue
+    return getRegistrationVenueName(player);
+  };
 
   const handleClick = (e: React.MouseEvent) => {
     if (onClick) {
@@ -90,7 +102,7 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({
 
             {/* Stats Row */}
             <div className="mt-2 flex items-center flex-wrap gap-4 text-sm">
-              {/* Games Played */}
+              {/* Games Played - show all-time games */}
               <div className="flex items-center text-gray-500">
                 <TrophyIcon className="h-4 w-4 mr-1" />
                 <span>{formatNumber(summary?.gamesPlayedAllTime)} games</span>
@@ -104,11 +116,11 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({
                 </span>
               </div>
 
-              {/* Primary Venue */}
+              {/* Venue - show primary venue or registration venue */}
               {showEntityInfo && (
                 <div className="flex items-center text-gray-500">
                   <MapPinIcon className="h-4 w-4 mr-1" />
-                  <span>{getPrimaryVenue(player)}</span>
+                  <span>{getVenueDisplay()}</span>
                 </div>
               )}
 
@@ -127,7 +139,7 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({
                 <div>
                   <span className="text-gray-500">30d Games:</span>
                   <span className="ml-1 font-medium text-gray-900">
-                    {formatNumber(summary.gamesPlayedLast30Days)}
+                    {formatNumber(summary.gamesPlayedLast30Days ?? 0)}
                   </span>
                 </div>
                 <div>

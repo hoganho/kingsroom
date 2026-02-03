@@ -519,7 +519,7 @@ const VenueCard: React.FC<VenueCardProps> = ({ data, seriesType, onNavigate }) =
             <p className="text-xs text-gray-500">Last Game</p>
             <p className="text-sm font-medium text-gray-700">
               {data.latestGameDaysAgo !== null 
-                ? data.latestGameDaysAgo === 0 
+                ? data.latestGameDaysAgo <= 0 
                   ? 'Today' 
                   : `${data.latestGameDaysAgo}d ago`
                 : '-'}

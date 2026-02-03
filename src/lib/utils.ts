@@ -546,21 +546,25 @@ export const formatDateWithDaysAgo = (date: Date | null, daysAgo: number | null)
   
   const formatted = formatDateAEST(date)
   
-  if (daysAgo === 0) {
+  // Clamp negative values to 0 — backend calculates in UTC which can
+  // produce -1 when the game date is "today" in AEST but "tomorrow" in UTC
+  const safeDaysAgo = Math.max(0, daysAgo)
+  
+  if (safeDaysAgo === 0) {
     return `${formatted} (today)`
-  } else if (daysAgo === 1) {
+  } else if (safeDaysAgo === 1) {
     return `${formatted} (yesterday)`
-  } else if (daysAgo < 7) {
-    return `${formatted} (${daysAgo}d ago)`
-  } else if (daysAgo < 30) {
-    const weeks = Math.floor(daysAgo / 7)
+  } else if (safeDaysAgo < 7) {
+    return `${formatted} (${safeDaysAgo}d ago)`
+  } else if (safeDaysAgo < 30) {
+    const weeks = Math.floor(safeDaysAgo / 7)
     return `${formatted} (${weeks}w ago)`
-  } else if (daysAgo < 365) {
-    const months = Math.floor(daysAgo / 30)
+  } else if (safeDaysAgo < 365) {
+    const months = Math.floor(safeDaysAgo / 30)
     return `${formatted} (${months}mo ago)`
   } else {
-    const years = Math.floor(daysAgo / 365)
-    const remainingMonths = Math.floor((daysAgo % 365) / 30)
+    const years = Math.floor(safeDaysAgo / 365)
+    const remainingMonths = Math.floor((safeDaysAgo % 365) / 30)
     if (remainingMonths > 0) {
       return `${formatted} (${years}y ${remainingMonths}mo ago)`
     }

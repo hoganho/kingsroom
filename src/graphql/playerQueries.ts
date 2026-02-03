@@ -402,21 +402,22 @@ export const LIST_PLAYERS = /* GraphQL */ `
     listPlayers(filter: $filter, limit: $limit, nextToken: $nextToken) {
       items {
         id
+        primaryEntityId
         firstName
         lastName
-        email
         phone
+        email
         status
         category
         targetingClassification
         registrationDate
+        firstGamePlayed
         lastPlayedDate
         creditBalance
         pointsBalance
-        registrationVenue {
-          id
-          name
-        }
+        venueAssignmentStatus
+        registrationVenueId
+        createdAt
         updatedAt
       }
       nextToken
@@ -433,10 +434,11 @@ export const LIST_PLAYERS_WITH_SUMMARY = /* GraphQL */ `
     listPlayers(filter: $filter, limit: $limit, nextToken: $nextToken) {
       items {
         id
+        primaryEntityId
         firstName
         lastName
-        email
         phone
+        email
         status
         category
         targetingClassification
@@ -445,13 +447,20 @@ export const LIST_PLAYERS_WITH_SUMMARY = /* GraphQL */ `
         lastPlayedDate
         creditBalance
         pointsBalance
-        primaryEntityId
+        venueAssignmentStatus
+        registrationVenueId
         registrationVenue {
           id
           name
+          entityId
+          entity {
+            id
+            entityName
+          }
         }
         playerSummary {
           id
+          playerId
           gamesPlayedLast30Days
           gamesPlayedLast90Days
           gamesPlayedAllTime
@@ -463,63 +472,18 @@ export const LIST_PLAYERS_WITH_SUMMARY = /* GraphQL */ `
           venuesVisited
           tournamentWinnings
           tournamentBuyIns
+          tournamentITM
+          tournamentsCashed
+          cashGameWinnings
+          cashGameBuyIns
           totalWinnings
           totalBuyIns
           lastPlayed
         }
-        updatedAt
-      }
-      nextToken
-    }
-  }
-`;
-
-// Dashboard query with venues and entries for cross-entity stats
-export const LIST_PLAYERS_FOR_DASHBOARD = /* GraphQL */ `
-  query ListPlayersForDashboardCustom(
-    $filter: ModelPlayerFilterInput
-    $limit: Int
-    $nextToken: String
-  ) {
-    listPlayers(filter: $filter, limit: $limit, nextToken: $nextToken) {
-      items {
-        id
-        firstName
-        lastName
-        email
-        phone
-        status
-        category
-        targetingClassification
-        registrationDate
-        firstGamePlayed
-        lastPlayedDate
-        creditBalance
-        pointsBalance
-        primaryEntityId
-        playerSummary {
-          id
-          gamesPlayedLast30Days
-          gamesPlayedLast90Days
-          gamesPlayedAllTime
-          averageFinishPosition
-          netBalance
-          sessionsPlayed
-          tournamentsPlayed
-          cashGamesPlayed
-          venuesVisited
-          tournamentWinnings
-          tournamentBuyIns
-          totalWinnings
-          totalBuyIns
-          lastPlayed
-        }
-        playerVenues(limit: 5) {
+        playerVenues(limit: 20) {
           items {
             id
             totalGamesPlayed
-            averageBuyIn
-            lastPlayedDate
             venue {
               id
               name
@@ -531,56 +495,29 @@ export const LIST_PLAYERS_FOR_DASHBOARD = /* GraphQL */ `
             }
           }
         }
-        playerEntries(limit: 10, sortDirection: DESC) {
-          items {
-            id
-            gameStartDateTime
-            status
-            game {
-              id
-              name
-              entityId
-              entity {
-                id
-                entityName
-              }
-              venue {
-                id
-                name
-              }
-            }
-          }
-        }
+        createdAt
+        updatedAt
       }
       nextToken
     }
   }
 `;
 
-// ============================================================================
-// Player Index Queries (using GSIs)
-// RENAMED: PlayersByEntity -> PlayersByEntityCustom to avoid conflict
-// ============================================================================
-
-export const PLAYERS_BY_ENTITY = /* GraphQL */ `
-  query PlayersByEntityCustom(
-    $primaryEntityId: ID!
+// Lightweight query for dashboard quick stats
+export const LIST_PLAYERS_FOR_DASHBOARD = /* GraphQL */ `
+  query ListPlayersForDashboardCustom(
+    $filter: ModelPlayerFilterInput
     $limit: Int
     $nextToken: String
   ) {
-    playersByEntity(
-      primaryEntityId: $primaryEntityId
-      limit: $limit
-      nextToken: $nextToken
-    ) {
+    listPlayers(filter: $filter, limit: $limit, nextToken: $nextToken) {
       items {
         id
+        primaryEntityId
         firstName
         lastName
-        email
         status
         category
-        targetingClassification
         registrationDate
         lastPlayedDate
         creditBalance
@@ -900,6 +837,7 @@ export const GET_PLAYER_TICKETS = /* GraphQL */ `
 
 // ============================================================================
 // Search Queries
+// FIXED: Added gamesPlayedLast30Days, gamesPlayedLast90Days, registrationVenue, and playerVenues
 // ============================================================================
 
 export const SEARCH_PLAYERS = /* GraphQL */ `
@@ -922,18 +860,45 @@ export const SEARCH_PLAYERS = /* GraphQL */ `
         phone
         status
         category
+        targetingClassification
         registrationDate
         lastPlayedDate
         creditBalance
         pointsBalance
+        registrationVenueId
         registrationVenue {
           id
           name
+          entityId
+          entity {
+            id
+            entityName
+          }
         }
         playerSummary {
+          gamesPlayedLast30Days
+          gamesPlayedLast90Days
           gamesPlayedAllTime
           netBalance
           lastPlayed
+          averageFinishPosition
+          tournamentsPlayed
+          cashGamesPlayed
+        }
+        playerVenues(limit: 20) {
+          items {
+            id
+            totalGamesPlayed
+            venue {
+              id
+              name
+              entityId
+              entity {
+                id
+                entityName
+              }
+            }
+          }
         }
       }
       nextToken
@@ -964,7 +929,7 @@ export const LIST_TOP_PLAYERS = /* GraphQL */ `
           tournamentsCashed
           averageFinishPosition
         }
-        playerVenues(limit: 3) {
+        playerVenues(limit: 20) {
           items {
             totalGamesPlayed
             venue {

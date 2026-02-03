@@ -102,3 +102,12 @@ type PlayerActivitySnapshot
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
 }
+
+# ===================================================================
+# CUSTOM MUTATIONS
+# ===================================================================
+
+extend type Mutation {
+  refreshTargetingClassifications(input: AWSJSON): AWSJSON
+    @function(name: "refreshTargetingClassifications-${env}")
+}

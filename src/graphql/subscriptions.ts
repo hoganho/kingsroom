@@ -2148,10 +2148,13 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
           activePlayerCount
           suspendedPlayerCount
           pendingVerificationPlayerCount
-          newPlayerCount
-          recreationalPlayerCount
+          trialistPlayerCount
+          casualPlayerCount
+          committedPlayerCount
           regularPlayerCount
           vipPlayerCount
+          newPlayerCount
+          recreationalPlayerCount
           lapsedPlayerCount
           notPlayedCount
           activeELCount
@@ -2187,6 +2190,7 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
           topPlayersByNetBalance
           topPlayersByGamesPlayed
           topPlayersByVenueCount
+          topPlayersByBuyIns
           playerGrowthTrend
           playerGrowthPercent
           activePlayerTrend
@@ -4451,10 +4455,13 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
           activePlayerCount
           suspendedPlayerCount
           pendingVerificationPlayerCount
-          newPlayerCount
-          recreationalPlayerCount
+          trialistPlayerCount
+          casualPlayerCount
+          committedPlayerCount
           regularPlayerCount
           vipPlayerCount
+          newPlayerCount
+          recreationalPlayerCount
           lapsedPlayerCount
           notPlayedCount
           activeELCount
@@ -4490,6 +4497,7 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
           topPlayersByNetBalance
           topPlayersByGamesPlayed
           topPlayersByVenueCount
+          topPlayersByBuyIns
           playerGrowthTrend
           playerGrowthPercent
           activePlayerTrend
@@ -8693,10 +8701,13 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             activePlayerCount
             suspendedPlayerCount
             pendingVerificationPlayerCount
-            newPlayerCount
-            recreationalPlayerCount
+            trialistPlayerCount
+            casualPlayerCount
+            committedPlayerCount
             regularPlayerCount
             vipPlayerCount
+            newPlayerCount
+            recreationalPlayerCount
             lapsedPlayerCount
             activeELCount
             activeCount
@@ -14524,10 +14535,13 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             activePlayerCount
             suspendedPlayerCount
             pendingVerificationPlayerCount
-            newPlayerCount
-            recreationalPlayerCount
+            trialistPlayerCount
+            casualPlayerCount
+            committedPlayerCount
             regularPlayerCount
             vipPlayerCount
+            newPlayerCount
+            recreationalPlayerCount
             lapsedPlayerCount
             notPlayedCount
             activeELCount
@@ -14563,6 +14577,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             topPlayersByNetBalance
             topPlayersByGamesPlayed
             topPlayersByVenueCount
+            topPlayersByBuyIns
             playerGrowthTrend
             playerGrowthPercent
             activePlayerTrend
@@ -17061,10 +17076,13 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           activePlayerCount
           suspendedPlayerCount
           pendingVerificationPlayerCount
-          newPlayerCount
-          recreationalPlayerCount
+          trialistPlayerCount
+          casualPlayerCount
+          committedPlayerCount
           regularPlayerCount
           vipPlayerCount
+          newPlayerCount
+          recreationalPlayerCount
           lapsedPlayerCount
           notPlayedCount
           activeELCount
@@ -17100,6 +17118,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           topPlayersByNetBalance
           topPlayersByGamesPlayed
           topPlayersByVenueCount
+          topPlayersByBuyIns
           playerGrowthTrend
           playerGrowthPercent
           activePlayerTrend
@@ -18909,10 +18928,13 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           activePlayerCount
           suspendedPlayerCount
           pendingVerificationPlayerCount
-          newPlayerCount
-          recreationalPlayerCount
+          trialistPlayerCount
+          casualPlayerCount
+          committedPlayerCount
           regularPlayerCount
           vipPlayerCount
+          newPlayerCount
+          recreationalPlayerCount
           lapsedPlayerCount
           activeELCount
           activeCount
@@ -19830,10 +19852,13 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             activePlayerCount
             suspendedPlayerCount
             pendingVerificationPlayerCount
-            newPlayerCount
-            recreationalPlayerCount
+            trialistPlayerCount
+            casualPlayerCount
+            committedPlayerCount
             regularPlayerCount
             vipPlayerCount
+            newPlayerCount
+            recreationalPlayerCount
             lapsedPlayerCount
             notPlayedCount
             activeELCount
@@ -19869,6 +19894,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             topPlayersByNetBalance
             topPlayersByGamesPlayed
             topPlayersByVenueCount
+            topPlayersByBuyIns
             playerGrowthTrend
             playerGrowthPercent
             activePlayerTrend
@@ -21890,10 +21916,13 @@ export const onDashboardCacheUpdate = /* GraphQL */ `subscription OnDashboardCac
           activePlayerCount
           suspendedPlayerCount
           pendingVerificationPlayerCount
-          newPlayerCount
-          recreationalPlayerCount
+          trialistPlayerCount
+          casualPlayerCount
+          committedPlayerCount
           regularPlayerCount
           vipPlayerCount
+          newPlayerCount
+          recreationalPlayerCount
           lapsedPlayerCount
           notPlayedCount
           activeELCount
@@ -21929,6 +21958,7 @@ export const onDashboardCacheUpdate = /* GraphQL */ `subscription OnDashboardCac
           topPlayersByNetBalance
           topPlayersByGamesPlayed
           topPlayersByVenueCount
+          topPlayersByBuyIns
           playerGrowthTrend
           playerGrowthPercent
           activePlayerTrend
@@ -26003,10 +26033,13 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             activePlayerCount
             suspendedPlayerCount
             pendingVerificationPlayerCount
-            newPlayerCount
-            recreationalPlayerCount
+            trialistPlayerCount
+            casualPlayerCount
+            committedPlayerCount
             regularPlayerCount
             vipPlayerCount
+            newPlayerCount
+            recreationalPlayerCount
             lapsedPlayerCount
             activeELCount
             activeCount
@@ -31834,10 +31867,13 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             activePlayerCount
             suspendedPlayerCount
             pendingVerificationPlayerCount
-            newPlayerCount
-            recreationalPlayerCount
+            trialistPlayerCount
+            casualPlayerCount
+            committedPlayerCount
             regularPlayerCount
             vipPlayerCount
+            newPlayerCount
+            recreationalPlayerCount
             lapsedPlayerCount
             notPlayedCount
             activeELCount
@@ -31873,6 +31909,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             topPlayersByNetBalance
             topPlayersByGamesPlayed
             topPlayersByVenueCount
+            topPlayersByBuyIns
             playerGrowthTrend
             playerGrowthPercent
             activePlayerTrend
@@ -34371,10 +34408,13 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           activePlayerCount
           suspendedPlayerCount
           pendingVerificationPlayerCount
-          newPlayerCount
-          recreationalPlayerCount
+          trialistPlayerCount
+          casualPlayerCount
+          committedPlayerCount
           regularPlayerCount
           vipPlayerCount
+          newPlayerCount
+          recreationalPlayerCount
           lapsedPlayerCount
           notPlayedCount
           activeELCount
@@ -34410,6 +34450,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           topPlayersByNetBalance
           topPlayersByGamesPlayed
           topPlayersByVenueCount
+          topPlayersByBuyIns
           playerGrowthTrend
           playerGrowthPercent
           activePlayerTrend
@@ -36219,10 +36260,13 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           activePlayerCount
           suspendedPlayerCount
           pendingVerificationPlayerCount
-          newPlayerCount
-          recreationalPlayerCount
+          trialistPlayerCount
+          casualPlayerCount
+          committedPlayerCount
           regularPlayerCount
           vipPlayerCount
+          newPlayerCount
+          recreationalPlayerCount
           lapsedPlayerCount
           activeELCount
           activeCount
@@ -37140,10 +37184,13 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             activePlayerCount
             suspendedPlayerCount
             pendingVerificationPlayerCount
-            newPlayerCount
-            recreationalPlayerCount
+            trialistPlayerCount
+            casualPlayerCount
+            committedPlayerCount
             regularPlayerCount
             vipPlayerCount
+            newPlayerCount
+            recreationalPlayerCount
             lapsedPlayerCount
             notPlayedCount
             activeELCount
@@ -37179,6 +37226,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             topPlayersByNetBalance
             topPlayersByGamesPlayed
             topPlayersByVenueCount
+            topPlayersByBuyIns
             playerGrowthTrend
             playerGrowthPercent
             activePlayerTrend
@@ -41226,10 +41274,13 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             activePlayerCount
             suspendedPlayerCount
             pendingVerificationPlayerCount
-            newPlayerCount
-            recreationalPlayerCount
+            trialistPlayerCount
+            casualPlayerCount
+            committedPlayerCount
             regularPlayerCount
             vipPlayerCount
+            newPlayerCount
+            recreationalPlayerCount
             lapsedPlayerCount
             activeELCount
             activeCount
@@ -47057,10 +47108,13 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             activePlayerCount
             suspendedPlayerCount
             pendingVerificationPlayerCount
-            newPlayerCount
-            recreationalPlayerCount
+            trialistPlayerCount
+            casualPlayerCount
+            committedPlayerCount
             regularPlayerCount
             vipPlayerCount
+            newPlayerCount
+            recreationalPlayerCount
             lapsedPlayerCount
             notPlayedCount
             activeELCount
@@ -47096,6 +47150,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             topPlayersByNetBalance
             topPlayersByGamesPlayed
             topPlayersByVenueCount
+            topPlayersByBuyIns
             playerGrowthTrend
             playerGrowthPercent
             activePlayerTrend
@@ -49594,10 +49649,13 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           activePlayerCount
           suspendedPlayerCount
           pendingVerificationPlayerCount
-          newPlayerCount
-          recreationalPlayerCount
+          trialistPlayerCount
+          casualPlayerCount
+          committedPlayerCount
           regularPlayerCount
           vipPlayerCount
+          newPlayerCount
+          recreationalPlayerCount
           lapsedPlayerCount
           notPlayedCount
           activeELCount
@@ -49633,6 +49691,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           topPlayersByNetBalance
           topPlayersByGamesPlayed
           topPlayersByVenueCount
+          topPlayersByBuyIns
           playerGrowthTrend
           playerGrowthPercent
           activePlayerTrend
@@ -51442,10 +51501,13 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           activePlayerCount
           suspendedPlayerCount
           pendingVerificationPlayerCount
-          newPlayerCount
-          recreationalPlayerCount
+          trialistPlayerCount
+          casualPlayerCount
+          committedPlayerCount
           regularPlayerCount
           vipPlayerCount
+          newPlayerCount
+          recreationalPlayerCount
           lapsedPlayerCount
           activeELCount
           activeCount
@@ -52363,10 +52425,13 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             activePlayerCount
             suspendedPlayerCount
             pendingVerificationPlayerCount
-            newPlayerCount
-            recreationalPlayerCount
+            trialistPlayerCount
+            casualPlayerCount
+            committedPlayerCount
             regularPlayerCount
             vipPlayerCount
+            newPlayerCount
+            recreationalPlayerCount
             lapsedPlayerCount
             notPlayedCount
             activeELCount
@@ -52402,6 +52467,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             topPlayersByNetBalance
             topPlayersByGamesPlayed
             topPlayersByVenueCount
+            topPlayersByBuyIns
             playerGrowthTrend
             playerGrowthPercent
             activePlayerTrend
@@ -56449,10 +56515,13 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             activePlayerCount
             suspendedPlayerCount
             pendingVerificationPlayerCount
-            newPlayerCount
-            recreationalPlayerCount
+            trialistPlayerCount
+            casualPlayerCount
+            committedPlayerCount
             regularPlayerCount
             vipPlayerCount
+            newPlayerCount
+            recreationalPlayerCount
             lapsedPlayerCount
             activeELCount
             activeCount
@@ -62280,10 +62349,13 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             activePlayerCount
             suspendedPlayerCount
             pendingVerificationPlayerCount
-            newPlayerCount
-            recreationalPlayerCount
+            trialistPlayerCount
+            casualPlayerCount
+            committedPlayerCount
             regularPlayerCount
             vipPlayerCount
+            newPlayerCount
+            recreationalPlayerCount
             lapsedPlayerCount
             notPlayedCount
             activeELCount
@@ -62319,6 +62391,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             topPlayersByNetBalance
             topPlayersByGamesPlayed
             topPlayersByVenueCount
+            topPlayersByBuyIns
             playerGrowthTrend
             playerGrowthPercent
             activePlayerTrend
@@ -64817,10 +64890,13 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           activePlayerCount
           suspendedPlayerCount
           pendingVerificationPlayerCount
-          newPlayerCount
-          recreationalPlayerCount
+          trialistPlayerCount
+          casualPlayerCount
+          committedPlayerCount
           regularPlayerCount
           vipPlayerCount
+          newPlayerCount
+          recreationalPlayerCount
           lapsedPlayerCount
           notPlayedCount
           activeELCount
@@ -64856,6 +64932,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           topPlayersByNetBalance
           topPlayersByGamesPlayed
           topPlayersByVenueCount
+          topPlayersByBuyIns
           playerGrowthTrend
           playerGrowthPercent
           activePlayerTrend
@@ -66665,10 +66742,13 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           activePlayerCount
           suspendedPlayerCount
           pendingVerificationPlayerCount
-          newPlayerCount
-          recreationalPlayerCount
+          trialistPlayerCount
+          casualPlayerCount
+          committedPlayerCount
           regularPlayerCount
           vipPlayerCount
+          newPlayerCount
+          recreationalPlayerCount
           lapsedPlayerCount
           activeELCount
           activeCount
@@ -67586,10 +67666,13 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             activePlayerCount
             suspendedPlayerCount
             pendingVerificationPlayerCount
-            newPlayerCount
-            recreationalPlayerCount
+            trialistPlayerCount
+            casualPlayerCount
+            committedPlayerCount
             regularPlayerCount
             vipPlayerCount
+            newPlayerCount
+            recreationalPlayerCount
             lapsedPlayerCount
             notPlayedCount
             activeELCount
@@ -67625,6 +67708,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             topPlayersByNetBalance
             topPlayersByGamesPlayed
             topPlayersByVenueCount
+            topPlayersByBuyIns
             playerGrowthTrend
             playerGrowthPercent
             activePlayerTrend
@@ -69648,10 +69732,13 @@ export const onCreateDashboardCache = /* GraphQL */ `subscription OnCreateDashbo
           activePlayerCount
           suspendedPlayerCount
           pendingVerificationPlayerCount
-          newPlayerCount
-          recreationalPlayerCount
+          trialistPlayerCount
+          casualPlayerCount
+          committedPlayerCount
           regularPlayerCount
           vipPlayerCount
+          newPlayerCount
+          recreationalPlayerCount
           lapsedPlayerCount
           notPlayedCount
           activeELCount
@@ -69687,6 +69774,7 @@ export const onCreateDashboardCache = /* GraphQL */ `subscription OnCreateDashbo
           topPlayersByNetBalance
           topPlayersByGamesPlayed
           topPlayersByVenueCount
+          topPlayersByBuyIns
           playerGrowthTrend
           playerGrowthPercent
           activePlayerTrend
@@ -71737,10 +71825,13 @@ export const onUpdateDashboardCache = /* GraphQL */ `subscription OnUpdateDashbo
           activePlayerCount
           suspendedPlayerCount
           pendingVerificationPlayerCount
-          newPlayerCount
-          recreationalPlayerCount
+          trialistPlayerCount
+          casualPlayerCount
+          committedPlayerCount
           regularPlayerCount
           vipPlayerCount
+          newPlayerCount
+          recreationalPlayerCount
           lapsedPlayerCount
           notPlayedCount
           activeELCount
@@ -71776,6 +71867,7 @@ export const onUpdateDashboardCache = /* GraphQL */ `subscription OnUpdateDashbo
           topPlayersByNetBalance
           topPlayersByGamesPlayed
           topPlayersByVenueCount
+          topPlayersByBuyIns
           playerGrowthTrend
           playerGrowthPercent
           activePlayerTrend
@@ -73826,10 +73918,13 @@ export const onDeleteDashboardCache = /* GraphQL */ `subscription OnDeleteDashbo
           activePlayerCount
           suspendedPlayerCount
           pendingVerificationPlayerCount
-          newPlayerCount
-          recreationalPlayerCount
+          trialistPlayerCount
+          casualPlayerCount
+          committedPlayerCount
           regularPlayerCount
           vipPlayerCount
+          newPlayerCount
+          recreationalPlayerCount
           lapsedPlayerCount
           notPlayedCount
           activeELCount
@@ -73865,6 +73960,7 @@ export const onDeleteDashboardCache = /* GraphQL */ `subscription OnDeleteDashbo
           topPlayersByNetBalance
           topPlayersByGamesPlayed
           topPlayersByVenueCount
+          topPlayersByBuyIns
           playerGrowthTrend
           playerGrowthPercent
           activePlayerTrend
@@ -76171,10 +76267,13 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
           activePlayerCount
           suspendedPlayerCount
           pendingVerificationPlayerCount
-          newPlayerCount
-          recreationalPlayerCount
+          trialistPlayerCount
+          casualPlayerCount
+          committedPlayerCount
           regularPlayerCount
           vipPlayerCount
+          newPlayerCount
+          recreationalPlayerCount
           lapsedPlayerCount
           notPlayedCount
           activeELCount
@@ -76210,6 +76309,7 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
           topPlayersByNetBalance
           topPlayersByGamesPlayed
           topPlayersByVenueCount
+          topPlayersByBuyIns
           playerGrowthTrend
           playerGrowthPercent
           activePlayerTrend
@@ -78496,10 +78596,13 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
           activePlayerCount
           suspendedPlayerCount
           pendingVerificationPlayerCount
-          newPlayerCount
-          recreationalPlayerCount
+          trialistPlayerCount
+          casualPlayerCount
+          committedPlayerCount
           regularPlayerCount
           vipPlayerCount
+          newPlayerCount
+          recreationalPlayerCount
           lapsedPlayerCount
           notPlayedCount
           activeELCount
@@ -78535,6 +78638,7 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
           topPlayersByNetBalance
           topPlayersByGamesPlayed
           topPlayersByVenueCount
+          topPlayersByBuyIns
           playerGrowthTrend
           playerGrowthPercent
           activePlayerTrend
@@ -80821,10 +80925,13 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
           activePlayerCount
           suspendedPlayerCount
           pendingVerificationPlayerCount
-          newPlayerCount
-          recreationalPlayerCount
+          trialistPlayerCount
+          casualPlayerCount
+          committedPlayerCount
           regularPlayerCount
           vipPlayerCount
+          newPlayerCount
+          recreationalPlayerCount
           lapsedPlayerCount
           notPlayedCount
           activeELCount
@@ -80860,6 +80967,7 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
           topPlayersByNetBalance
           topPlayersByGamesPlayed
           topPlayersByVenueCount
+          topPlayersByBuyIns
           playerGrowthTrend
           playerGrowthPercent
           activePlayerTrend
@@ -83124,10 +83232,13 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
           activePlayerCount
           suspendedPlayerCount
           pendingVerificationPlayerCount
-          newPlayerCount
-          recreationalPlayerCount
+          trialistPlayerCount
+          casualPlayerCount
+          committedPlayerCount
           regularPlayerCount
           vipPlayerCount
+          newPlayerCount
+          recreationalPlayerCount
           lapsedPlayerCount
           notPlayedCount
           activeELCount
@@ -83163,6 +83274,7 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
           topPlayersByNetBalance
           topPlayersByGamesPlayed
           topPlayersByVenueCount
+          topPlayersByBuyIns
           playerGrowthTrend
           playerGrowthPercent
           activePlayerTrend
@@ -85440,10 +85552,13 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
           activePlayerCount
           suspendedPlayerCount
           pendingVerificationPlayerCount
-          newPlayerCount
-          recreationalPlayerCount
+          trialistPlayerCount
+          casualPlayerCount
+          committedPlayerCount
           regularPlayerCount
           vipPlayerCount
+          newPlayerCount
+          recreationalPlayerCount
           lapsedPlayerCount
           notPlayedCount
           activeELCount
@@ -85479,6 +85594,7 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
           topPlayersByNetBalance
           topPlayersByGamesPlayed
           topPlayersByVenueCount
+          topPlayersByBuyIns
           playerGrowthTrend
           playerGrowthPercent
           activePlayerTrend
@@ -87756,10 +87872,13 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
           activePlayerCount
           suspendedPlayerCount
           pendingVerificationPlayerCount
-          newPlayerCount
-          recreationalPlayerCount
+          trialistPlayerCount
+          casualPlayerCount
+          committedPlayerCount
           regularPlayerCount
           vipPlayerCount
+          newPlayerCount
+          recreationalPlayerCount
           lapsedPlayerCount
           notPlayedCount
           activeELCount
@@ -87795,6 +87914,7 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
           topPlayersByNetBalance
           topPlayersByGamesPlayed
           topPlayersByVenueCount
+          topPlayersByBuyIns
           playerGrowthTrend
           playerGrowthPercent
           activePlayerTrend

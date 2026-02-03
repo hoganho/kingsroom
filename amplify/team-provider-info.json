@@ -273,7 +273,7 @@
         },
         "tournamentConsolidator": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
-          "s3Key": "amplify-builds/tournamentConsolidator-4f744f6c75424f664f66-build.zip"
+          "s3Key": "amplify-builds/tournamentConsolidator-5033697132666e663773-build.zip"
         },
         "userLastActiveUpdater": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
@@ -314,7 +314,7 @@
         },
         "aiReportGenerator": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
-          "s3Key": "amplify-builds/aiReportGenerator-58446e414b7a716b656c-build.zip"
+          "s3Key": "amplify-builds/aiReportGenerator-597447786f5033586f2b-build.zip"
         },
         "metricsPackGenerator": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
@@ -322,11 +322,11 @@
         },
         "refreshPlayerMetrics": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
-          "s3Key": "amplify-builds/refreshPlayerMetrics-374e352b46534c447046-build.zip"
+          "s3Key": "amplify-builds/refreshPlayerMetrics-4d543541443854636348-build.zip"
         },
         "refreshTargetingClassifications": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
-          "s3Key": "amplify-builds/refreshTargetingClassifications-3150504865416a624932-build.zip"
+          "s3Key": "amplify-builds/refreshTargetingClassifications-4253774a426f2b5a4b6a-build.zip"
         }
       },
       "api": {

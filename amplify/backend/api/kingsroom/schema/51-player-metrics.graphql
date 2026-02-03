@@ -44,12 +44,18 @@ type GlobalPlayerMetrics
   pendingVerificationPlayerCount: Int! @default(value: "0")
   
   # === BY CATEGORY ===
-  newPlayerCount: Int! @default(value: "0")
-  recreationalPlayerCount: Int! @default(value: "0")
-  regularPlayerCount: Int! @default(value: "0")
-  vipPlayerCount: Int! @default(value: "0")
-  lapsedPlayerCount: Int! @default(value: "0")
-  
+  # New enum values (v2): TRIALIST, CASUAL, COMMITTED, REGULAR, VIP
+  # Note: Nullable to support existing records before Lambda refresh
+  trialistPlayerCount: Int @default(value: "0")    # Early-stage explorer (was NEW)
+  casualPlayerCount: Int @default(value: "0")      # Plays occasionally (was RECREATIONAL)
+  committedPlayerCount: Int @default(value: "0")   # Regular intent, not weekly (new)
+  regularPlayerCount: Int! @default(value: "0")    # Weekly participation sustained
+  vipPlayerCount: Int! @default(value: "0")        # Top 5% by value
+  # Legacy fields (deprecated - kept for backward compatibility during transition)
+  newPlayerCount: Int! @default(value: "0")        # @deprecated - use trialistPlayerCount
+  recreationalPlayerCount: Int! @default(value: "0") # @deprecated - use casualPlayerCount
+  lapsedPlayerCount: Int! @default(value: "0")     # @deprecated - removed from enum
+
   # === BY TARGETING CLASSIFICATION ===
   notPlayedCount: Int! @default(value: "0")
   activeELCount: Int! @default(value: "0")
@@ -114,6 +120,10 @@ type GlobalPlayerMetrics
   # [{ playerId, name, venueCount, entityCount, gamesPlayed }, ...]
   # Players who have played at the most venues
   
+  topPlayersByBuyIns: AWSJSON
+  # [{ playerId, name, totalBuyIns, gamesPlayed }, ...]
+  # Players with highest total buy-ins (Top Spenders)
+  
   # === METADATA ===
   calculatedAt: AWSDateTime!
   calculatedBy: String! @default(value: "SCHEDULED_LAMBDA")
@@ -165,12 +175,16 @@ type EntityPlayerMetrics
   pendingVerificationPlayerCount: Int! @default(value: "0")
   
   # === BY CATEGORY ===
-  newPlayerCount: Int! @default(value: "0")
-  recreationalPlayerCount: Int! @default(value: "0")
+  trialistPlayerCount: Int @default(value: "0")
+  casualPlayerCount: Int @default(value: "0")
+  committedPlayerCount: Int @default(value: "0")
   regularPlayerCount: Int! @default(value: "0")
   vipPlayerCount: Int! @default(value: "0")
+  # Legacy (deprecated)
+  newPlayerCount: Int! @default(value: "0")
+  recreationalPlayerCount: Int! @default(value: "0")
   lapsedPlayerCount: Int! @default(value: "0")
-  
+
   # === BY TARGETING CLASSIFICATION ===
   notPlayedCount: Int! @default(value: "0")
   activeELCount: Int! @default(value: "0")
@@ -234,6 +248,10 @@ type EntityPlayerMetrics
   # [{ playerId, name, venueCount, gamesPlayed }, ...]
   # Players who have played at the most venues within this entity
   
+  topPlayersByBuyIns: AWSJSON
+  # [{ playerId, name, totalBuyIns, gamesPlayed }, ...]
+  # Players with highest total buy-ins within this entity (Top Spenders)
+  
   # === TRENDS ===
   playerGrowthTrend: String  # "up", "down", "stable"
   playerGrowthPercent: Float
@@ -292,12 +310,16 @@ type VenuePlayerMetrics
   pendingVerificationPlayerCount: Int! @default(value: "0")
   
   # === BY CATEGORY ===
-  newPlayerCount: Int! @default(value: "0")
-  recreationalPlayerCount: Int! @default(value: "0")
+  trialistPlayerCount: Int @default(value: "0")
+  casualPlayerCount: Int @default(value: "0")
+  committedPlayerCount: Int @default(value: "0")
   regularPlayerCount: Int! @default(value: "0")
   vipPlayerCount: Int! @default(value: "0")
+  # Legacy (deprecated)
+  newPlayerCount: Int! @default(value: "0")
+  recreationalPlayerCount: Int! @default(value: "0")
   lapsedPlayerCount: Int! @default(value: "0")
-  
+
   # === BY TARGETING CLASSIFICATION (venue-specific) ===
   activeELCount: Int! @default(value: "0")
   activeCount: Int! @default(value: "0")

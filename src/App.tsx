@@ -59,6 +59,8 @@ import GameManagement from './pages/settings/GameManagement';
 import { SeriesManagementPage } from './pages/settings/SeriesManagement';
 import { UserManagement } from './pages/settings/UserManagement';
 import MetricsManagement from './pages/settings/MetricsManagement';
+import PlayerManagement from './pages/settings/PlayerManagement';
+import { PlayerManagementProfile } from './pages/settings/PlayerManagementProfile';
 
 // Scraper Pages (SuperAdmin)
 import { ScraperAdminPage } from './pages/scraper/ScraperAdmin';
@@ -435,6 +437,8 @@ const AuthenticatedRoutes = () => {
             <Route path="/settings/venue-management" element={<VenueManagement />} />
             <Route path="/settings/game-management" element={<GameManagement />} />
             <Route path="/settings/series-management" element={<SeriesManagementPage />} />
+            <Route path="/settings/player-management" element={<PlayerManagement />} />
+            <Route path="/settings/player-management/edit/:playerId" element={<PlayerManagementProfile />} />
             <Route path="/settings/metrics-management" element={<MetricsManagement />} />
             <Route path="/settings/social-accounts" element={<SocialAccountManagement />} />
             <Route path="/settings/user-management" element={<UserManagement />} />

@@ -491,7 +491,7 @@ const generateStatAdjustments = (playerJourneys) => {
                 },
                 // PlayerVenue adjustments (per venue)
                 venueAdjustments: {
-                    totalGamesPlayed: -stats.overCountedGames,
+                    //totalGamesPlayed: -stats.overCountedGames,
                     totalBuyIns: -stats.overCountedBuyInAmount,
                     netProfit: stats.overCountedBuyInAmount
                 },

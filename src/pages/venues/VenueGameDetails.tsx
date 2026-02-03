@@ -1,7 +1,12 @@
 // src/pages/venues/VenueGameDetails.tsx
-// VERSION: 3.14.1 - TypeScript fixes
+// VERSION: 3.14.3 - Fix Buy-In and Margin column display
 //
 // CHANGELOG:
+// - v3.14.3: Fixed Margin column in P&L table rows
+//           - profitMargin is a decimal (e.g. 0.25), now multiplied by 100 for display
+// - v3.14.2: Fixed Buy-In column in P&L table
+//           - Now shows base amount (buyIn - rake) outside brackets
+//           - Rake amount shown in brackets: "$100 (+$20)" where $100 is base, $20 is rake
 // - v3.14.1: Fixed TypeScript errors
 //           - Removed unused variables (isUnknown, entityId)
 //           - Removed invalid 'description' prop from PageWrapper components
@@ -14,7 +19,7 @@
 //           - Always shows field with "N/A" if value is 0 or missing
 // - v3.13.0: P&L table column improvements
 //           - Moved GTD column to after COSTS
-//           - Buy-In now shows base + rake: "$100 (+$20)" format
+//           - Buy-In now shows base + rake: "$100 (+$20)" format where $100 = buyIn - rake
 //           - Added UNQ/ENT column showing totalUniquePlayers/totalEntries
 // - v3.12.0: Launch icon now navigates to GameDetails page
 //           - Removed edit modal from this page
@@ -883,13 +888,14 @@ const PLRow: React.FC<PLRowProps> = ({ enrichedInstance, onNavigateToGame }) => 
   const profitColor = profit >= 0 ? 'text-blue-600' : 'text-red-600';
   const marginColor = (financialSnapshot?.profitMargin ?? 0) >= 0 ? 'text-blue-600' : 'text-red-600';
   
-  // Format buy-in with rake
+  // Format buy-in with rake: show base (buyIn - rake) outside, rake in brackets
   const formatBuyInWithRake = () => {
     const buyIn = game?.buyIn ?? 0;
     const rake = game?.rake ?? 0;
     if (buyIn === 0) return '-';
     if (rake === 0) return formatCurrency(buyIn);
-    return `${formatCurrency(buyIn)} (+${formatCurrency(rake)})`;
+    const base = buyIn - rake;
+    return `${formatCurrency(base)} (+${formatCurrency(rake)})`;
   };
 
   return (
@@ -918,7 +924,7 @@ const PLRow: React.FC<PLRowProps> = ({ enrichedInstance, onNavigateToGame }) => 
         </td>
         <td className={`px-1 py-1.5 text-xs text-right whitespace-nowrap ${marginColor}`}>
           {hasFinancials && financialSnapshot?.profitMargin != null 
-            ? `${financialSnapshot.profitMargin.toFixed(0)}%` 
+            ? `${(financialSnapshot.profitMargin * 100).toFixed(0)}%` 
             : '-'}
         </td>
         <td className="px-1 py-1.5 text-xs text-right text-emerald-600 whitespace-nowrap hidden sm:table-cell">

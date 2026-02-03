@@ -321,7 +321,8 @@
         },
         "Runtime": "nodejs22.x",
         "Layers": [],
-        "Timeout": 300
+        "Timeout": 900,
+        "MemorySize": 1024
       }
     },
     "CloudWatchEvent": {
@@ -455,6 +456,15 @@
         "PolicyDocument": {
           "Version": "2012-10-17",
           "Statement": [
+            {
+              "Action": [
+                "lambda:InvokeFunction"
+              ],
+              "Resource": [
+                "arn:aws:lambda:*:*:function:refreshPlayerMetrics-*"
+              ],
+              "Effect": "Allow"
+            },
             {
               "Action": [
                 "ses:SendEmail",

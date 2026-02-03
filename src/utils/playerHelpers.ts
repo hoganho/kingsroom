@@ -114,25 +114,36 @@ export const formatStatus = (status: PlayerAccountStatus): StatusDisplay => {
   };
 };
 
+// ============================================================================
+// Category Formatting - UPDATED with new labels and colors
+// ============================================================================
+// PlayerAccountCategory values:
+//   TRIALIST   -> "Trialist" (was "New")
+//   CASUAL     -> "Casual" (was "Recreational")
+//   COMMITTED  -> "Committed" (new)
+//   REGULAR    -> "Regular"
+//   VIP        -> "VIP"
+// ============================================================================
+
 export const formatCategory = (category: PlayerAccountCategory): CategoryDisplay => {
   const categoryMap: Record<PlayerAccountCategory, CategoryDisplay> = {
     [PlayerAccountCategory.TRIALIST]: {
       label: 'Trialist',
-      color: 'green',
-      bgColor: 'bg-green-100',
-      textColor: 'text-green-800',
+      color: 'emerald',
+      bgColor: 'bg-emerald-100',
+      textColor: 'text-emerald-800',
     },
     [PlayerAccountCategory.CASUAL]: {
-      label: 'Recreational',
-      color: 'blue',
-      bgColor: 'bg-blue-100',
-      textColor: 'text-blue-800',
+      label: 'Casual',
+      color: 'sky',
+      bgColor: 'bg-sky-100',
+      textColor: 'text-sky-800',
     },
     [PlayerAccountCategory.COMMITTED]: {
       label: 'Committed',
-      color: 'blue',
-      bgColor: 'bg-blue-100',
-      textColor: 'text-blue-800',
+      color: 'amber',
+      bgColor: 'bg-amber-100',
+      textColor: 'text-amber-800',
     },
     [PlayerAccountCategory.REGULAR]: {
       label: 'Regular',
@@ -266,15 +277,15 @@ export const formatTicketStatus = (status: TicketStatus): StatusDisplay => {
     },
     [TicketStatus.EXPIRED]: {
       label: 'Expired',
-      color: 'red',
-      bgColor: 'bg-red-100',
-      textColor: 'text-red-800',
-    },
-    [TicketStatus.USED]: {
-      label: 'Used',
       color: 'gray',
       bgColor: 'bg-gray-100',
       textColor: 'text-gray-800',
+    },
+    [TicketStatus.USED]: {
+      label: 'Used',
+      color: 'blue',
+      bgColor: 'bg-blue-100',
+      textColor: 'text-blue-800',
     },
   };
 
@@ -388,16 +399,33 @@ export const calculatePerformanceStats = (summary: PlayerSummary | null): Player
 // ============================================================================
 
 export const getPrimaryVenue = (player: PlayerListItem): string => {
+  // First, check playerVenues for the venue with most games played
   const venues = player.playerVenues?.items?.filter(Boolean) || [];
-  if (venues.length === 0) return 'No venue';
+  if (venues.length > 0) {
+    // Find the venue with most games played
+    const primaryVenue = venues.reduce((prev, current) => {
+      if (!current || !prev) return prev || current;
+      return (current.totalGamesPlayed || 0) > (prev.totalGamesPlayed || 0) ? current : prev;
+    }, null as PlayerVenue | null);
 
-  // Find the venue with most games played
-  const primaryVenue = venues.reduce((prev, current) => {
-    if (!current || !prev) return prev || current;
-    return (current.totalGamesPlayed || 0) > (prev.totalGamesPlayed || 0) ? current : prev;
-  }, null as PlayerVenue | null);
+    if (primaryVenue?.venue?.name) {
+      return primaryVenue.venue.name;
+    }
+  }
+  
+  // Fall back to registration venue if available
+  if (player.registrationVenue?.name) {
+    return player.registrationVenue.name;
+  }
 
-  return primaryVenue?.venue?.name || 'Unknown venue';
+  return 'No venue';
+};
+
+export const getRegistrationVenueName = (player: PlayerListItem): string => {
+  if (player.registrationVenue?.name) {
+    return player.registrationVenue.name;
+  }
+  return 'No venue';
 };
 
 export const getVenueCount = (player: PlayerListItem): number => {
