@@ -1104,6 +1104,7 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             isReconciled
             reconciledAt
             reconciledBy
+            excludeFromAccounting
             createdAt
             updatedAt
             _version
@@ -3411,6 +3412,7 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             isReconciled
             reconciledAt
             reconciledBy
+            excludeFromAccounting
             createdAt
             updatedAt
             _version
@@ -5372,6 +5374,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             isReconciled
             reconciledAt
             reconciledBy
+            excludeFromAccounting
             createdAt
             updatedAt
             _version
@@ -6642,6 +6645,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           isReconciled
           reconciledAt
           reconciledBy
+          excludeFromAccounting
           createdAt
           updatedAt
           _version
@@ -7882,6 +7886,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             isReconciled
             reconciledAt
             reconciledBy
+            excludeFromAccounting
             createdAt
             updatedAt
             _version
@@ -9842,6 +9847,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             isReconciled
             reconciledAt
             reconciledBy
+            excludeFromAccounting
             createdAt
             updatedAt
             _version
@@ -10915,6 +10921,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             isReconciled
             reconciledAt
             reconciledBy
+            excludeFromAccounting
             createdAt
             updatedAt
             _version
@@ -11645,6 +11652,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             isReconciled
             reconciledAt
             reconciledBy
+            excludeFromAccounting
             createdAt
             updatedAt
             _version
@@ -11913,6 +11921,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
         isReconciled
         reconciledAt
         reconciledBy
+        excludeFromAccounting
         createdAt
         updatedAt
         _version
@@ -13076,6 +13085,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             isReconciled
             reconciledAt
             reconciledBy
+            excludeFromAccounting
             createdAt
             updatedAt
             _version
@@ -16032,6 +16042,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             isReconciled
             reconciledAt
             reconciledBy
+            excludeFromAccounting
             createdAt
             updatedAt
             _version
@@ -17932,6 +17943,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             isReconciled
             reconciledAt
             reconciledBy
+            excludeFromAccounting
             createdAt
             updatedAt
             _version
@@ -20872,6 +20884,7 @@ export const onDashboardCacheUpdate = /* GraphQL */ `subscription OnDashboardCac
             isReconciled
             reconciledAt
             reconciledBy
+            excludeFromAccounting
             createdAt
             updatedAt
             _version
@@ -22704,6 +22717,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             isReconciled
             reconciledAt
             reconciledBy
+            excludeFromAccounting
             createdAt
             updatedAt
             _version
@@ -23974,6 +23988,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           isReconciled
           reconciledAt
           reconciledBy
+          excludeFromAccounting
           createdAt
           updatedAt
           _version
@@ -25214,6 +25229,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             isReconciled
             reconciledAt
             reconciledBy
+            excludeFromAccounting
             createdAt
             updatedAt
             _version
@@ -27174,6 +27190,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             isReconciled
             reconciledAt
             reconciledBy
+            excludeFromAccounting
             createdAt
             updatedAt
             _version
@@ -28247,6 +28264,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             isReconciled
             reconciledAt
             reconciledBy
+            excludeFromAccounting
             createdAt
             updatedAt
             _version
@@ -28977,6 +28995,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             isReconciled
             reconciledAt
             reconciledBy
+            excludeFromAccounting
             createdAt
             updatedAt
             _version
@@ -29245,6 +29264,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
         isReconciled
         reconciledAt
         reconciledBy
+        excludeFromAccounting
         createdAt
         updatedAt
         _version
@@ -30408,6 +30428,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             isReconciled
             reconciledAt
             reconciledBy
+            excludeFromAccounting
             createdAt
             updatedAt
             _version
@@ -33364,6 +33385,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             isReconciled
             reconciledAt
             reconciledBy
+            excludeFromAccounting
             createdAt
             updatedAt
             _version
@@ -35264,6 +35286,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             isReconciled
             reconciledAt
             reconciledBy
+            excludeFromAccounting
             createdAt
             updatedAt
             _version
@@ -37945,6 +37968,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             isReconciled
             reconciledAt
             reconciledBy
+            excludeFromAccounting
             createdAt
             updatedAt
             _version
@@ -39215,6 +39239,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           isReconciled
           reconciledAt
           reconciledBy
+          excludeFromAccounting
           createdAt
           updatedAt
           _version
@@ -40455,6 +40480,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             isReconciled
             reconciledAt
             reconciledBy
+            excludeFromAccounting
             createdAt
             updatedAt
             _version
@@ -42415,6 +42441,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             isReconciled
             reconciledAt
             reconciledBy
+            excludeFromAccounting
             createdAt
             updatedAt
             _version
@@ -43488,6 +43515,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             isReconciled
             reconciledAt
             reconciledBy
+            excludeFromAccounting
             createdAt
             updatedAt
             _version
@@ -44218,6 +44246,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             isReconciled
             reconciledAt
             reconciledBy
+            excludeFromAccounting
             createdAt
             updatedAt
             _version
@@ -44486,6 +44515,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
         isReconciled
         reconciledAt
         reconciledBy
+        excludeFromAccounting
         createdAt
         updatedAt
         _version
@@ -45649,6 +45679,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             isReconciled
             reconciledAt
             reconciledBy
+            excludeFromAccounting
             createdAt
             updatedAt
             _version
@@ -48605,6 +48636,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             isReconciled
             reconciledAt
             reconciledBy
+            excludeFromAccounting
             createdAt
             updatedAt
             _version
@@ -50505,6 +50537,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             isReconciled
             reconciledAt
             reconciledBy
+            excludeFromAccounting
             createdAt
             updatedAt
             _version
@@ -53186,6 +53219,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             isReconciled
             reconciledAt
             reconciledBy
+            excludeFromAccounting
             createdAt
             updatedAt
             _version
@@ -54456,6 +54490,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           isReconciled
           reconciledAt
           reconciledBy
+          excludeFromAccounting
           createdAt
           updatedAt
           _version
@@ -55696,6 +55731,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             isReconciled
             reconciledAt
             reconciledBy
+            excludeFromAccounting
             createdAt
             updatedAt
             _version
@@ -57656,6 +57692,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             isReconciled
             reconciledAt
             reconciledBy
+            excludeFromAccounting
             createdAt
             updatedAt
             _version
@@ -58729,6 +58766,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             isReconciled
             reconciledAt
             reconciledBy
+            excludeFromAccounting
             createdAt
             updatedAt
             _version
@@ -59459,6 +59497,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             isReconciled
             reconciledAt
             reconciledBy
+            excludeFromAccounting
             createdAt
             updatedAt
             _version
@@ -59727,6 +59766,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
         isReconciled
         reconciledAt
         reconciledBy
+        excludeFromAccounting
         createdAt
         updatedAt
         _version
@@ -60890,6 +60930,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             isReconciled
             reconciledAt
             reconciledBy
+            excludeFromAccounting
             createdAt
             updatedAt
             _version
@@ -63846,6 +63887,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             isReconciled
             reconciledAt
             reconciledBy
+            excludeFromAccounting
             createdAt
             updatedAt
             _version
@@ -65746,6 +65788,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             isReconciled
             reconciledAt
             reconciledBy
+            excludeFromAccounting
             createdAt
             updatedAt
             _version
@@ -68688,6 +68731,7 @@ export const onCreateDashboardCache = /* GraphQL */ `subscription OnCreateDashbo
             isReconciled
             reconciledAt
             reconciledBy
+            excludeFromAccounting
             createdAt
             updatedAt
             _version
@@ -70781,6 +70825,7 @@ export const onUpdateDashboardCache = /* GraphQL */ `subscription OnUpdateDashbo
             isReconciled
             reconciledAt
             reconciledBy
+            excludeFromAccounting
             createdAt
             updatedAt
             _version
@@ -72874,6 +72919,7 @@ export const onDeleteDashboardCache = /* GraphQL */ `subscription OnDeleteDashbo
             isReconciled
             reconciledAt
             reconciledBy
+            excludeFromAccounting
             createdAt
             updatedAt
             _version
@@ -75223,6 +75269,7 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             isReconciled
             reconciledAt
             reconciledBy
+            excludeFromAccounting
             createdAt
             updatedAt
             _version
@@ -77552,6 +77599,7 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             isReconciled
             reconciledAt
             reconciledBy
+            excludeFromAccounting
             createdAt
             updatedAt
             _version
@@ -79881,6 +79929,7 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             isReconciled
             reconciledAt
             reconciledBy
+            excludeFromAccounting
             createdAt
             updatedAt
             _version
@@ -82188,6 +82237,7 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             isReconciled
             reconciledAt
             reconciledBy
+            excludeFromAccounting
             createdAt
             updatedAt
             _version
@@ -84508,6 +84558,7 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             isReconciled
             reconciledAt
             reconciledBy
+            excludeFromAccounting
             createdAt
             updatedAt
             _version
@@ -86828,6 +86879,7 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             isReconciled
             reconciledAt
             reconciledBy
+            excludeFromAccounting
             createdAt
             updatedAt
             _version

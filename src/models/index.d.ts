@@ -7042,6 +7042,7 @@ type EagerGameFinancialSnapshot = {
   readonly isReconciled?: boolean | null;
   readonly reconciledAt?: string | null;
   readonly reconciledBy?: string | null;
+  readonly excludeFromAccounting?: boolean | null;
   readonly createdAt: string;
   readonly updatedAt: string;
 }
@@ -7126,6 +7127,7 @@ type LazyGameFinancialSnapshot = {
   readonly isReconciled?: boolean | null;
   readonly reconciledAt?: string | null;
   readonly reconciledBy?: string | null;
+  readonly excludeFromAccounting?: boolean | null;
   readonly createdAt: string;
   readonly updatedAt: string;
 }
