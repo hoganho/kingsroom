@@ -1,7 +1,14 @@
 // src/pages/venues/VenueGameDetails.tsx
-// VERSION: 3.14.3 - Fix Buy-In and Margin column display
+// VERSION: 3.15.0 - excludeFromAccounting support for corrupted game data
 //
 // CHANGELOG:
+// - v3.15.0: excludeFromAccounting handling for corrupted game data
+//           - Excluded instances removed from all totals (summary stats, KPIs, chart trend)
+//           - Chart treats excluded instances as missing (null profit, excluded from trendline)
+//           - PLRow: strikethrough + opacity on excluded rows, red "Excluded" badge in Status column
+//           - Footer shows excluded count: "TOTALS (N · M excluded)"
+//           - Confirmed Games KPI shows excluded subtext
+//           - PP column now uses game.prizepoolPaid (not snapshot.prizepoolTotal)
 // - v3.14.3: Fixed Margin column in P&L table rows
 //           - profitMargin is a decimal (e.g. 0.25), now multiplied by 100 for display
 // - v3.14.2: Fixed Buy-In column in P&L table
@@ -282,6 +289,7 @@ const listRecurringGameInstancesQuery = /* GraphQL */ `
             rakePerEntry
             guaranteeOverlayPerPlayer
             prizepoolPaidDelta
+            excludeFromAccounting
           }
         }
       }
@@ -393,6 +401,7 @@ interface GameFinancialSnapshotData {
   rakePerEntry?: number | null;
   guaranteeOverlayPerPlayer?: number | null;
   prizepoolPaidDelta?: number | null;
+  excludeFromAccounting?: boolean | null;
 }
 
 interface EnrichedInstance {
@@ -451,6 +460,7 @@ interface SummaryStats {
   confirmedGames: number;
   unknownGames: number;
   cancelledGames: number;
+  excludedGames: number;
   totalEntries: number;
   totalUniquePlayers: number;
   totalRevenue: number;
@@ -485,24 +495,28 @@ function buildSummaryStats(enrichedInstances: EnrichedInstance[]): SummaryStats 
     e.instance.status === 'CANCELLED' || e.instance.status === 'SKIPPED' || e.instance.status === 'REPLACED'
   );
 
-  // Only count instances that have both game AND financial data
-  const confirmedWithFinancials = confirmedInstances.filter(e => e.game && e.financialSnapshot);
+  // Separate excluded instances
+  const excludedInstances = confirmedInstances.filter(e => e.financialSnapshot?.excludeFromAccounting === true);
+  const includedConfirmed = confirmedInstances.filter(e => e.financialSnapshot?.excludeFromAccounting !== true);
 
-  const totalEntries = confirmedInstances.reduce((sum, e) => 
+  // Only count included instances that have both game AND financial data
+  const includedWithFinancials = includedConfirmed.filter(e => e.game && e.financialSnapshot);
+
+  const totalEntries = includedConfirmed.reduce((sum, e) => 
     sum + (e.game?.totalEntries ?? 0), 0
   );
-  const totalUniquePlayers = confirmedInstances.reduce((sum, e) => 
+  const totalUniquePlayers = includedConfirmed.reduce((sum, e) => 
     sum + (e.game?.totalUniquePlayers ?? 0), 0
   );
   
-  // Use snapshot values only
-  const totalRevenue = confirmedWithFinancials.reduce((sum, e) => 
+  // Use snapshot values only from included instances
+  const totalRevenue = includedWithFinancials.reduce((sum, e) => 
     sum + (e.financialSnapshot?.totalRevenue ?? 0), 0
   );
-  const totalCost = confirmedWithFinancials.reduce((sum, e) => 
+  const totalCost = includedWithFinancials.reduce((sum, e) => 
     sum + (e.financialSnapshot?.totalCost ?? 0), 0
   );
-  const totalProfit = confirmedWithFinancials.reduce((sum, e) => 
+  const totalProfit = includedWithFinancials.reduce((sum, e) => 
     sum + (e.financialSnapshot?.netProfit ?? 0), 0
   );
 
@@ -511,13 +525,14 @@ function buildSummaryStats(enrichedInstances: EnrichedInstance[]): SummaryStats 
     confirmedGames: confirmedInstances.length,
     unknownGames: unknownInstances.length,
     cancelledGames: cancelledInstances.length,
+    excludedGames: excludedInstances.length,
     totalEntries,
     totalUniquePlayers,
     totalRevenue,
     totalCost,
     totalProfit,
-    avgProfit: confirmedInstances.length > 0 ? totalProfit / confirmedInstances.length : 0,
-    avgEntries: confirmedInstances.length > 0 ? totalEntries / confirmedInstances.length : 0,
+    avgProfit: includedConfirmed.length > 0 ? totalProfit / includedConfirmed.length : 0,
+    avgEntries: includedConfirmed.length > 0 ? totalEntries / includedConfirmed.length : 0,
   };
 }
 
@@ -532,9 +547,10 @@ function convertInstancesToChartData(instances: EnrichedInstance[]): ProfitDataP
   });
 
   return sorted.map((inst) => {
-    const hasData = inst.instance.status === 'CONFIRMED' && inst.game && inst.financialSnapshot;
+    const isExcluded = inst.financialSnapshot?.excludeFromAccounting === true;
+    const hasData = inst.instance.status === 'CONFIRMED' && inst.game && inst.financialSnapshot && !isExcluded;
     const profit = hasData ? (inst.financialSnapshot?.netProfit ?? 0) : null;
-    const isMissing = inst.instance.status !== 'CONFIRMED' || !inst.game;
+    const isMissing = inst.instance.status !== 'CONFIRMED' || !inst.game || isExcluded;
     
     let displayDate = '';
     try {
@@ -551,7 +567,7 @@ function convertInstancesToChartData(instances: EnrichedInstance[]): ProfitDataP
       fullDate: inst.instance.expectedDate,
       profit,
       isMissing,
-      status: inst.instance.status || inst.game?.gameStatus,
+      status: isExcluded ? 'EXCLUDED' : (inst.instance.status || inst.game?.gameStatus),
     };
   });
 }
@@ -855,6 +871,7 @@ const PLRow: React.FC<PLRowProps> = ({ enrichedInstance, onNavigateToGame }) => 
   const { instance, game, financialSnapshot } = enrichedInstance;
   
   const isConfirmed = instance.status === 'CONFIRMED';
+  const isExcluded = financialSnapshot?.excludeFromAccounting === true;
   const hasData = isConfirmed && game;
   const hasFinancials = hasData && financialSnapshot;
 
@@ -901,7 +918,7 @@ const PLRow: React.FC<PLRowProps> = ({ enrichedInstance, onNavigateToGame }) => 
   return (
     <>
       <tr 
-        className={`hover:bg-gray-50 cursor-pointer border-b border-gray-100 ${!hasData ? 'bg-gray-50/50' : ''}`}
+        className={`hover:bg-gray-50 cursor-pointer border-b border-gray-100 ${!hasData ? 'bg-gray-50/50' : ''} ${isExcluded ? 'line-through opacity-50' : ''}`}
         onClick={handleRowClick}
       >
         <td className="pl-2 pr-0 py-1.5 w-5">
@@ -917,7 +934,17 @@ const PLRow: React.FC<PLRowProps> = ({ enrichedInstance, onNavigateToGame }) => 
         </td>
         <td className="px-1 py-1.5 text-xs text-gray-600 whitespace-nowrap">{displayDate}</td>
         <td className="px-1 py-1.5">
-          <GameStatusBadge status={hasData ? game?.gameStatus : instance.status} />
+          <div className="flex items-center gap-1">
+            <GameStatusBadge status={hasData ? game?.gameStatus : instance.status} />
+            {isExcluded && (
+              <span 
+                className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-red-100 text-red-700"
+                title="Excluded from all totals — corrupted data"
+              >
+                Excluded
+              </span>
+            )}
+          </div>
         </td>
         <td className={`px-1 py-1.5 text-xs text-right font-semibold whitespace-nowrap ${profitColor}`}>
           {hasFinancials ? formatCurrency(profit) : '-'}
@@ -943,7 +970,7 @@ const PLRow: React.FC<PLRowProps> = ({ enrichedInstance, onNavigateToGame }) => 
           {hasData ? `${game?.totalUniquePlayers ?? 0}/${game?.totalEntries ?? 0}` : '-'}
         </td>
         <td className="px-1 py-1.5 text-xs text-right whitespace-nowrap hidden lg:table-cell">
-          {hasFinancials ? formatCurrency(financialSnapshot?.prizepoolTotal) : '-'}
+          {hasData ? formatCurrency(game?.prizepoolPaid) : '-'}
         </td>
         <td className="px-1 py-1.5 text-xs text-right whitespace-nowrap hidden lg:table-cell pr-2" title="Prizepool discrepancy">
           {hasFinancials && financialSnapshot?.prizepoolPaidDelta !== null && financialSnapshot?.prizepoolPaidDelta !== undefined
@@ -1350,7 +1377,11 @@ export const VenueGameDetails: React.FC = () => {
           label="Confirmed Games"
           value={summaryStats.confirmedGames.toLocaleString()}
           icon={<CalendarIcon className="h-6 w-6" />}
-          secondary={summaryStats.unknownGames > 0 ? `${summaryStats.unknownGames} unknown` : undefined}
+          secondary={
+            summaryStats.excludedGames > 0 
+              ? `${summaryStats.unknownGames > 0 ? `${summaryStats.unknownGames} unknown · ` : ''}${summaryStats.excludedGames} excluded`
+              : summaryStats.unknownGames > 0 ? `${summaryStats.unknownGames} unknown` : undefined
+          }
         />
         <MetricCard
           label="Total Players"
@@ -1437,7 +1468,7 @@ export const VenueGameDetails: React.FC = () => {
                 <tr className="font-semibold">
                   <td className="pl-2 pr-0 py-1.5 w-5"></td>
                   <td className="px-1 py-1.5 text-xs text-gray-700 whitespace-nowrap">
-                    TOTALS ({summaryStats.confirmedGames})
+                    TOTALS ({summaryStats.confirmedGames}{summaryStats.excludedGames > 0 ? ` · ${summaryStats.excludedGames} excluded` : ''})
                   </td>
                   <td className="px-1 py-1.5"></td>
                   <td className="px-1 py-1.5 text-xs text-right whitespace-nowrap">
